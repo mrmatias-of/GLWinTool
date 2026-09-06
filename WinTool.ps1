@@ -344,6 +344,11 @@ function Test-AssistenteSelfTest {
     }
     Clear-TweakSelection
 
+    $emptyUndo = Get-AllTweaks | Where-Object { $_.name -eq "Ocultar inicio das Configuracoes" } | Select-Object -First 1
+    if ($emptyUndo -and "$($emptyUndo.undoValue)" -ne "") {
+        throw "Autoteste falhou: reversao por remocao de propriedade nao configurada."
+    }
+
     Select-SafeAppx
     if ($script:SelectedAppxNames.Count -eq 0) {
         throw "Autoteste falhou: selecao segura de AppX vazia."
@@ -1049,14 +1054,21 @@ function Undo-TweakItem {
         return
     }
 
-    $undoTweak = [pscustomobject]@{
-        name = $Tweak.name
-        path = $Tweak.path
-        property = $Tweak.property
-        value = $Tweak.undoValue
-        valueKind = $Tweak.valueKind
+    if ("$($Tweak.undoValue)" -eq "") {
+        if ($BackupDir) {
+            Export-RegistryBackup -RegistryPath $Tweak.path -BackupDir $BackupDir
+        }
+        Remove-ItemProperty -LiteralPath $Tweak.path -Name $Tweak.property -ErrorAction SilentlyContinue
+    } else {
+        $undoTweak = [pscustomobject]@{
+            name = $Tweak.name
+            path = $Tweak.path
+            property = $Tweak.property
+            value = $Tweak.undoValue
+            valueKind = $Tweak.valueKind
+        }
+        Set-RegistryTweak -Tweak $undoTweak -BackupDir $BackupDir
     }
-    Set-RegistryTweak -Tweak $undoTweak -BackupDir $BackupDir
     Write-Log "Ajuste desfeito: $($Tweak.name)"
 }
 
