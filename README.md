@@ -3,75 +3,105 @@
 ![Banner do Assistente G-LAB](assets/readme/hero.svg)
 
 <p align="center">
-  <img alt="PowerShell" src="https://img.shields.io/badge/PowerShell-5.1+-2563EB?style=for-the-badge&logo=powershell&logoColor=white">
   <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0EA5E9?style=for-the-badge&logo=windows&logoColor=white">
-  <img alt="WinGet" src="https://img.shields.io/badge/WinGet-ready-16A34A?style=for-the-badge">
-  <img alt="Idioma" src="https://img.shields.io/badge/pt--BR-interface-7C3AED?style=for-the-badge">
+  <img alt="PowerShell" src="https://img.shields.io/badge/PowerShell-5.1+-2563EB?style=for-the-badge&logo=powershell&logoColor=white">
+  <img alt="WinGet" src="https://img.shields.io/badge/WinGet-integrado-16A34A?style=for-the-badge">
+  <img alt="Idioma" src="https://img.shields.io/badge/interface-pt--BR-7C3AED?style=for-the-badge">
 </p>
 
-O **Assistente G-LAB** e uma central Windows em PowerShell/WPF para preparar, instalar, ajustar e manter computadores com mais agilidade e seguranca operacional.
+<p align="center">
+  <strong>Central grafica para preparar, ajustar e manter ambientes Windows com rapidez, padrao e seguranca operacional.</strong>
+</p>
 
-Ele foi inspirado no conceito do Chris Titus Tech WinUtil, mas segue uma identidade propria para o ecossistema G-LAB: interface em pt-BR, curadoria local, backups preventivos e um fluxo pensado para uso tecnico em bancada, laboratorio e suporte.
+<p align="center">
+  <a href="#inicio-rapido">Inicio rapido</a> •
+  <a href="#modulos">Modulos</a> •
+  <a href="#seguranca-operacional">Seguranca</a> •
+  <a href="#roadmap">Roadmap</a>
+</p>
 
-## Comece em um comando
+---
 
-Abra o **Windows PowerShell como administrador** e execute:
+## Visao geral
+
+O **Assistente G-LAB** e uma ferramenta Windows em PowerShell/WPF criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
+
+O projeto reune instalacao de aplicativos, ajustes do Windows, remocao controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface unica, leve e em portugues.
+
+## Inicio rapido
+
+Execute no **Windows PowerShell**:
 
 ```powershell
 irm https://www.glabcursos.com.br/win | iex
 ```
 
-Alternativa direta pelo GitHub:
+Fonte direta pelo GitHub:
 
 ```powershell
 irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-bootstrap-template.ps1 | iex
 ```
 
-O comando deve ser executado no Windows PowerShell.
-
 ## Preview
 
 ![Preview da interface](assets/readme/app-preview.svg)
 
-## O que ele faz hoje
+## Destaques
 
-- Instala, atualiza e remove aplicativos pelo instalador padrao do Windows.
-- Catalogo com **232 aplicativos** organizados por categorias.
-- Suporte a pacotes do WinGet e Microsoft Store.
-- Busca por nome, categoria, id, descricao e tags.
-- Selecao persistente entre categorias.
-- Presets de instalacao para preparar maquinas rapidamente.
-- Icones locais por aplicativo.
-- Aba **Ajustes** com opcoes selecionaveis por checkbox.
-- Ajustes seguros por registro e comandos controlados.
-- Aba **Atualizar** com verificacao, update dos selecionados, update geral e reparo de fontes.
-- Aba **AppX** para remover apps provisionados do Windows com confirmacao.
-- Seletor DNS: padrao do provedor, Cloudflare, Google, Quad9 e AdGuard.
-- Modos de Windows Update: padrao, avisar e desativar.
-- Reparo do Windows com DISM e SFC.
-- Limpeza de arquivos temporarios.
-- Criacao de ponto de restauracao.
-- Log integrado na interface.
+| Area | Recursos |
+| --- | --- |
+| Aplicativos | Catalogo com 232 apps, busca, categorias, presets, icones e selecao persistente |
+| Atualizacoes | Verificacao de updates, atualizacao dos selecionados, atualizacao geral e reparo de fontes |
+| Ajustes Windows | Checkboxes seletivos, ajustes seguros, registro controlado e reinicio do Explorer |
+| AppX | Remocao controlada de apps provisionados, categorias, busca, bloqueios e inventario antes da acao |
+| Manutencao | DISM, SFC, limpeza de temporarios, ponto de restauracao e modos de Windows Update |
+| Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
 
-## Seguranca antes da acao
+## Modulos
+
+### Instalar
+
+Catalogo de aplicativos organizado por categoria, com busca por nome, id, descricao e tags. A instalacao, atualizacao e remocao usam o instalador padrao do Windows, com suporte a pacotes WinGet e Microsoft Store.
+
+### Ajustes
+
+Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. Apenas itens marcados como seguros podem ser aplicados diretamente; itens planejados ou sensiveis permanecem bloqueados ate receberem tratamento dedicado.
+
+### Configurar
+
+Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, reparo do Windows, reinicio do Explorer e modos de Windows Update.
+
+### Atualizar
+
+Painel para verificar atualizacoes disponiveis, atualizar aplicativos selecionados, atualizar todos os aplicativos detectados e reparar as fontes usadas pelo instalador.
+
+### AppX
+
+Remocao controlada de aplicativos provisionados do Windows, com categorias, busca, selecao de itens seguros, confirmacao e inventario antes da remocao.
+
+### Win11
+
+Base inicial para rotinas de preparacao do Windows 11, com caminho planejado para ISO, pendrive, AutoUnattend, drivers e ajustes offline.
+
+## Seguranca operacional
 
 ![Fluxo seguro de operacao](assets/readme/safety-flow.svg)
 
-O Assistente G-LAB evita executar alteracoes sensiveis no escuro. Antes de procedimentos de maior impacto, ele cria uma trilha de recuperacao quando possivel.
+O Assistente G-LAB foi desenhado para evitar alteracoes sensiveis sem contexto. Procedimentos de maior impacto passam por confirmacao, log e backups locais quando aplicavel.
 
-Medidas ja implementadas:
+Medidas implementadas:
 
 - confirmacao antes de acoes destrutivas;
 - backup antes de ajustes de registro;
-- backup da configuracao DNS antes de alterar;
-- exportacao da politica local de Windows Update antes de mudar o modo;
+- backup da configuracao DNS antes de alteracoes;
+- exportacao de politicas locais antes de mudar Windows Update;
 - inventario AppX antes da remocao;
 - tentativa de ponto de restauracao em ajustes e AppX quando executado como administrador;
-- bloqueio contra duas acoes simultaneas;
+- bloqueio contra acoes simultaneas;
 - barra de progresso durante operacoes;
-- log visivel para auditoria.
+- log visivel na interface.
 
-Os backups ficam na pasta `backups` dentro da copia local em execucao. Quando iniciado pelo comando remoto, a copia fica na pasta temporaria do Windows daquela execucao.
+Os backups sao gravados em `backups/` dentro da copia local em execucao.
 
 ## Execucao local
 
@@ -79,19 +109,19 @@ Os backups ficam na pasta `backups` dentro da copia local em execucao. Quando in
 powershell -ExecutionPolicy Bypass -File .\Start-Assistente-GLAB.ps1
 ```
 
-Ou diretamente:
+Execucao direta:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1
 ```
 
-Validar catalogos sem abrir a interface:
+Validacao sem abrir a interface:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ```
 
-## Estrutura do projeto
+## Estrutura
 
 ```text
 .
@@ -108,126 +138,52 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 │   ├── icons
 │   └── readme
 ├── docs
-│   └── ARCHITECTURE.md
 ├── functions
-│   ├── private
-│   └── public
 ├── pester
 ├── scripts
 ├── src
-│   └── New-IconAssets.ps1
 └── xaml
 ```
 
 ## Catalogos
 
-### Aplicativos
+| Arquivo | Finalidade |
+| --- | --- |
+| `config/apps.json` | Aplicativos disponiveis para instalacao, atualizacao e remocao |
+| `config/presets.json` | Conjuntos prontos de aplicativos para cenarios comuns |
+| `config/tweaks.json` | Ajustes do Windows, comandos controlados e itens planejados |
+| `config/appx.json` | Aplicativos AppX provisionados/removiveis |
 
-Arquivo: `config/apps.json`
+## Icones
 
-Campos principais:
+Os icones dos aplicativos sao armazenados localmente em `assets/icons`.
 
-- `name`: nome exibido.
-- `id`: ID do pacote. Use `msstore:<id>` para Microsoft Store.
-- `category`: categoria visivel na interface.
-- `description`: descricao curta.
-- `domain`: usado pelo gerador de icones.
-- `tags`: termos de busca.
-
-### Ajustes
-
-Arquivo: `config/tweaks.json`
-
-Tipos suportados:
-
-- `registry`: cria ou altera uma chave de registro.
-- `command`: executa um comando controlado.
-- `planned`: aparece na interface, mas fica bloqueado.
-
-Somente ajustes com `safe: true` podem ser selecionados e aplicados.
-
-### AppX
-
-Arquivo: `config/appx.json`
-
-Contem aplicativos provisionados/removiveis do Windows. A remocao pede confirmacao, gera inventario antes de executar e ignora itens bloqueados.
-
-## Gerar icones
+Para regenerar os assets:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
 ```
 
-## Plano de crescimento
+## Roadmap
 
-### Fase 1 - Base confiavel
-
-- Corrigir instalacao, remocao e atualizacao de apps.
-- Garantir compatibilidade com Windows PowerShell 5.1.
-- Validar catalogos antes de publicar.
-- Manter UI em pt-BR.
-
-Status: em andamento avancado.
-
-### Fase 2 - Ajustes Windows
-
-- Expandir ajustes seguros.
-- Criar presets de ajustes: minimo, padrao e avancado.
-- Detectar ajustes ja aplicados.
-- Adicionar desfazer ajustes selecionados.
-- Melhorar tela de preferencias.
-
-Status: em andamento.
-
-### Fase 3 - Apps e AppX
-
-- Revisar catalogo de apps continuamente.
-- Melhorar deteccao de apps instalados.
-- Manter catalogo AppX externo em JSON.
-- Adicionar preview antes de remover AppX.
-- Criar restauracao/reinstalacao quando possivel.
-
-Status: iniciado com catalogos importados.
-
-### Fase 4 - Reparos e atualizacoes
-
-- Reparar fontes do instalador padrao do Windows.
-- Corrigir problemas do Windows Update.
-- Corrigir rede.
-- Corrigir horario/NTP.
-- Gerar relatorio de saude do sistema.
-
-Status: iniciado com verificacao de updates, reparo de fontes, backups preventivos e acoes de manutencao.
-
-### Fase 5 - Windows 11 Creator
-
-- Baixar ISO oficial.
-- Criar pendrive bootavel.
-- Gerar AutoUnattend.
-- Injetar drivers.
-- Aplicar ajustes offline.
-
-Status: planejado.
-
-### Fase 6 - Arquitetura
-
-- Separar `WinTool.ps1` em modulos.
-- Mover XAML para `xaml/inputXML.xaml`.
-- Criar `Compile.ps1` completo.
-- Adicionar testes Pester.
-- Criar pipeline de release.
-
-Status: planejado.
+| Fase | Objetivo | Status |
+| --- | --- | --- |
+| Base confiavel | Instalacao, remocao, atualizacao, validacao e compatibilidade PowerShell 5.1 | Em andamento avancado |
+| Ajustes Windows | Mais ajustes seguros, presets, deteccao de estado e desfazer | Em andamento |
+| AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
+| Reparos | Windows Update, rede, horario/NTP e relatorio de saude | Iniciado |
+| Windows 11 Creator | ISO, USB, AutoUnattend, drivers e ajustes offline | Planejado |
+| Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
 
 ## Desenvolvimento
 
-Antes de commitar:
+Antes de publicar alteracoes:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ```
 
-Publicacao:
+Fluxo de publicacao:
 
 ```powershell
 git add .
