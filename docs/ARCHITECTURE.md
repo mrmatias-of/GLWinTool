@@ -1,6 +1,6 @@
 # Architecture
 
-Assistente G-LAB is moving toward a modular PowerShell/WPF layout inspired by mature Windows utility projects.
+GL WinTool is moving toward a modular PowerShell/WPF layout inspired by mature Windows utility projects.
 
 The current app still keeps most runtime code in `WinTool.ps1` for stability, while the repository now exposes the target architecture used for the next refactors.
 
@@ -56,4 +56,5 @@ The reference project separates concerns into:
 - `xaml/inputXML.xaml` for the interface.
 - `Compile.ps1` for producing a distributable script.
 
-Assistente G-LAB should follow the pattern without copying branding or blindly importing commands.
+GL WinTool should follow the pattern without copying branding or blindly importing commands.
+

@@ -8,7 +8,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
-.\dist\Assistente-G-LAB.exe -SelfTest
+.\dist\GL-WinTool.exe -SelfTest
 ```
 
 4. Compacte a pasta `dist` em um `.zip`.
@@ -33,3 +33,4 @@ Ela compara a versao publicada com o arquivo local `VERSION`.
 - Builds de teste: use sufixo `-dev`.
 - Builds oficiais: use tag sem `-dev`, por exemplo `0.4.0`.
 - Nunca substitua release antiga: publique uma nova tag.
+

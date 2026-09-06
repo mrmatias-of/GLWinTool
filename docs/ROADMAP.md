@@ -1,6 +1,6 @@
 # Plano de melhorias e implementacao
 
-Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de produto, seguranca e manutencao.
+Este documento organiza a evolucao do GL WinTool em frentes praticas de produto, seguranca e manutencao.
 
 ## 1. Experiencia do usuario
 
@@ -90,3 +90,4 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 - AppX com fluxo controlado.
 - Ajustes com presets e reversao parcial.
 - Reparos basicos avancados iniciados.
+

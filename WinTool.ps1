@@ -148,7 +148,7 @@ function Export-AppxInventory {
 }
 
 function New-SafeRestorePoint {
-    param([string]$Description = "Assistente G-LAB")
+    param([string]$Description = "GL WinTool")
     if (-not (Test-IsAdmin)) {
         Write-Log "Ponto de restauracao ignorado: execute como administrador para habilitar."
         return
@@ -1301,7 +1301,7 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar Windows Update" -Body "Refaz caches de atualizacao com backup e reinicia servicos essenciais." -ButtonText "Reparar update" -Icon "WU" -Accent "#7C3AED" -ClickAction { Invoke-WindowsUpdateRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Abrir configuracoes" -Body "Abre a tela oficial do Windows Update." -ButtonText "Abrir Windows" -Icon "WU" -Accent "#0EA5E9" -ClickAction { Open-WindowsUpdateSettings })) | Out-Null
 
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo GL WinTool.")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Windows" -Body $osText -Icon "OS" -Accent "#0EA5E9")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Armazenamento" -Body $diskText -Icon "HD" -Accent "#16A34A")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Catalogo JSON" -Body $script:ConfigPath -Icon "JS" -Accent "#2563EB")) | Out-Null
@@ -1317,7 +1317,7 @@ function Show-UpdatesView {
     Set-ActiveTab -TabName "UpdatesTab"
     Update-SidebarForView
     Clear-MainPanel
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar o Assistente G-LAB" -Subtitle "Confira se existe uma versao nova publicada no GitHub antes de atualizar aplicativos do Windows.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar o GL WinTool" -Subtitle "Confira se existe uma versao nova publicada no GitHub antes de atualizar aplicativos do Windows.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Checar versao do Assistente" -Body "Compara a versao instalada com o manifesto online do projeto." -ButtonText "Checar agora" -Icon "GL" -Accent "#0F172A" -ClickAction { Invoke-CheckAssistenteUpdate })) | Out-Null
 
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar aplicativos" -Subtitle "Verifique, atualize selecionados ou rode uma atualizacao geral com confirmacao.")) | Out-Null
@@ -1337,7 +1337,7 @@ function Show-UpdatesView {
         }
     })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar fontes" -Body "Restaura e sincroniza as fontes usadas para encontrar aplicativos." -ButtonText "Reparar fontes" -Icon "RF" -Accent "#7C3AED" -ClickAction { Invoke-RepairPackageManager })) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "Registro" -Body "Todos os resultados aparecem no console inferior do Assistente G-LAB." -Icon "LOG" -Accent "#111827")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Registro" -Body "Todos os resultados aparecem no console inferior do GL WinTool." -Icon "LOG" -Accent "#111827")) | Out-Null
     Write-Status "Atualizar" "Verificacao e manutencao disponiveis"
 }
 
@@ -1489,7 +1489,7 @@ function Invoke-CheckAssistenteUpdate {
                 Write-Log "Existe uma versao diferente publicada."
                 Write-Log "Pagina de releases: $($manifest.releaseUrl)"
             } else {
-                Write-Log "Assistente G-LAB ja esta na versao publicada."
+                Write-Log "GL WinTool ja esta na versao publicada."
             }
             if ($manifest.notes) { Write-Log "Notas: $($manifest.notes)" }
         } catch {
@@ -1510,7 +1510,7 @@ function Show-StartupUpdateScreen {
     if ($ValidateOnly -or $SelfTest) { return $true }
 
     $splash = [System.Windows.Window]::new()
-    $splash.Title = "Assistente G-LAB"
+    $splash.Title = "GL WinTool $script:AppVersion"
     $splash.Width = 520
     $splash.Height = 330
     $splash.WindowStartupLocation = "CenterScreen"
@@ -1546,7 +1546,7 @@ function Show-StartupUpdateScreen {
     $panel.Children.Add($logoBox) | Out-Null
 
     $title = [System.Windows.Controls.TextBlock]::new()
-    $title.Text = "Assistente G-LAB"
+    $title.Text = "GL WinTool"
     $title.FontSize = 28
     $title.FontWeight = "SemiBold"
     $title.Foreground = "#F8FAFC"
@@ -1652,7 +1652,7 @@ function Invoke-SlowPcRescue {
         }
 
         if (Test-IsAdmin) {
-            New-SafeRestorePoint -Description "Assistente G-LAB - manutencao"
+            New-SafeRestorePoint -Description "GL WinTool - manutencao"
         } else {
             Write-Log "Ponto de restauracao ignorado: execute como administrador para habilitar."
         }
@@ -1687,7 +1687,7 @@ function Invoke-SafeTweaks {
 
         Write-Log "Aplicando $($selectedTweaks.Count) ajustes selecionados."
         $backupDir = New-BackupSession -Reason "ajustes"
-        New-SafeRestorePoint -Description "Assistente G-LAB - ajustes"
+        New-SafeRestorePoint -Description "GL WinTool - ajustes"
         foreach ($tweak in $selectedTweaks) {
             Invoke-TweakItem -Tweak $tweak -BackupDir $backupDir
         }
@@ -1784,7 +1784,7 @@ function Show-SystemHealthReport {
         $backupDir = New-BackupSession -Reason "relatorio-saude"
         $reportPath = Join-Path $backupDir "relatorio-saude.txt"
         $report = [System.Collections.Generic.List[string]]::new()
-        $report.Add("Assistente G-LAB - Relatorio de saude")
+        $report.Add("GL WinTool - Relatorio de saude")
         $report.Add("Gerado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
         $report.Add("")
 
@@ -1874,7 +1874,7 @@ function New-GLabRestorePoint {
             return
         }
         Write-Log "Criando ponto de restauracao do sistema..."
-        New-SafeRestorePoint -Description "Assistente G-LAB"
+        New-SafeRestorePoint -Description "GL WinTool"
     }
 }
 
@@ -2017,7 +2017,7 @@ function Open-BackupFolder {
 function Open-AppFolder {
     Invoke-SafeUiAction -Name "Abrir pasta do app" -Action {
         Start-Process explorer.exe $script:Root
-        Write-Log "Pasta local do Assistente G-LAB aberta."
+        Write-Log "Pasta local do GL WinTool aberta."
     }
 }
 
@@ -2052,7 +2052,7 @@ function Invoke-AppxRemoval {
         }
         $backupDir = New-BackupSession -Reason "appx"
         Export-AppxInventory -BackupDir $backupDir
-        New-SafeRestorePoint -Description "Assistente G-LAB - AppX"
+        New-SafeRestorePoint -Description "GL WinTool - AppX"
         foreach ($appx in $selected) {
             $name = if ($appx.name) { $appx.name } else { $appx.Name }
             $package = if ($appx.package) { $appx.package } else { $appx.Package }
@@ -2177,7 +2177,7 @@ function Build-Ui {
     $xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Assistente G-LAB" Height="780" Width="1240" MinHeight="720" MinWidth="1120" WindowStartupLocation="CenterScreen"
+        Title="GL WinTool" Height="780" Width="1240" MinHeight="720" MinWidth="1120" WindowStartupLocation="CenterScreen"
         Background="#E8EEF6" FontFamily="Segoe UI">
     <Window.Resources>
         <Style TargetType="Button">
@@ -2214,7 +2214,7 @@ function Build-Ui {
                         <Image x:Name="LogoImage" Stretch="UniformToFill"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Assistente G-LAB" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
+                        <TextBlock Text="GL WinTool" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
                         <TextBlock Text="Instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD" TextWrapping="NoWrap"/>
                         <TextBlock x:Name="VersionText" Text="" FontSize="11" Foreground="#64748B" TextWrapping="NoWrap"/>
                     </StackPanel>
@@ -2305,7 +2305,7 @@ $script:AppxCatalog = Load-AppxCatalog
 $script:ValidationRan = $false
 $window = Build-Ui
 if (-not $window) {
-    throw "Nao foi possivel carregar a janela WPF do Assistente G-LAB."
+    throw "Nao foi possivel carregar a janela WPF do GL WinTool."
 }
 
 $script:SearchBox = $window.FindName("SearchBox")
@@ -2333,6 +2333,7 @@ if ($script:LogoImage -and (Test-Path -LiteralPath $script:LogoPath)) {
 if ($script:VersionText) {
     $script:VersionText.Text = "Versao $script:AppVersion"
 }
+$window.Title = "GL WinTool $script:AppVersion"
 
 $categories = @([pscustomobject]@{ Label = "Todos"; Value = "All" }) + (($script:Catalog | Select-Object -ExpandProperty category -Unique | Sort-Object) | ForEach-Object {
     [pscustomobject]@{ Label = $_; Value = $_ }
@@ -2434,7 +2435,7 @@ if (Test-IsAdmin) {
     $adminText.Foreground = "#B45309"
 }
 
-Write-Log "Assistente G-LAB iniciado. Catalogo carregado: $($script:Catalog.Count) apps."
+Write-Log "GL WinTool iniciado. Catalogo carregado: $($script:Catalog.Count) apps."
 Refresh-AppGrid
 if ($ValidateOnly) {
     Test-AssistenteConfig
@@ -2453,3 +2454,4 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+

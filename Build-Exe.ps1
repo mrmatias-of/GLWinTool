@@ -1,12 +1,15 @@
 param(
-    [string]$Version = "0.4.0"
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $dist = Join-Path $projectRoot "dist"
-$compiledScript = Join-Path $dist "AssistenteGLAB.ps1"
-$exePath = Join-Path $dist "Assistente-G-LAB.exe"
+$compiledScript = Join-Path $dist "GLWinTool.ps1"
+$exePath = Join-Path $dist "GL-WinTool.exe"
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $Version = (Get-Content -LiteralPath (Join-Path $projectRoot "VERSION") -Raw).Trim() -replace '-.*$', ''
+}
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $projectRoot "Compile.ps1")
 
@@ -16,10 +19,11 @@ if (-not $ps2exe) {
 }
 
 Invoke-ps2exe $compiledScript $exePath `
-    -title "Assistente G-LAB" `
+    -title "GL WinTool" `
     -description "Central de instalacao, ajustes e manutencao Windows" `
     -company "G-LAB Cursos" `
-    -product "Assistente G-LAB" `
+    -product "GL WinTool" `
     -version $Version
 
 Write-Host "EXE gerado: $exePath"
+

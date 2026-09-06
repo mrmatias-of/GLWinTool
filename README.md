@@ -1,4 +1,4 @@
-# Assistente G-LAB
+# GL WinTool
 
 <p align="center">
   <img src="assets/readme/glab-logo.png" alt="Logo G-LAB Cursos" width="760">
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.4.0-dev</code>
+  Versao atual: <code>0.4.1-dev</code>
 </p>
 
 <p align="center">
@@ -31,11 +31,11 @@
 
 ## Visao geral
 
-O **Assistente G-LAB** e uma ferramenta Windows em PowerShell/WPF criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
+O **GL WinTool** e uma ferramenta Windows em PowerShell/WPF criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
 
 O projeto reune instalacao de aplicativos, ajustes do Windows, remocao controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface unica, leve e em portugues.
 
-![Banner do Assistente G-LAB](assets/readme/hero.svg)
+![Banner do GL WinTool](assets/readme/hero.svg)
 
 ## Inicio rapido
 
@@ -62,7 +62,7 @@ Gerar executavel local:
 ```powershell
 Install-Module ps2exe -Scope CurrentUser
 powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
-.\dist\Assistente-G-LAB.exe -SelfTest
+.\dist\GL-WinTool.exe -SelfTest
 ```
 
 ## Preview
@@ -119,7 +119,7 @@ Base inicial para rotinas de preparacao do Windows 11, com atalhos para download
 
 ![Fluxo seguro de operacao](assets/readme/safety-flow.svg)
 
-O Assistente G-LAB foi desenhado para evitar alteracoes sensiveis sem contexto. Procedimentos de maior impacto passam por confirmacao, log e backups locais quando aplicavel.
+O GL WinTool foi desenhado para evitar alteracoes sensiveis sem contexto. Procedimentos de maior impacto passam por confirmacao, log e backups locais quando aplicavel.
 
 Medidas implementadas:
 
@@ -232,4 +232,5 @@ git push
 
 ## Uso responsavel
 
-O Assistente G-LAB executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
+O GL WinTool executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
+

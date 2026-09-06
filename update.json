@@ -1,7 +1,7 @@
 {
-  "version": "0.4.0-dev",
+  "version": "0.4.1-dev",
   "channel": "dev",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip",
-  "notes": "Canal de desenvolvimento. Use GitHub Releases para publicar builds oficiais em exe."
+  "notes": "Renomeado para GL WinTool. Cada atualizacao publicada deve alterar a versao."
 }

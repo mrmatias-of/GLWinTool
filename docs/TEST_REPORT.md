@@ -43,4 +43,5 @@ As acoes abaixo alteram o Windows e devem ser testadas manualmente em maquina de
 
 ## Comparacao com a referencia
 
-O comportamento principal ja segue o modelo da referencia: selecao por checkbox, presets, confirmacao, progresso, log e execucao por acoes. A diferenca proposital e que o Assistente G-LAB mantem somente ajustes seguros ativos; itens sensiveis precisam de fluxo dedicado com backup, confirmacao e reversao clara.
+O comportamento principal ja segue o modelo da referencia: selecao por checkbox, presets, confirmacao, progresso, log e execucao por acoes. A diferenca proposital e que o GL WinTool mantem somente ajustes seguros ativos; itens sensiveis precisam de fluxo dedicado com backup, confirmacao e reversao clara.
+
