@@ -48,7 +48,7 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 - Reparo basico de rede.
 - Correcao de horario/NTP.
 - Reparo de fontes do instalador.
-- Reparo de Windows Update em fluxo dedicado.
+- Reparo de Windows Update em fluxo dedicado. Status: implementado com backup, parada de servicos, renomeio recuperavel de caches e reinicio dos servicos.
 - Limpeza de temporarios com log de itens ignorados.
 
 ## 6. Windows 11 Creator
@@ -88,4 +88,4 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 - Backups preventivos implementados.
 - AppX com fluxo controlado.
 - Ajustes com presets e reversao parcial.
-- Reparos basicos iniciados.
+- Reparos basicos avancados iniciados.

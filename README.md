@@ -78,7 +78,7 @@ Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba in
 
 ### Configurar
 
-Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer e modos de Windows Update.
+Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer, modos de Windows Update e reparo dedicado de componentes de atualizacao.
 
 Tambem oferece atalhos para abrir backups, a pasta local do assistente e configuracoes oficiais do Windows.
 
@@ -105,7 +105,8 @@ Medidas implementadas:
 - confirmacao antes de acoes destrutivas;
 - backup antes de ajustes de registro;
 - backup da configuracao DNS antes de alteracoes;
-- exportacao de politicas locais antes de mudar Windows Update;
+- exportacao de politicas locais antes de mudar ou reparar Windows Update;
+- renomeio recuperavel dos caches do Windows Update em vez de exclusao direta;
 - inventario AppX antes da remocao;
 - tentativa de ponto de restauracao em ajustes e AppX quando executado como administrador;
 - bloqueio contra acoes simultaneas;
@@ -184,7 +185,7 @@ O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 | Base confiavel | Instalacao, remocao, atualizacao, validacao e compatibilidade PowerShell 5.1 | Em andamento avancado |
 | Ajustes Windows | Mais ajustes seguros, deteccao de estado refinada e reversoes adicionais | Em andamento |
 | AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
-| Reparos | Windows Update, rede, horario/NTP e relatorio de saude | Em andamento |
+| Reparos | Windows Update, rede, horario/NTP, imagem do Windows e relatorio de saude | Em andamento avancado |
 | Windows 11 Creator | Download oficial, preparacao inicial, USB, AutoUnattend, drivers e ajustes offline | Iniciado |
 | Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
 

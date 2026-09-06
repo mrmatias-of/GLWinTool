@@ -1128,10 +1128,11 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar rede" -Body "Limpa DNS, renova IP e redefine Winsock/IP com backup previo." -ButtonText "Reparar rede" -Icon "RD" -Accent "#0284C7" -ClickAction { Invoke-NetworkRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Corrigir horario" -Body "Ativa o servico de tempo do Windows e solicita sincronizacao NTP." -ButtonText "Sincronizar" -Icon "HR" -Accent "#4F46E5" -ClickAction { Invoke-TimeRepair })) | Out-Null
 
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows Update" -Subtitle "Escolha o comportamento das atualizacoes automaticas por politica local.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows Update" -Subtitle "Controle o comportamento das atualizacoes ou repare componentes quando o Windows Update travar.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Padrao do Windows" -Body "Remove politicas locais criadas pelo assistente." -ButtonText "Restaurar padrao" -Icon "UP" -Accent "#2563EB" -ClickAction { Set-WindowsUpdateMode -Mode "Padrao" })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Baixar e avisar" -Body "Baixa atualizacoes e avisa antes da instalacao." -ButtonText "Aplicar modo aviso" -Icon "AV" -Accent "#0891B2" -ClickAction { Set-WindowsUpdateMode -Mode "Seguranca" })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Desativar automaticas" -Body "Opcao avancada. Exige confirmacao antes de aplicar." -ButtonText "Desativar" -Icon "!" -Accent "#DC2626" -ClickAction { Set-WindowsUpdateMode -Mode "Desativar" })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar Windows Update" -Body "Refaz caches de atualizacao com backup e reinicia servicos essenciais." -ButtonText "Reparar update" -Icon "WU" -Accent "#7C3AED" -ClickAction { Invoke-WindowsUpdateRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Abrir configuracoes" -Body "Abre a tela oficial do Windows Update." -ButtonText "Abrir Windows" -Icon "WU" -Accent "#0EA5E9" -ClickAction { Open-WindowsUpdateSettings })) | Out-Null
 
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB.")) | Out-Null
@@ -1553,6 +1554,76 @@ function Set-WindowsUpdateMode {
                 Write-Log "Atualizacoes automaticas desativadas por politica local."
             }
         }
+    }
+}
+
+function Rename-WindowsUpdateCache {
+    param([Parameter(Mandatory=$true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        Write-Log "Cache nao encontrado: $Path"
+        return
+    }
+
+    $parent = Split-Path -Parent $Path
+    $leaf = Split-Path -Leaf $Path
+    $backupName = "{0}.glab-bak-{1}" -f $leaf, (Get-Date -Format "yyyyMMdd-HHmmss")
+    $target = Join-Path $parent $backupName
+    try {
+        Rename-Item -LiteralPath $Path -NewName $backupName -ErrorAction Stop
+        Write-Log "Cache preservado como backup: $target"
+    } catch {
+        Write-Log "Nao foi possivel renomear ${Path}: $($_.Exception.Message)"
+    }
+}
+
+function Invoke-WindowsUpdateRepair {
+    Invoke-SafeUiAction -Name "Reparar Windows Update" -Action {
+        if (-not (Test-IsAdmin)) {
+            Write-Log "Reparar Windows Update exige execucao como administrador."
+            return
+        }
+        if (-not (Confirm-GLabAction -Title "Confirmar reparo do Windows Update" -Message "Reparar componentes do Windows Update agora?`n`nO Assistente vai salvar informacoes atuais, parar servicos, renomear caches antigos e reiniciar os servicos. Pode ser necessario reiniciar o computador depois.")) {
+            Write-Log "Reparo do Windows Update cancelado pelo usuario."
+            return
+        }
+
+        $backupDir = New-BackupSession -Reason "windows-update-reparo"
+        Export-RegistryBackup -RegistryPath "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -BackupDir $backupDir
+        Get-Service -Name "wuauserv","bits","cryptsvc","appidsvc" -ErrorAction SilentlyContinue |
+            Select-Object Name, Status, StartType |
+            ConvertTo-Json -Depth 3 |
+            Set-Content -LiteralPath (Join-Path $backupDir "servicos-windows-update.json") -Encoding UTF8
+
+        Write-Log "Parando servicos de atualizacao..."
+        foreach ($serviceName in @("wuauserv", "bits", "cryptsvc", "appidsvc")) {
+            try {
+                Stop-Service -Name $serviceName -Force -ErrorAction Stop
+                Write-Log "Servico parado: $serviceName"
+            } catch {
+                Write-Log "Servico nao parado ou indisponivel: $serviceName"
+            }
+        }
+
+        Rename-WindowsUpdateCache -Path (Join-Path $env:SystemRoot "SoftwareDistribution")
+        Rename-WindowsUpdateCache -Path (Join-Path $env:SystemRoot "System32\catroot2")
+
+        Write-Log "Reiniciando servicos de atualizacao..."
+        foreach ($serviceName in @("appidsvc", "cryptsvc", "bits", "wuauserv")) {
+            try {
+                Start-Service -Name $serviceName -ErrorAction Stop
+                Write-Log "Servico iniciado: $serviceName"
+            } catch {
+                Write-Log "Servico nao iniciado automaticamente: $serviceName"
+            }
+        }
+
+        if (Get-Command "UsoClient.exe" -ErrorAction SilentlyContinue) {
+            Invoke-LoggedProcess -FilePath "UsoClient.exe" -Arguments @("StartScan") | Out-Null
+        } elseif (Get-Command "wuauclt.exe" -ErrorAction SilentlyContinue) {
+            Invoke-LoggedProcess -FilePath "wuauclt.exe" -Arguments @("/resetauthorization", "/detectnow") | Out-Null
+        }
+
+        Write-Log "Reparo do Windows Update finalizado. Se ainda houver erro, reinicie o computador e tente novamente."
     }
 }
 
