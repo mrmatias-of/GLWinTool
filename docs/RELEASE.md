@@ -11,9 +11,9 @@ powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
 .\dist\GL-WinTool.exe -SelfTest
 ```
 
-4. Compacte a pasta `dist` em um `.zip`.
+4. Compacte o conteudo da pasta `dist` em `GL-WinTool.zip`.
 5. Crie uma release no GitHub com tag da versao, por exemplo `v0.4.0`.
-6. Anexe o `.zip` da pasta `dist`.
+6. Anexe o arquivo `GL-WinTool.zip` na release.
 7. Suba o commit com `VERSION`, `update.json` e documentacao.
 
 ## Como o app checa atualizacoes
@@ -27,6 +27,11 @@ https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json
 ```
 
 Ela compara a versao publicada com o arquivo local `VERSION`.
+Quando houver atualizacao, o download direto usa:
+
+```text
+https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip
+```
 
 ## Regra recomendada
 

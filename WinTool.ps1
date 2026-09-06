@@ -1506,6 +1506,21 @@ function Get-AssistenteUpdateManifest {
     }
 }
 
+function Save-AssistenteUpdatePackage {
+    param([Parameter(Mandatory=$true)][psobject]$Manifest)
+    $url = if ($Manifest.zipUrl) { "$($Manifest.zipUrl)" } else { "$($Manifest.releaseUrl)" }
+    if ([string]::IsNullOrWhiteSpace($url)) {
+        throw "Manifesto de atualizacao sem link de download."
+    }
+
+    $downloads = Join-Path $env:USERPROFILE "Downloads"
+    if (-not (Test-Path -LiteralPath $downloads)) { $downloads = $env:TEMP }
+    $version = if ($Manifest.version) { "$($Manifest.version)" } else { "nova" }
+    $target = Join-Path $downloads ("GL-WinTool-{0}.zip" -f $version)
+    Invoke-WebRequest -Uri $url -OutFile $target -UseBasicParsing
+    return $target
+}
+
 function Show-StartupUpdateScreen {
     if ($ValidateOnly -or $SelfTest) { return $true }
 
@@ -1570,15 +1585,27 @@ function Show-StartupUpdateScreen {
     $panel.Children.Add($progress) | Out-Null
 
     $button = [System.Windows.Controls.Button]::new()
-    $button.Content = "Atualizar"
+    $button.Content = "Baixar atualizacao"
     $button.Height = 38
     $button.Width = 180
     $button.HorizontalAlignment = "Center"
     $button.Visibility = "Collapsed"
     $button.Add_Click({
         $manifest = $this.Tag
-        if ($manifest -and $manifest.releaseUrl) {
-            Start-Process "$($manifest.releaseUrl)"
+        if ($manifest) {
+            $this.IsEnabled = $false
+            $this.Content = "Baixando..."
+            try {
+                $file = Save-AssistenteUpdatePackage -Manifest $manifest
+                $status.Text = "Atualizacao baixada. Abra o ZIP e substitua pela nova versao."
+                Start-Process explorer.exe "/select,`"$file`""
+            } catch {
+                $status.Text = "Nao foi possivel baixar. Abrindo pagina de release."
+                if ($manifest.releaseUrl) { Start-Process "$($manifest.releaseUrl)" }
+            } finally {
+                $this.Content = "Baixar atualizacao"
+                $this.IsEnabled = $true
+            }
         }
     })
     $panel.Children.Add($button) | Out-Null
@@ -1588,7 +1615,7 @@ function Show-StartupUpdateScreen {
         $manifest = Get-AssistenteUpdateManifest
         $progress.IsIndeterminate = $false
         if ($manifest -and "$($manifest.version)" -ne "$script:AppVersion") {
-            $status.Text = "Atualizacao disponivel: $($manifest.version). Atualize para continuar."
+            $status.Text = "Atualizacao disponivel: $($manifest.version). Baixe para continuar."
             $button.Tag = $manifest
             $button.Visibility = "Visible"
         } else {
