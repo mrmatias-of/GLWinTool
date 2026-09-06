@@ -927,6 +927,8 @@ function Show-TweaksView {
     $leftPanel = [System.Windows.Controls.StackPanel]::new()
     $rightPanel = [System.Windows.Controls.StackPanel]::new()
 
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Verificar ajustes" -Body "Mostra no log quais ajustes de registro ja estao aplicados." -ButtonText "Verificar agora" -Icon "VA" -Accent "#0EA5E9" -ClickAction { Show-TweakStatusReport })) | Out-Null
+
     $leftBorder = [System.Windows.Controls.Border]::new()
     $leftBorder.Padding = "10"
     $leftBorder.Margin = "0,0,5,0"
@@ -1202,6 +1204,30 @@ function Invoke-SafeTweaks {
         }
         Write-Log "Ajustes selecionados finalizados."
         Restart-ExplorerShell
+    }
+}
+
+function Test-TweakState {
+    param([Parameter(Mandatory=$true)][psobject]$Tweak)
+    if ($Tweak.type -ne "registry") { return "Nao verificavel automaticamente" }
+    try {
+        if (-not (Test-Path -LiteralPath $Tweak.path)) { return "Nao aplicado" }
+        $current = (Get-ItemProperty -LiteralPath $Tweak.path -Name $Tweak.property -ErrorAction Stop).$($Tweak.property)
+        if ("$current" -eq "$($Tweak.value)") { return "Aplicado" }
+        return "Diferente do esperado"
+    } catch {
+        return "Nao aplicado"
+    }
+}
+
+function Show-TweakStatusReport {
+    Invoke-SafeUiAction -Name "Verificar ajustes" -Action {
+        $safeTweaks = @((Get-AllTweaks) | Where-Object { $_.safe })
+        Write-Log "Verificando estado de $($safeTweaks.Count) ajustes seguros..."
+        foreach ($tweak in $safeTweaks) {
+            Write-Log "$($tweak.name): $(Test-TweakState -Tweak $tweak)"
+        }
+        Write-Log "Verificacao de ajustes finalizada."
     }
 }
 
@@ -1515,6 +1541,7 @@ function Build-Ui {
                     <Button x:Name="ClearButton" Content="Limpar selecao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="InstalledButton" Content="Marcar instalados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="SelectTweaksButton" Content="Selecionar ajustes seguros" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="CheckTweaksButton" Content="Verificar ajustes" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="ApplyTweaksButton" Content="Aplicar ajustes marcados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RemoveAppxButton" Content="Remover AppX marcados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
@@ -1639,6 +1666,7 @@ $window.FindName("InstalledButton").Add_Click({
     }
 })
 $window.FindName("SelectTweaksButton").Add_Click({ Select-SafeTweaks })
+$window.FindName("CheckTweaksButton").Add_Click({ Show-TweakStatusReport })
 $window.FindName("ApplyTweaksButton").Add_Click({ Invoke-SafeUiAction -Name "Aplicar ajustes seguros" -Action { Invoke-SafeTweaks } })
 $window.FindName("ApplyDnsButton").Add_Click({
     if ($script:DnsBox.SelectedItem) {
