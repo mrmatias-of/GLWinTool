@@ -99,7 +99,7 @@ Remocao controlada de aplicativos provisionados do Windows, com categorias, busc
 
 ### Win11
 
-Base inicial para rotinas de preparacao do Windows 11, com caminho planejado para ISO, pendrive, AutoUnattend, drivers e ajustes offline.
+Base inicial para rotinas de preparacao do Windows 11, com atalhos para download oficial, gerenciamento de disco, pasta Downloads e geracao inicial de `AutoUnattend.xml` em pt-BR. A criacao de pendrive e alteracoes destrutivas de disco continuam bloqueadas ate existir um fluxo proprio de selecao e confirmacao.
 
 ## Seguranca operacional
 
@@ -194,7 +194,7 @@ O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 | AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
 | Reparos | Windows Update, rede, horario/NTP, imagem do Windows e relatorio de saude | Em andamento avancado |
 | Experiencia | Fluxos por problema real, textos mais claros e menos dependencia do menu lateral | Em andamento avancado |
-| Windows 11 Creator | Download oficial, preparacao inicial, USB, AutoUnattend, drivers e ajustes offline | Iniciado |
+| Windows 11 Creator | Download oficial, preparacao inicial, AutoUnattend, USB, drivers e ajustes offline | Iniciado avancado |
 | Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
 
 ## Desenvolvimento

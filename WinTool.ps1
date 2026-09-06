@@ -1298,13 +1298,14 @@ function Show-Win11View {
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Preparar Windows 11" -Subtitle "Comece pelas fontes oficiais. A criacao de pendrive sera adicionada com selecao segura de disco.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
         [pscustomobject]@{ Label = "Download oficial"; Primary = $true; Action = { Open-Windows11Creator } },
+        [pscustomobject]@{ Label = "Gerar AutoUnattend"; Primary = $false; Action = { New-AutoUnattendFile } },
         [pscustomobject]@{ Label = "Gerenciamento de disco"; Primary = $false; Action = { Open-DiskManagement } },
         [pscustomobject]@{ Label = "Pasta Downloads"; Primary = $false; Action = { Open-DownloadsFolder } }
     ))) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "ISO oficial" -Body "Baixe a imagem ou a ferramenta da Microsoft antes de preparar a midia." -Icon "ISO" -Accent "#2563EB")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Pendrive" -Body "Use um dispositivo dedicado. A gravacao apaga dados e tera confirmacao propria." -Icon "USB" -Accent "#F59E0B")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Drivers" -Body "Separe drivers de rede, chipset e armazenamento antes da instalacao." -Icon "DR" -Accent "#0F766E")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "AutoUnattend" -Body "Proxima etapa: gerar arquivo de instalacao automatizada." -Icon "AU" -Accent "#7C3AED")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "AutoUnattend" -Body "Gera um modelo inicial em pt-BR para instalacoes assistidas, sem chave e sem formatacao automatica." -Icon "AU" -Accent "#7C3AED")) | Out-Null
     Write-Status "Windows 11" "Preparacao inicial disponivel"
 }
 
@@ -1842,6 +1843,55 @@ function Open-DownloadsFolder {
         } else {
             Write-Log "Pasta Downloads nao encontrada."
         }
+    }
+}
+
+function New-AutoUnattendFile {
+    Invoke-SafeUiAction -Name "Gerar AutoUnattend" -Action {
+        if (-not (Confirm-GLabAction -Title "Gerar AutoUnattend" -Message "Gerar um modelo inicial de AutoUnattend.xml?`n`nEle sera salvo em uma pasta de backup do Assistente. Nada sera aplicado no computador e nenhum disco sera alterado.")) {
+            Write-Log "Geracao de AutoUnattend cancelada pelo usuario."
+            return
+        }
+
+        $outputDir = New-BackupSession -Reason "win11-autounattend"
+        $target = Join-Path $outputDir "AutoUnattend.xml"
+        $xml = @'
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+  <settings pass="windowsPE">
+    <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <SetupUILanguage>
+        <UILanguage>pt-BR</UILanguage>
+      </SetupUILanguage>
+      <InputLocale>pt-BR</InputLocale>
+      <SystemLocale>pt-BR</SystemLocale>
+      <UILanguage>pt-BR</UILanguage>
+      <UserLocale>pt-BR</UserLocale>
+    </component>
+  </settings>
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <InputLocale>pt-BR</InputLocale>
+      <SystemLocale>pt-BR</SystemLocale>
+      <UILanguage>pt-BR</UILanguage>
+      <UserLocale>pt-BR</UserLocale>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <TimeZone>E. South America Standard Time</TimeZone>
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>false</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>false</HideWirelessSetupInOOBE>
+        <ProtectYourPC>3</ProtectYourPC>
+      </OOBE>
+    </component>
+  </settings>
+</unattend>
+'@
+        Set-Content -LiteralPath $target -Value $xml -Encoding UTF8
+        Write-Log "AutoUnattend gerado: $target"
+        Start-Process explorer.exe $outputDir
     }
 }
 

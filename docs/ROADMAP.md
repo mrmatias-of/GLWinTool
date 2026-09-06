@@ -58,7 +58,7 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 - Abrir Gerenciamento de Disco para conferencia manual. Status: implementado.
 - Abrir pasta Downloads para localizar ISO/ferramentas. Status: implementado.
 - Preparar fluxo de criacao de midia USB.
-- Gerar AutoUnattend.
+- Gerar AutoUnattend. Status: implementado modelo inicial pt-BR sem formatacao automatica.
 - Injetar drivers em imagem offline.
 - Aplicar ajustes offline.
 - Adicionar validacoes antes de formatar pendrive.
