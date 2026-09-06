@@ -38,7 +38,7 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 - Marcar apenas itens seguros em lote.
 - Exibir previa antes de remover.
 - Salvar inventario antes de executar.
-- Criar fluxo de restauracao quando houver pacote recuperavel.
+- Criar fluxo de restauracao quando houver pacote recuperavel. Status: iniciado via reinstalacao pelo instalador de apps.
 - Manter itens criticos bloqueados.
 
 ## 5. Manutencao e reparos

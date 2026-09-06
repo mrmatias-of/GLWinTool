@@ -1334,10 +1334,11 @@ function Show-AppxView {
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
         [pscustomobject]@{ Label = "Marcar seguros"; Primary = $false; Action = { Select-SafeAppx } },
         [pscustomobject]@{ Label = "Remover"; Primary = $true; Action = { Invoke-AppxRemoval } },
+        [pscustomobject]@{ Label = "Reinstalar"; Primary = $false; Action = { Invoke-AppxInstall } },
         [pscustomobject]@{ Label = "Ver marcados"; Primary = $false; Action = { Show-SelectedAppxPreview } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { $script:SelectedAppxNames.Clear(); Show-AppxView } }
     ))) | Out-Null
-    $panel.Children.Add((New-SectionHeader -Title "Aplicativos do Windows" -Subtitle "Marque o que deseja remover. O Assistente salva um inventario e pede confirmacao antes de executar.")) | Out-Null
+    $panel.Children.Add((New-SectionHeader -Title "Aplicativos do Windows" -Subtitle "Marque o que deseja remover ou reinstalar. O Assistente pede confirmacao antes de executar.")) | Out-Null
 
     $items = @($script:AppxCatalog | Where-Object {
         if (-not $query) { return $true }
@@ -1908,6 +1909,40 @@ function Invoke-AppxRemoval {
             Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $package } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Out-Null
         }
         Write-Log "Remocao AppX finalizada."
+    }
+}
+
+function Invoke-AppxInstall {
+    Invoke-SafeUiAction -Name "Reinstalar AppX" -Action {
+        $selected = @($script:AppxCatalog | Where-Object {
+            $package = if ($_.package) { $_.package } else { $_.Package }
+            $script:SelectedAppxNames.Contains($package)
+        })
+        if ($selected.Count -eq 0) { Write-Log "Nenhum AppX selecionado para reinstalar."; return }
+
+        $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
+        if (-not $wingetCommand) {
+            Write-Log "Instalador de apps nao encontrado. Abra a Microsoft Store para reinstalar manualmente."
+            return
+        }
+
+        $names = ($selected | ForEach-Object { "- " + $(if ($_.name) { $_.name } else { $_.Name }) }) -join "`n"
+        if (-not (Confirm-GLabAction -Title "Confirmar reinstalacao AppX" -Message "Reinstalar $($selected.Count) apps do Windows selecionados?`n`n$names`n`nO Assistente tentara usar o instalador de apps do Windows.")) {
+            Write-Log "Reinstalacao AppX cancelada pelo usuario."
+            return
+        }
+
+        Update-WingetSources -WingetPath $wingetCommand.Source
+        foreach ($appx in $selected) {
+            $name = if ($appx.name) { $appx.name } else { $appx.Name }
+            $package = if ($appx.package) { $appx.package } else { $appx.Package }
+            Write-Log "Reinstalando AppX: $name"
+            $exitCode = Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("install", "--id", $package, "--exact", "--accept-package-agreements", "--accept-source-agreements", "--silent", "--disable-interactivity")
+            if ($exitCode -ne 0) {
+                Write-Log "Atencao: $name pode exigir reinstalacao pela Microsoft Store."
+            }
+        }
+        Write-Log "Reinstalacao AppX finalizada."
     }
 }
 

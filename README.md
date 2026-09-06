@@ -68,7 +68,7 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -SelfTest
 | Aplicativos | Catalogo com 232 apps, busca, categorias, presets, icones e selecao persistente |
 | Atualizacoes | Verificacao de updates, atualizacao dos selecionados, atualizacao geral e reparo de fontes |
 | Ajustes Windows | Presets Minimo/Padrao/Avancado, checkboxes seletivos, verificacao, aplicacao, desfazer e backups |
-| AppX | Remocao controlada de apps provisionados, categorias, busca, preview, bloqueios e inventario antes da acao |
+| AppX | Remocao e reinstalacao controlada de apps provisionados, categorias, busca, preview, bloqueios e inventario antes da acao |
 | Manutencao | DISM, SFC, reparo de rede, horario/NTP, limpeza de temporarios, relatorio de saude e ponto de restauracao |
 | Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
 
@@ -101,7 +101,7 @@ Painel para verificar atualizacoes disponiveis, atualizar aplicativos selecionad
 
 ### AppX
 
-Remocao controlada de aplicativos provisionados do Windows, com categorias, busca, selecao de itens seguros, confirmacao e inventario antes da remocao.
+Remocao e reinstalacao controlada de aplicativos provisionados do Windows, com categorias, busca, selecao de itens seguros, confirmacao e inventario antes da remocao.
 
 ### Win11
 
