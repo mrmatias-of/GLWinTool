@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.3.0-dev</code>
+  Versao atual: <code>0.4.0-dev</code>
 </p>
 
 <p align="center">
@@ -74,7 +74,7 @@ Catalogo de aplicativos organizado por categoria, com busca por nome, id, descri
 
 ### Ajustes
 
-Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba inclui presets **Minimo**, **Padrao** e **Avancado**, verificacao de estado, aplicacao e reversao dos ajustes compativeis. Apenas itens marcados como seguros podem ser aplicados diretamente; itens planejados ou sensiveis permanecem bloqueados ate receberem tratamento dedicado.
+Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba inclui presets **Minimo**, **Padrao** e **Avancado**, verificacao de estado, aplicacao e reversao dos ajustes compativeis. Acoes sensiveis ficam em fluxos dedicados, com confirmacao e backup quando aplicavel.
 
 ### Configurar
 
