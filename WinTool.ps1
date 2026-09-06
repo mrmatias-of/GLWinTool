@@ -1052,7 +1052,7 @@ function Build-Ui {
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="82"/>
-            <RowDefinition Height="46"/>
+            <RowDefinition Height="44"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
@@ -1074,18 +1074,22 @@ function Build-Ui {
             </DockPanel>
         </Border>
 
-        <DockPanel Grid.Row="1" LastChildFill="True" Margin="16,12,16,8">
-            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                <Button x:Name="InstallTab" Content="Instalar" Width="118" Margin="0,0,8,0"/>
-                <Button x:Name="TweaksTab" Content="Ajustes" Width="118" Margin="0,0,8,0"/>
-                <Button x:Name="ConfigTab" Content="Configurar" Width="118" Margin="0,0,8,0"/>
-                <Button x:Name="UpdatesTab" Content="Atualizar" Width="118" Margin="0,0,8,0"/>
-                <Button x:Name="AppxTab" Content="AppX" Width="92" Margin="0,0,8,0"/>
-                <Button x:Name="Win11Tab" Content="Win11" Width="92" Margin="0,0,8,0"/>
+        <Grid Grid.Row="1" Margin="16,8,16,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="704"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button x:Name="InstallTab" Content="Instalar" Width="110" Margin="0,0,7,0" FontSize="12"/>
+                <Button x:Name="TweaksTab" Content="Ajustes" Width="110" Margin="0,0,7,0" FontSize="12"/>
+                <Button x:Name="ConfigTab" Content="Configurar" Width="110" Margin="0,0,7,0" FontSize="12"/>
+                <Button x:Name="UpdatesTab" Content="Atualizar" Width="110" Margin="0,0,7,0" FontSize="12"/>
+                <Button x:Name="AppxTab" Content="AppX" Width="82" Margin="0,0,7,0" FontSize="12"/>
+                <Button x:Name="Win11Tab" Content="Win11" Width="82" Margin="0,0,7,0" FontSize="12"/>
             </StackPanel>
-            <TextBox x:Name="SearchBox" Height="31" Margin="10,0,0,0" Padding="10,0" VerticalContentAlignment="Center"
+            <TextBox Grid.Column="1" x:Name="SearchBox" Height="29" Margin="8,0,0,0" Padding="10,0" VerticalContentAlignment="Center"
                      BorderBrush="#CBD5E1" Background="#FFFFFF" Foreground="#0F172A" ToolTip="Buscar por nome, categoria, id ou tag"/>
-        </DockPanel>
+        </Grid>
 
         <Grid Grid.Row="2" Margin="16,0,16,0">
             <Grid.ColumnDefinitions>
