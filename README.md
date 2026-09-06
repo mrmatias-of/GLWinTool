@@ -27,7 +27,7 @@ Alternativa direta pelo GitHub:
 irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-bootstrap-template.ps1 | iex
 ```
 
-> Dica: se estiver no Prompt de Comando antigo, `irm` nao existe. Use Windows PowerShell.
+O comando deve ser executado no Windows PowerShell.
 
 ## Preview
 
@@ -235,6 +235,6 @@ git commit -m "Descreva a mudanca"
 git push
 ```
 
-## Aviso
+## Uso responsavel
 
-Este projeto executa comandos que podem alterar configuracoes do Windows. Use em maquinas de teste antes de aplicar em ambientes de producao.
+O Assistente G-LAB executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
