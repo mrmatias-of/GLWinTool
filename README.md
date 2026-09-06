@@ -1,10 +1,21 @@
 # Assistente G-LAB
 
-Central Windows em PowerShell/WPF para instalacao de apps, ajustes de sistema, manutencao, AppX, DNS, Windows Update e preparacao tecnica de maquinas.
+![Banner do Assistente G-LAB](assets/readme/hero.svg)
 
-Inspirado no conceito do Chris Titus Tech WinUtil, mas com identidade e curadoria propria para o ecossistema G-LAB.
+<p align="center">
+  <img alt="PowerShell" src="https://img.shields.io/badge/PowerShell-5.1+-2563EB?style=for-the-badge&logo=powershell&logoColor=white">
+  <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0EA5E9?style=for-the-badge&logo=windows&logoColor=white">
+  <img alt="WinGet" src="https://img.shields.io/badge/WinGet-ready-16A34A?style=for-the-badge">
+  <img alt="Idioma" src="https://img.shields.io/badge/pt--BR-interface-7C3AED?style=for-the-badge">
+</p>
 
-## Comando rapido
+O **Assistente G-LAB** e uma central Windows em PowerShell/WPF para preparar, instalar, ajustar e manter computadores com mais agilidade e seguranca operacional.
+
+Ele foi inspirado no conceito do Chris Titus Tech WinUtil, mas segue uma identidade propria para o ecossistema G-LAB: interface em pt-BR, curadoria local, backups preventivos e um fluxo pensado para uso tecnico em bancada, laboratorio e suporte.
+
+## Comece em um comando
+
+Abra o **Windows PowerShell como administrador** e execute:
 
 ```powershell
 irm https://www.glabcursos.com.br/win | iex
@@ -16,32 +27,51 @@ Alternativa direta pelo GitHub:
 irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-bootstrap-template.ps1 | iex
 ```
 
-## Recursos atuais
+> Dica: se estiver no Prompt de Comando antigo, `irm` nao existe. Use Windows PowerShell.
 
-- Interface grafica WPF.
-- Catalogo de apps em JSON com 232 entradas importadas da referencia WinUtil.
-- Instalacao, atualizacao e desinstalacao via WinGet.
-- Suporte a pacotes `winget` e `msstore`.
-- Atualizacao automatica das fontes WinGet antes de instalar/remover.
-- Aba Atualizar com verificacao de updates, atualizacao de selecionados, atualizacao geral e reparo de fontes.
-- Confirmacao antes de acoes destrutivas.
+## Preview
+
+![Preview da interface](assets/readme/app-preview.svg)
+
+## O que ele faz hoje
+
+- Instala, atualiza e remove aplicativos pelo instalador padrao do Windows.
+- Catalogo com **232 aplicativos** organizados por categorias.
+- Suporte a pacotes do WinGet e Microsoft Store.
 - Busca por nome, categoria, id, descricao e tags.
 - Selecao persistente entre categorias.
-- Predefinicoes de apps.
-- Marcacao automatica de apps instalados.
+- Presets de instalacao para preparar maquinas rapidamente.
 - Icones locais por aplicativo.
-- Ajustes do Windows seletivos por checkbox.
+- Aba **Ajustes** com opcoes selecionaveis por checkbox.
 - Ajustes seguros por registro e comandos controlados.
-- Reinicio do Explorer apos ajustes visuais.
-- Seletor DNS: provedor, Cloudflare, Google, Quad9 e AdGuard.
+- Aba **Atualizar** com verificacao, update dos selecionados, update geral e reparo de fontes.
+- Aba **AppX** para remover apps provisionados do Windows com confirmacao.
+- Seletor DNS: padrao do provedor, Cloudflare, Google, Quad9 e AdGuard.
 - Modos de Windows Update: padrao, avisar e desativar.
 - Reparo do Windows com DISM e SFC.
 - Limpeza de arquivos temporarios.
 - Criacao de ponto de restauracao.
-- Backups locais antes de ajustes de registro, DNS, AppX e Windows Update.
-- Aba AppX com catalogo externo em JSON, remocoes seguras e itens sensiveis bloqueados.
-- Aba Win11 com ponto inicial para Windows 11 Creator.
 - Log integrado na interface.
+
+## Seguranca antes da acao
+
+![Fluxo seguro de operacao](assets/readme/safety-flow.svg)
+
+O Assistente G-LAB evita executar alteracoes sensiveis no escuro. Antes de procedimentos de maior impacto, ele cria uma trilha de recuperacao quando possivel.
+
+Medidas ja implementadas:
+
+- confirmacao antes de acoes destrutivas;
+- backup antes de ajustes de registro;
+- backup da configuracao DNS antes de alterar;
+- exportacao da politica local de Windows Update antes de mudar o modo;
+- inventario AppX antes da remocao;
+- tentativa de ponto de restauracao em ajustes e AppX quando executado como administrador;
+- bloqueio contra duas acoes simultaneas;
+- barra de progresso durante operacoes;
+- log visivel para auditoria.
+
+Os backups ficam na pasta `backups` dentro da copia local em execucao. Quando iniciado pelo comando remoto, a copia fica na pasta temporaria do Windows daquela execucao.
 
 ## Execucao local
 
@@ -55,13 +85,13 @@ Ou diretamente:
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1
 ```
 
-Validar sem abrir a janela:
+Validar catalogos sem abrir a interface:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ```
 
-## Estrutura
+## Estrutura do projeto
 
 ```text
 .
@@ -75,7 +105,8 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 │   ├── presets.json
 │   └── tweaks.json
 ├── assets
-│   └── icons
+│   ├── icons
+│   └── readme
 ├── docs
 │   └── ARCHITECTURE.md
 ├── functions
@@ -90,14 +121,14 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 
 ## Catalogos
 
-### Apps
+### Aplicativos
 
 Arquivo: `config/apps.json`
 
 Campos principais:
 
 - `name`: nome exibido.
-- `id`: ID do WinGet. Use `msstore:<id>` para Microsoft Store.
+- `id`: ID do pacote. Use `msstore:<id>` para Microsoft Store.
 - `category`: categoria visivel na interface.
 - `description`: descricao curta.
 - `domain`: usado pelo gerador de icones.
@@ -109,7 +140,7 @@ Arquivo: `config/tweaks.json`
 
 Tipos suportados:
 
-- `registry`: cria/altera uma chave de registro.
+- `registry`: cria ou altera uma chave de registro.
 - `command`: executa um comando controlado.
 - `planned`: aparece na interface, mas fica bloqueado.
 
@@ -119,41 +150,19 @@ Somente ajustes com `safe: true` podem ser selecionados e aplicados.
 
 Arquivo: `config/appx.json`
 
-Contem apps provisionados/removiveis inspirados na referencia WinUtil. A remocao pede confirmacao antes de executar.
+Contem aplicativos provisionados/removiveis do Windows. A remocao pede confirmacao, gera inventario antes de executar e ignora itens bloqueados.
 
-## Seguranca operacional
+## Gerar icones
 
-Este projeto executa comandos administrativos no Windows. Use com criterio em maquinas de producao.
-
-Medidas ja adotadas:
-
-- acoes destrutivas pedem confirmacao;
-- ajustes selecionados criam uma sessao de backup antes de alterar registro;
-- DNS salva a configuracao atual antes de aplicar novo provedor;
-- Windows Update exporta a politica local antes de alterar o modo;
-- AppX salva inventario de pacotes instalados e provisionados antes da remocao;
-- AppX e ajustes tentam criar ponto de restauracao quando o app esta em modo administrador;
-- AppX sensiveis ficam bloqueados;
-- ajustes planejados aparecem, mas nao executam;
-- argumentos WinGet sao montados por funcao central;
-- `ValidateOnly` valida catalogos e argumentos;
-- logs ficam visiveis para auditoria.
-
-Os backups ficam na pasta `backups`, dentro da copia local executada. Ao rodar pelo comando remoto, eles ficam na pasta temporaria baixada pelo bootstrap daquela execucao.
-
-Recomendado para ambientes profissionais:
-
-- usar ponto de restauracao antes de alteracoes amplas;
-- testar presets em VM antes de usar em bancada;
-- publicar releases versionadas;
-- assinar scripts;
-- evitar apontar o bootstrap para branches instaveis.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
+```
 
 ## Plano de crescimento
 
 ### Fase 1 - Base confiavel
 
-- Corrigir instalacao/remocao/atualizacao de apps.
+- Corrigir instalacao, remocao e atualizacao de apps.
 - Garantir compatibilidade com Windows PowerShell 5.1.
 - Validar catalogos antes de publicar.
 - Manter UI em pt-BR.
@@ -172,7 +181,7 @@ Status: em andamento.
 
 ### Fase 3 - Apps e AppX
 
-- Expandir e revisar catalogo de apps.
+- Revisar catalogo de apps continuamente.
 - Melhorar deteccao de apps instalados.
 - Manter catalogo AppX externo em JSON.
 - Adicionar preview antes de remover AppX.
@@ -183,10 +192,10 @@ Status: iniciado com catalogos importados.
 ### Fase 4 - Reparos e atualizacoes
 
 - Reparar fontes do instalador padrao do Windows.
-- Fix Windows Update.
-- Fix rede.
-- Fix horario/NTP.
-- Relatorio de saude do sistema.
+- Corrigir problemas do Windows Update.
+- Corrigir rede.
+- Corrigir horario/NTP.
+- Gerar relatorio de saude do sistema.
 
 Status: iniciado com verificacao de updates, reparo de fontes, backups preventivos e acoes de manutencao.
 
@@ -210,12 +219,6 @@ Status: planejado.
 
 Status: planejado.
 
-## Gerar icones
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
-```
-
 ## Desenvolvimento
 
 Antes de commitar:
@@ -224,10 +227,14 @@ Antes de commitar:
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ```
 
-Commit e publicacao:
+Publicacao:
 
 ```powershell
 git add .
 git commit -m "Descreva a mudanca"
 git push
 ```
+
+## Aviso
+
+Este projeto executa comandos que podem alterar configuracoes do Windows. Use em maquinas de teste antes de aplicar em ambientes de producao.

@@ -520,6 +520,30 @@ function Select-SafeTweaks {
     Write-Log "Ajustes seguros selecionados: $($script:SelectedTweakNames.Count)."
 }
 
+function Get-AppxCategory {
+    param([object]$Appx)
+    $name = if ($Appx.name) { $Appx.name } else { $Appx.Name }
+    $package = if ($Appx.package) { $Appx.package } else { $Appx.Package }
+    $text = "$name $package".ToLowerInvariant()
+
+    if ($text -match "xbox|gaming|solitaire") { return "Jogos e Xbox" }
+    if ($text -match "bing|news|weather|start|copilot") { return "Conteudo e IA" }
+    if ($text -match "teams|outlook|office|todo|sticky|phone|crossdevice") { return "Produtividade e conexao" }
+    if ($text -match "clipchamp|zunemusic|photos|paint|camera|sound|screensketch") { return "Midia e criacao" }
+    return "Sistema e utilitarios"
+}
+
+function Select-SafeAppx {
+    $script:SelectedAppxNames.Clear()
+    foreach ($appx in $script:AppxCatalog) {
+        $package = if ($appx.package) { $appx.package } else { $appx.Package }
+        $safe = if ($null -ne $appx.safe) { $appx.safe } else { $appx.Safe }
+        if ($safe) { [void]$script:SelectedAppxNames.Add($package) }
+    }
+    Show-AppxView
+    Write-Log "AppX seguros selecionados: $($script:SelectedAppxNames.Count)."
+}
+
 function New-AppCard {
     param([object]$App)
 
@@ -674,6 +698,28 @@ function New-TweakCard {
     $checkbox.ToolTip = "$($Tweak.description)`nEscopo: $($Tweak.scope)"
     $checkbox.Add_Checked({ Set-TweakSelection -Tweak $this.Tag -Selected $true })
     $checkbox.Add_Unchecked({ Set-TweakSelection -Tweak $this.Tag -Selected $false })
+    return $checkbox
+}
+
+function New-AppxRow {
+    param([object]$Appx)
+
+    $name = if ($Appx.name) { $Appx.name } else { $Appx.Name }
+    $package = if ($Appx.package) { $Appx.package } else { $Appx.Package }
+    $description = if ($Appx.description) { $Appx.description } else { $Appx.Description }
+    $safe = if ($null -ne $Appx.safe) { $Appx.safe } else { $Appx.Safe }
+
+    $checkbox = [System.Windows.Controls.CheckBox]::new()
+    $checkbox.Margin = "0,3,0,3"
+    $checkbox.FontSize = 12
+    $checkbox.Foreground = "#0F172A"
+    $checkbox.Content = if ($safe) { "$name" } else { "$name - bloqueado" }
+    $checkbox.Tag = $Appx
+    $checkbox.IsEnabled = [bool]$safe
+    $checkbox.IsChecked = $script:SelectedAppxNames.Contains($package)
+    $checkbox.ToolTip = "$description`nPacote: $package"
+    $checkbox.Add_Checked({ Set-AppxSelection -Appx $this.Tag -Selected $true })
+    $checkbox.Add_Unchecked({ Set-AppxSelection -Appx $this.Tag -Selected $false })
     return $checkbox
 }
 
@@ -963,25 +1009,27 @@ function Show-AppxView {
     $panel = [System.Windows.Controls.StackPanel]::new()
     $panel.Width = 930
     $panel.Margin = "6"
-    $panel.Children.Add((New-SectionHeader -Title "Remocao de AppX" -Subtitle "Marque apps provisionados seguros para remocao. Itens sensiveis ficam bloqueados.")) | Out-Null
-    foreach ($appx in $script:AppxCatalog) {
-        $name = if ($appx.name) { $appx.name } else { $appx.Name }
-        $package = if ($appx.package) { $appx.package } else { $appx.Package }
-        $safe = if ($null -ne $appx.safe) { $appx.safe } else { $appx.Safe }
-        $checkbox = [System.Windows.Controls.CheckBox]::new()
-        $checkbox.Content = if ($safe) { "$name ($package)" } else { "$name - sensivel/bloqueado" }
-        $checkbox.Margin = "8,2,0,2"
-        $checkbox.FontSize = 12
-        $checkbox.Tag = $appx
-        $checkbox.IsEnabled = [bool]$safe
-        $checkbox.IsChecked = $script:SelectedAppxNames.Contains($package)
-        $checkbox.Add_Checked({ Set-AppxSelection -Appx $this.Tag -Selected $true })
-        $checkbox.Add_Unchecked({ Set-AppxSelection -Appx $this.Tag -Selected $false })
-        $panel.Children.Add($checkbox) | Out-Null
+    $query = $script:SearchBox.Text.Trim().ToLowerInvariant()
+    $panel.Children.Add((New-SectionHeader -Title "Remocao de aplicativos do Windows" -Subtitle "Marque apenas o que deseja remover. Antes da remocao, o app salva inventario e pede confirmacao.")) | Out-Null
+
+    $items = @($script:AppxCatalog | Where-Object {
+        if (-not $query) { return $true }
+        $name = if ($_.name) { $_.name } else { $_.Name }
+        $package = if ($_.package) { $_.package } else { $_.Package }
+        $description = if ($_.description) { $_.description } else { $_.Description }
+        return ("$name $package $description".ToLowerInvariant()).Contains($query)
+    })
+
+    foreach ($group in ($items | Group-Object { Get-AppxCategory -Appx $_ } | Sort-Object Name)) {
+        $panel.Children.Add((New-SectionHeader -Title $group.Name -Subtitle "$($group.Count) itens nesta categoria.")) | Out-Null
+        foreach ($appx in ($group.Group | Sort-Object name)) {
+            $panel.Children.Add((New-AppxRow -Appx $appx)) | Out-Null
+        }
     }
     $script:AppsPanel.Children.Add($panel) | Out-Null
     Update-SelectedCount
-    Write-Status "AppX" "$(@($script:AppxCatalog | Where-Object { if ($null -ne $_.safe) { $_.safe } else { $_.Safe } }).Count) remocoes seguras disponiveis"
+    $safeCount = @($script:AppxCatalog | Where-Object { if ($null -ne $_.safe) { $_.safe } else { $_.Safe } }).Count
+    Write-Status "AppX" "$safeCount remocoes seguras disponiveis"
 }
 
 function Show-Win11View {
@@ -1430,7 +1478,13 @@ $window.FindName("ApplyPresetButton").Add_Click({
         Select-PresetApps -PresetName $script:PresetBox.SelectedItem.Tag
     }
 })
-$window.FindName("InstalledButton").Add_Click({ Select-InstalledApps })
+$window.FindName("InstalledButton").Add_Click({
+    if ($script:ActiveView -eq "Appx") {
+        Select-SafeAppx
+    } else {
+        Select-InstalledApps
+    }
+})
 $window.FindName("SelectTweaksButton").Add_Click({ Select-SafeTweaks })
 $window.FindName("ApplyTweaksButton").Add_Click({ Invoke-SafeUiAction -Name "Aplicar ajustes seguros" -Action { Invoke-SafeTweaks } })
 $window.FindName("ApplyDnsButton").Add_Click({
@@ -1481,7 +1535,11 @@ $window.FindName("UpdatesTab").Add_Click({ Show-UpdatesView })
 $window.FindName("AppxTab").Add_Click({ Show-AppxView })
 $window.FindName("Win11Tab").Add_Click({ Show-Win11View })
 $script:SearchBox.Add_TextChanged({
-    if ($script:ActiveView -eq "Install") { Refresh-AppGrid }
+    if ($script:ActiveView -eq "Install") {
+        Refresh-AppGrid
+    } elseif ($script:ActiveView -eq "Appx") {
+        Show-AppxView
+    }
 })
 $script:CategoryBox.Add_SelectionChanged({
     if ($script:ActiveView -eq "Install") { Refresh-AppGrid }
