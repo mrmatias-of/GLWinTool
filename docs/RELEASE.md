@@ -18,7 +18,9 @@ powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
 
 ## Como o app checa atualizacoes
 
-A aba **Atualizar** consulta:
+Ao iniciar, o app mostra uma tela de busca de atualizacoes antes da janela principal. Se houver versao nova, o botao **Atualizar** aparece e o usuario precisa abrir a pagina de release para atualizar. Se nao houver atualizacao, o app inicia automaticamente depois de 3 segundos.
+
+A aba **Atualizar** tambem permite checagem manual e consulta:
 
 ```text
 https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json

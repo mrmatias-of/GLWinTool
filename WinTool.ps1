@@ -1498,15 +1498,113 @@ function Invoke-CheckAssistenteUpdate {
     }
 }
 
-function Start-AssistenteUpdateCheck {
-    if ($ValidateOnly -or $SelfTest) { return }
-    $timer = [System.Windows.Threading.DispatcherTimer]::new()
-    $timer.Interval = [TimeSpan]::FromSeconds(2)
-    $timer.Add_Tick({
-        $this.Stop()
-        Invoke-CheckAssistenteUpdate
+function Get-AssistenteUpdateManifest {
+    try {
+        return Invoke-RestMethod -Uri $script:UpdateManifestUrl -UseBasicParsing
+    } catch {
+        return $null
+    }
+}
+
+function Show-StartupUpdateScreen {
+    if ($ValidateOnly -or $SelfTest) { return $true }
+
+    $splash = [System.Windows.Window]::new()
+    $splash.Title = "Assistente G-LAB"
+    $splash.Width = 520
+    $splash.Height = 330
+    $splash.WindowStartupLocation = "CenterScreen"
+    $splash.ResizeMode = "NoResize"
+    $splash.Background = "#060A17"
+    $splash.FontFamily = "Segoe UI"
+
+    $panel = [System.Windows.Controls.StackPanel]::new()
+    $panel.Margin = "34"
+    $panel.HorizontalAlignment = "Stretch"
+    $panel.VerticalAlignment = "Center"
+
+    $logoBox = [System.Windows.Controls.Border]::new()
+    $logoBox.Width = 72
+    $logoBox.Height = 72
+    $logoBox.CornerRadius = "18"
+    $logoBox.BorderBrush = "#22D3EE"
+    $logoBox.BorderThickness = "1"
+    $logoBox.Background = "#111827"
+    $logoBox.HorizontalAlignment = "Center"
+    if (Test-Path -LiteralPath $script:LogoPath) {
+        $img = [System.Windows.Controls.Image]::new()
+        $bmp = [System.Windows.Media.Imaging.BitmapImage]::new()
+        $bmp.BeginInit()
+        $bmp.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+        $bmp.UriSource = [Uri]$script:LogoPath
+        $bmp.EndInit()
+        $bmp.Freeze()
+        $img.Source = $bmp
+        $img.Stretch = "UniformToFill"
+        $logoBox.Child = $img
+    }
+    $panel.Children.Add($logoBox) | Out-Null
+
+    $title = [System.Windows.Controls.TextBlock]::new()
+    $title.Text = "Assistente G-LAB"
+    $title.FontSize = 28
+    $title.FontWeight = "SemiBold"
+    $title.Foreground = "#F8FAFC"
+    $title.HorizontalAlignment = "Center"
+    $title.Margin = "0,16,0,4"
+    $panel.Children.Add($title) | Out-Null
+
+    $status = [System.Windows.Controls.TextBlock]::new()
+    $status.Text = "Buscando atualizacoes..."
+    $status.FontSize = 14
+    $status.Foreground = "#93C5FD"
+    $status.TextAlignment = "Center"
+    $status.TextWrapping = "Wrap"
+    $status.Margin = "0,0,0,18"
+    $panel.Children.Add($status) | Out-Null
+
+    $progress = [System.Windows.Controls.ProgressBar]::new()
+    $progress.Height = 8
+    $progress.IsIndeterminate = $true
+    $progress.Margin = "0,0,0,18"
+    $panel.Children.Add($progress) | Out-Null
+
+    $button = [System.Windows.Controls.Button]::new()
+    $button.Content = "Atualizar"
+    $button.Height = 38
+    $button.Width = 180
+    $button.HorizontalAlignment = "Center"
+    $button.Visibility = "Collapsed"
+    $button.Add_Click({
+        $manifest = $this.Tag
+        if ($manifest -and $manifest.releaseUrl) {
+            Start-Process "$($manifest.releaseUrl)"
+        }
     })
-    $timer.Start()
+    $panel.Children.Add($button) | Out-Null
+
+    $splash.Content = $panel
+    $splash.Add_ContentRendered({
+        $manifest = Get-AssistenteUpdateManifest
+        $progress.IsIndeterminate = $false
+        if ($manifest -and "$($manifest.version)" -ne "$script:AppVersion") {
+            $status.Text = "Atualizacao disponivel: $($manifest.version). Atualize para continuar."
+            $button.Tag = $manifest
+            $button.Visibility = "Visible"
+        } else {
+            $status.Text = "Sem atualizacao disponivel. Iniciando em 3 segundos..."
+            $timer = [System.Windows.Threading.DispatcherTimer]::new()
+            $timer.Interval = [TimeSpan]::FromSeconds(3)
+            $timer.Add_Tick({
+                $this.Stop()
+                $splash.DialogResult = $true
+                $splash.Close()
+            })
+            $timer.Start()
+        }
+    })
+
+    return [bool]$splash.ShowDialog()
 }
 
 function Invoke-RepairPackageManager {
@@ -2338,7 +2436,6 @@ if (Test-IsAdmin) {
 
 Write-Log "Assistente G-LAB iniciado. Catalogo carregado: $($script:Catalog.Count) apps."
 Refresh-AppGrid
-Start-AssistenteUpdateCheck
 if ($ValidateOnly) {
     Test-AssistenteConfig
     $script:ValidationRan = $true
@@ -2353,4 +2450,6 @@ if (-not $window) {
     throw "A janela WPF nao foi inicializada. Execute novamente com powershell.exe -STA."
 }
 
-[void]$window.ShowDialog()
+if (Show-StartupUpdateScreen) {
+    [void]$window.ShowDialog()
+}
