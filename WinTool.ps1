@@ -549,10 +549,10 @@ function New-AppCard {
     param([object]$App)
 
     $border = [System.Windows.Controls.Border]::new()
-    $border.Margin = "5"
-    $border.Padding = "9"
-    $border.Width = 265
-    $border.MinHeight = 72
+    $border.Margin = "4"
+    $border.Padding = "8"
+    $border.Width = 255
+    $border.MinHeight = 68
     $border.BorderBrush = "#CBD5E1"
     $border.BorderThickness = "1"
     $border.CornerRadius = "12"
@@ -576,17 +576,17 @@ function New-AppCard {
     $name.TextWrapping = "Wrap"
 
     $desc = [System.Windows.Controls.TextBlock]::new()
-    $desc.Text = "Categoria: $($App.category)"
+    $desc.Text = $App.category
     $desc.Foreground = "#475569"
     $desc.Margin = "0,3,0,0"
-    $desc.FontSize = 12
+    $desc.FontSize = 11
     $desc.TextWrapping = "Wrap"
 
     $id = [System.Windows.Controls.TextBlock]::new()
     $id.Text = $App.id
     $id.Foreground = "#64748B"
-    $id.Margin = "0,4,0,0"
-    $id.FontSize = 11
+    $id.Margin = "0,3,0,0"
+    $id.FontSize = 10
     $id.FontFamily = "Consolas"
 
     $stack.Children.Add($name) | Out-Null
@@ -598,7 +598,7 @@ function New-AppCard {
 
     $checkbox = [System.Windows.Controls.CheckBox]::new()
     $checkbox.VerticalAlignment = "Center"
-    $checkbox.Margin = "8,0,0,0"
+    $checkbox.Margin = "6,0,0,0"
     $checkbox.ToolTip = "Selecionar $($App.name)"
     $checkbox.Tag = $App
     $checkbox.IsChecked = $script:SelectedAppIds.Contains($App.id)
@@ -621,10 +621,10 @@ function New-InfoCard {
     )
 
     $card = [System.Windows.Controls.Border]::new()
-    $card.Margin = "5"
-    $card.Padding = "10"
-    $card.Width = 265
-    $card.MinHeight = 88
+    $card.Margin = "4"
+    $card.Padding = "9"
+    $card.Width = 255
+    $card.MinHeight = 84
     $card.BorderBrush = "#CBD5E1"
     $card.BorderThickness = "1"
     $card.CornerRadius = "12"
@@ -646,8 +646,8 @@ function New-InfoCard {
     $bodyBlock.Foreground = "#475569"
     $bodyBlock.Margin = "0,4,0,0"
     $bodyBlock.TextWrapping = "Wrap"
-    $bodyBlock.FontSize = 12
-    $bodyBlock.MaxWidth = 190
+    $bodyBlock.FontSize = 11
+    $bodyBlock.MaxWidth = 182
 
     $stack.Children.Add($titleBlock) | Out-Null
     $stack.Children.Add($bodyBlock) | Out-Null
@@ -731,9 +731,9 @@ function New-SectionHeader {
     )
 
     $outer = [System.Windows.Controls.Border]::new()
-    $outer.Width = 1100
-    $outer.Margin = "5,10,5,5"
-    $outer.Padding = "10,7"
+    $outer.Width = 900
+    $outer.Margin = "4,8,4,5"
+    $outer.Padding = "10,6"
     $outer.CornerRadius = "10"
     $outer.Background = "#E0E7FF"
     $outer.BorderBrush = "#C7D2FE"
@@ -843,8 +843,46 @@ function Write-Status {
     }
 }
 
+function Set-ActiveTab {
+    param([string]$TabName)
+    foreach ($name in @("InstallTab", "TweaksTab", "ConfigTab", "UpdatesTab", "AppxTab", "Win11Tab")) {
+        $button = $window.FindName($name)
+        if (-not $button) { continue }
+        if ($name -eq $TabName) {
+            $button.Background = "#0F172A"
+            $button.Foreground = "#FFFFFF"
+            $button.BorderBrush = "#22D3EE"
+        } else {
+            $button.Background = "#FFFFFF"
+            $button.Foreground = "#0F172A"
+            $button.BorderBrush = "#B8C4D6"
+        }
+    }
+}
+
+function Update-SidebarForView {
+    if (-not $window) { return }
+    $installedButton = $window.FindName("InstalledButton")
+    $applyTweaksButton = $window.FindName("ApplyTweaksButton")
+    $removeAppxButton = $window.FindName("RemoveAppxButton")
+
+    if ($installedButton) {
+        $installedButton.Content = if ($script:ActiveView -eq "Appx") { "Marcar AppX seguros" } else { "Marcar instalados" }
+    }
+    if ($applyTweaksButton) {
+        $applyTweaksButton.IsEnabled = $script:ActiveView -eq "Tweaks"
+        $applyTweaksButton.Opacity = if ($script:ActiveView -eq "Tweaks") { 1 } else { 0.55 }
+    }
+    if ($removeAppxButton) {
+        $removeAppxButton.IsEnabled = $script:ActiveView -eq "Appx"
+        $removeAppxButton.Opacity = if ($script:ActiveView -eq "Appx") { 1 } else { 0.55 }
+    }
+}
+
 function Refresh-AppGrid {
     $script:ActiveView = "Install"
+    Set-ActiveTab -TabName "InstallTab"
+    Update-SidebarForView
     $query = $script:SearchBox.Text.Trim().ToLowerInvariant()
     $category = $script:CategoryBox.SelectedItem.Tag
 
@@ -872,6 +910,8 @@ function Refresh-AppGrid {
 
 function Show-TweaksView {
     $script:ActiveView = "Tweaks"
+    Set-ActiveTab -TabName "TweaksTab"
+    Update-SidebarForView
     Clear-MainPanel
 
     $grid = [System.Windows.Controls.Grid]::new()
@@ -954,12 +994,18 @@ function Show-TweaksView {
 
 function Show-ConfigView {
     $script:ActiveView = "Config"
+    Set-ActiveTab -TabName "ConfigTab"
+    Update-SidebarForView
     Clear-MainPanel
     $adminStatus = if (Test-IsAdmin) { "Executando elevado." } else { "Nao elevado; algumas acoes podem pedir permissao." }
     $winget = Get-Command winget -ErrorAction SilentlyContinue
     $wingetStatus = if ($winget) { "Disponivel: $($winget.Source)" } else { "Nao encontrado no PATH desta sessao." }
     $presetCount = @($script:Presets.PSObject.Properties).Count
     $tweakCount = @((Get-AllTweaks)).Count
+    $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
+    $osText = if ($os) { "$($os.Caption) build $($os.BuildNumber)" } else { "Nao foi possivel ler a versao do Windows." }
+    $disk = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction SilentlyContinue
+    $diskText = if ($disk -and $disk.Size) { "Livre em C: {0:N1} GB de {1:N1} GB" -f ($disk.FreeSpace / 1GB), ($disk.Size / 1GB) } else { "Disco principal nao identificado." }
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Configurar e manter" -Subtitle "Acoes rapidas inspiradas no WinUtil, com confirmacao nos itens sensiveis.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Criar ponto de restauracao" -Body "Recomendado antes de ajustes maiores no Windows." -ButtonText "Criar agora" -Icon "PR" -Accent "#16A34A" -ClickAction { New-GLabRestorePoint })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Limpar arquivos temporarios" -Body "Remove sobras em pastas temporarias do usuario e do sistema." -ButtonText "Limpar" -Icon "LT" -Accent "#F59E0B" -ClickAction { Invoke-TempCleanup })) | Out-Null
@@ -972,6 +1018,8 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Desativar automaticas" -Body "Opcao avancada. Exige confirmacao antes de aplicar." -ButtonText "Desativar" -Icon "!" -Accent "#DC2626" -ClickAction { Set-WindowsUpdateMode -Mode "Desativar" })) | Out-Null
 
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Windows" -Body $osText -Icon "OS" -Accent "#0EA5E9")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Armazenamento" -Body $diskText -Icon "HD" -Accent "#16A34A")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Catalogo JSON" -Body $script:ConfigPath -Icon "JS" -Accent "#2563EB")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Administrador" -Body $adminStatus -Icon "AD" -Accent "#64748B")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Instalador do Windows" -Body $wingetStatus -Icon "IN" -Accent "#7C3AED")) | Out-Null
@@ -982,6 +1030,8 @@ function Show-ConfigView {
 
 function Show-UpdatesView {
     $script:ActiveView = "Updates"
+    Set-ActiveTab -TabName "UpdatesTab"
+    Update-SidebarForView
     Clear-MainPanel
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar aplicativos" -Subtitle "Verifique, atualize selecionados ou rode uma atualizacao geral com confirmacao.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Verificar atualizacoes" -Body "Lista no log quais aplicativos possuem atualizacao disponivel." -ButtonText "Verificar" -Icon "VR" -Accent "#2563EB" -ClickAction { Invoke-CheckAppUpdates })) | Out-Null
@@ -1006,6 +1056,8 @@ function Show-UpdatesView {
 
 function Show-AppxView {
     $script:ActiveView = "Appx"
+    Set-ActiveTab -TabName "AppxTab"
+    Update-SidebarForView
     Clear-MainPanel
     $panel = [System.Windows.Controls.StackPanel]::new()
     $panel.Width = 930
@@ -1035,6 +1087,8 @@ function Show-AppxView {
 
 function Show-Win11View {
     $script:ActiveView = "Win11"
+    Set-ActiveTab -TabName "Win11Tab"
+    Update-SidebarForView
     Clear-MainPanel
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows 11 Creator" -Subtitle "Area para preparar ISO/USB do Windows 11. Por seguranca, a primeira versao abre a fonte oficial.")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Baixar Windows 11" -Body "Abre a pagina oficial da Microsoft para ISO, assistente de instalacao e media creation tool." -Icon "11" -Accent "#2563EB")) | Out-Null
@@ -1265,8 +1319,9 @@ function Invoke-AppxRemoval {
             $script:SelectedAppxNames.Contains($package) -and $safe
         })
         if ($selected.Count -eq 0) { Write-Log "Nenhum AppX seguro selecionado para remocao."; return }
-        $names = ($selected | ForEach-Object { if ($_.name) { $_.name } else { $_.Name } }) -join ", "
-        if (-not (Confirm-GLabAction -Title "Confirmar remocao AppX" -Message "Remover os AppX selecionados?`n`n$names")) {
+        $names = ($selected | ForEach-Object { "- " + $(if ($_.name) { $_.name } else { $_.Name }) }) -join "`n"
+        $message = "Remover $($selected.Count) aplicativos AppX selecionados?`n`n$names`n`nAntes da remocao sera salvo um inventario local dos pacotes."
+        if (-not (Confirm-GLabAction -Title "Confirmar remocao AppX" -Message $message)) {
             Write-Log "Remocao AppX cancelada pelo usuario."
             return
         }
@@ -1296,27 +1351,36 @@ function Build-Ui {
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Assistente G-LAB" Height="780" Width="1240" MinHeight="720" MinWidth="1120" WindowStartupLocation="CenterScreen"
-        Background="#EEF2F7" FontFamily="Segoe UI">
+        Background="#E8EEF6" FontFamily="Segoe UI">
     <Window.Resources>
         <Style TargetType="Button">
-            <Setter Property="Background" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#B8C4D6"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,6"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="#0F172A"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="82"/>
-            <RowDefinition Height="44"/>
+            <RowDefinition Height="78"/>
+            <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="118"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#070B1A" Padding="18,12">
+        <Border Grid.Row="0" Background="#060A17" Padding="18,11">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <Border Width="48" Height="48" CornerRadius="14" Background="#111827" Margin="0,0,12,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
@@ -1324,7 +1388,7 @@ function Build-Ui {
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Assistente G-LAB" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
-                        <TextBlock Text="Central de instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD" TextWrapping="NoWrap"/>
+                        <TextBlock Text="Instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD" TextWrapping="NoWrap"/>
                     </StackPanel>
                 </StackPanel>
                 <Border DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="18" Padding="14,7">
@@ -1336,33 +1400,33 @@ function Build-Ui {
             </DockPanel>
         </Border>
 
-        <Grid Grid.Row="1" Margin="16,8,16,6">
+        <Grid Grid.Row="1" Margin="14,7,14,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="704"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Button x:Name="InstallTab" Content="Instalar" Width="110" Margin="0,0,7,0" FontSize="12"/>
-                <Button x:Name="TweaksTab" Content="Ajustes" Width="110" Margin="0,0,7,0" FontSize="12"/>
-                <Button x:Name="ConfigTab" Content="Configurar" Width="110" Margin="0,0,7,0" FontSize="12"/>
-                <Button x:Name="UpdatesTab" Content="Atualizar" Width="110" Margin="0,0,7,0" FontSize="12"/>
-                <Button x:Name="AppxTab" Content="AppX" Width="82" Margin="0,0,7,0" FontSize="12"/>
-                <Button x:Name="Win11Tab" Content="Win11" Width="82" Margin="0,0,7,0" FontSize="12"/>
+                <Button x:Name="InstallTab" Content="Instalar" Width="110" Margin="0,0,7,0" FontSize="12" Background="#FFFFFF"/>
+                <Button x:Name="TweaksTab" Content="Ajustes" Width="110" Margin="0,0,7,0" FontSize="12" Background="#FFFFFF"/>
+                <Button x:Name="ConfigTab" Content="Configurar" Width="110" Margin="0,0,7,0" FontSize="12" Background="#FFFFFF"/>
+                <Button x:Name="UpdatesTab" Content="Atualizar" Width="110" Margin="0,0,7,0" FontSize="12" Background="#FFFFFF"/>
+                <Button x:Name="AppxTab" Content="AppX" Width="82" Margin="0,0,7,0" FontSize="12" Background="#FFFFFF"/>
+                <Button x:Name="Win11Tab" Content="Win11" Width="82" Margin="0,0,7,0" FontSize="12" Background="#FFFFFF"/>
             </StackPanel>
             <TextBox Grid.Column="1" x:Name="SearchBox" Height="29" Margin="8,0,0,0" Padding="10,0" VerticalContentAlignment="Center"
-                     BorderBrush="#CBD5E1" Background="#FFFFFF" Foreground="#0F172A" ToolTip="Buscar por nome, categoria, id ou tag"/>
+                     BorderBrush="#CBD5E1" Background="#FFFFFF" Foreground="#0F172A" ToolTip="Digite para buscar por nome, categoria, id ou tag"/>
         </Grid>
 
-        <Grid Grid.Row="2" Margin="16,0,16,0">
+        <Grid Grid.Row="2" Margin="14,0,14,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="230"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Padding="10" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="14">
+            <Border Grid.Column="0" Padding="10" Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="14">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
-                    <TextBlock Text="Acoes" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,10"/>
+                    <TextBlock Text="Acoes" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,8"/>
                     <Button x:Name="InstallButton" Content="Instalar selecionados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpgradeButton" Content="Atualizar selecionados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UninstallButton" Content="Desinstalar selecionados" Margin="0,0,0,5" Height="29"/>
@@ -1405,7 +1469,7 @@ function Build-Ui {
             </DockPanel>
         </Grid>
 
-        <Border Grid.Row="3" Margin="16,10,16,14" Padding="10" Background="#0B1020" CornerRadius="14">
+        <Border Grid.Row="3" Margin="14,8,14,12" Padding="8" Background="#0B1020" CornerRadius="14">
             <TextBox x:Name="LogBox" Background="#0F172A" Foreground="#E5E7EB" BorderThickness="0"
                      FontFamily="Consolas" FontSize="12" IsReadOnly="True" TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto"/>
@@ -1525,6 +1589,10 @@ $window.FindName("ReloadButton").Add_Click({
         Show-ConfigView
     } elseif ($script:ActiveView -eq "Updates") {
         Show-UpdatesView
+    } elseif ($script:ActiveView -eq "Appx") {
+        Show-AppxView
+    } elseif ($script:ActiveView -eq "Win11") {
+        Show-Win11View
     } else {
         Refresh-AppGrid
     }
