@@ -16,6 +16,7 @@ function Get-AssistenteRoot {
 $script:Root = Get-AssistenteRoot
 $script:ConfigPath = Join-Path $script:Root "config\apps.json"
 $script:VersionPath = Join-Path $script:Root "VERSION"
+$script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
 $script:PresetsPath = Join-Path $script:Root "config\presets.json"
 $script:AppxPath = Join-Path $script:Root "config\appx.json"
@@ -1316,6 +1317,9 @@ function Show-UpdatesView {
     Set-ActiveTab -TabName "UpdatesTab"
     Update-SidebarForView
     Clear-MainPanel
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar o Assistente G-LAB" -Subtitle "Confira se existe uma versao nova publicada no GitHub antes de atualizar aplicativos do Windows.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Checar versao do Assistente" -Body "Compara a versao instalada com o manifesto online do projeto." -ButtonText "Checar agora" -Icon "GL" -Accent "#0F172A" -ClickAction { Invoke-CheckAssistenteUpdate })) | Out-Null
+
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar aplicativos" -Subtitle "Verifique, atualize selecionados ou rode uma atualizacao geral com confirmacao.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Verificar atualizacoes" -Body "Lista no log quais aplicativos possuem atualizacao disponivel." -ButtonText "Verificar" -Icon "VR" -Accent "#2563EB" -ClickAction { Invoke-CheckAppUpdates })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Atualizar selecionados" -Body "Atualiza apenas os aplicativos marcados na aba Instalar." -ButtonText "Atualizar marcados" -Icon "AT" -Accent "#16A34A" -ClickAction { Invoke-WingetForSelection -Action "upgrade" })) | Out-Null
@@ -1473,6 +1477,36 @@ function Invoke-CheckAppUpdates {
         Write-Log "Verificando atualizacoes disponiveis..."
         Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("upgrade", "--accept-source-agreements", "--disable-interactivity") | Out-Null
     }
+}
+
+function Invoke-CheckAssistenteUpdate {
+    Invoke-SafeUiAction -Name "Checar atualizacao do Assistente" -Action {
+        Write-Log "Versao instalada: $script:AppVersion"
+        try {
+            $manifest = Invoke-RestMethod -Uri $script:UpdateManifestUrl -UseBasicParsing
+            Write-Log "Versao publicada: $($manifest.version)"
+            if ("$($manifest.version)" -ne "$script:AppVersion") {
+                Write-Log "Existe uma versao diferente publicada."
+                Write-Log "Pagina de releases: $($manifest.releaseUrl)"
+            } else {
+                Write-Log "Assistente G-LAB ja esta na versao publicada."
+            }
+            if ($manifest.notes) { Write-Log "Notas: $($manifest.notes)" }
+        } catch {
+            Write-Log "Nao foi possivel checar atualizacao do Assistente: $($_.Exception.Message)"
+        }
+    }
+}
+
+function Start-AssistenteUpdateCheck {
+    if ($ValidateOnly -or $SelfTest) { return }
+    $timer = [System.Windows.Threading.DispatcherTimer]::new()
+    $timer.Interval = [TimeSpan]::FromSeconds(2)
+    $timer.Add_Tick({
+        $this.Stop()
+        Invoke-CheckAssistenteUpdate
+    })
+    $timer.Start()
 }
 
 function Invoke-RepairPackageManager {
@@ -2304,6 +2338,7 @@ if (Test-IsAdmin) {
 
 Write-Log "Assistente G-LAB iniciado. Catalogo carregado: $($script:Catalog.Count) apps."
 Refresh-AppGrid
+Start-AssistenteUpdateCheck
 if ($ValidateOnly) {
     Test-AssistenteConfig
     $script:ValidationRan = $true

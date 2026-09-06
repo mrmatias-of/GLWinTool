@@ -32,7 +32,9 @@ foreach ($folder in @("config", "assets")) {
     Copy-Item -LiteralPath $source -Destination $target -Recurse -Force
 }
 
-Copy-Item -LiteralPath (Join-Path $projectRoot "VERSION") -Destination (Join-Path $outputDir "VERSION") -Force
+foreach ($file in @("VERSION", "update.json")) {
+    Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination (Join-Path $outputDir $file) -Force
+}
 Write-Host "Release assets copied to: $outputDir"
 
 if ($Run) {
