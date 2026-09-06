@@ -523,6 +523,52 @@ function Select-SafeTweaks {
     Write-Log "Ajustes seguros selecionados: $($script:SelectedTweakNames.Count)."
 }
 
+function Select-TweakPreset {
+    param([ValidateSet("Minimo", "Padrao", "Avancado")][string]$Preset)
+
+    $names = switch ($Preset) {
+        "Minimo" {
+            @(
+                "Mostrar extensoes de arquivos",
+                "Mostrar arquivos ocultos",
+                "Abrir Explorer em Este Computador",
+                "Desativar ID de publicidade",
+                "Desativar teclas de aderencia"
+            )
+        }
+        "Padrao" {
+            @(
+                "Mostrar extensoes de arquivos",
+                "Mostrar arquivos ocultos",
+                "Abrir Explorer em Este Computador",
+                "Mostrar sempre barras de rolagem",
+                "Desativar busca do Bing no iniciar",
+                "Desativar recomendacoes do iniciar",
+                "Desativar ID de publicidade",
+                "Desativar historico de atividades",
+                "Desativar consumidor Microsoft",
+                "Ativar caminhos longos",
+                "Desativar teclas de aderencia",
+                "Ativar Num Lock na inicializacao",
+                "Tema escuro para aplicativos",
+                "Tema escuro do sistema",
+                "Desativar transparencia"
+            )
+        }
+        "Avancado" {
+            @((Get-AllTweaks | Where-Object { $_.safe }) | Select-Object -ExpandProperty name)
+        }
+    }
+
+    Clear-TweakSelection
+    foreach ($name in $names) {
+        $tweak = Get-AllTweaks | Where-Object { $_.safe -and $_.name -eq $name } | Select-Object -First 1
+        if ($tweak) { [void]$script:SelectedTweakNames.Add($name) }
+    }
+    Show-TweaksView
+    Write-Log "Preset de ajustes aplicado: $Preset ($($script:SelectedTweakNames.Count) ajustes)."
+}
+
 function Get-AppxCategory {
     param([object]$Appx)
     $name = if ($Appx.name) { $Appx.name } else { $Appx.Name }
@@ -938,7 +984,9 @@ function Show-TweaksView {
     Clear-MainPanel
 
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
-        [pscustomobject]@{ Label = "Selecionar seguros"; Primary = $false; Action = { Select-SafeTweaks } },
+        [pscustomobject]@{ Label = "Minimo"; Primary = $false; Action = { Select-TweakPreset -Preset "Minimo" } },
+        [pscustomobject]@{ Label = "Padrao"; Primary = $false; Action = { Select-TweakPreset -Preset "Padrao" } },
+        [pscustomobject]@{ Label = "Avancado"; Primary = $false; Action = { Select-TweakPreset -Preset "Avancado" } },
         [pscustomobject]@{ Label = "Verificar ajustes"; Primary = $false; Action = { Show-TweakStatusReport } },
         [pscustomobject]@{ Label = "Aplicar marcados"; Primary = $true; Action = { Invoke-SafeTweaks } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-TweakSelection } }
