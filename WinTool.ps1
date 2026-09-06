@@ -1854,26 +1854,18 @@ function Build-Ui {
             <Border Grid.Column="0" Padding="10" Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="14">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
-                    <TextBlock Text="Painel rapido" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,8"/>
+                    <TextBlock Text="Atalhos" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,8"/>
                     <TextBlock Text="Predefinicoes" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <ComboBox x:Name="PresetBox" Height="29" Margin="0,0,0,5"/>
-                    <Button x:Name="ApplyPresetButton" Content="Aplicar predefinicao" Margin="0,0,0,10" Height="29"/>
+                    <Button x:Name="ApplyPresetButton" Content="Usar predefinicao" Margin="0,0,0,10" Height="29"/>
                     <TextBlock Text="DNS" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <ComboBox x:Name="DnsBox" Height="29" Margin="0,0,0,5"/>
-                    <Button x:Name="ApplyDnsButton" Content="Aplicar DNS" Margin="0,0,0,10" Height="29"/>
-                    <TextBlock Text="Selecao e sistema" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
+                    <Button x:Name="ApplyDnsButton" Content="Trocar DNS" Margin="0,0,0,10" Height="29"/>
+                    <TextBlock Text="Uso rapido" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <Button x:Name="ClearButton" Content="Limpar selecao" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="RestorePointButton" Content="Criar ponto seguro" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="BackupsButton" Content="Abrir backups" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="NetworkRepairButton" Content="Reparar rede" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="TimeRepairButton" Content="Corrigir horario" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="HealthButton" Content="Relatorio de saude" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UpdateDefaultButton" Content="Updates: padrao" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UpdateSecurityButton" Content="Updates: avisar" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UpdateDisableButton" Content="Updates: desativar" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="Win11CreatorButton" Content="Abrir Win11 Creator" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="ReloadButton" Content="Recarregar catalogos" Margin="0,0,0,10" Height="29"/>
                     <Border Background="#F1F5F9" CornerRadius="10" Padding="10" Margin="0,4,0,0">
                         <StackPanel>
@@ -1985,15 +1977,7 @@ $window.FindName("ApplyDnsButton").Add_Click({
 })
 $window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
 $window.FindName("BackupsButton").Add_Click({ Open-BackupFolder })
-$window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
-$window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
-$window.FindName("NetworkRepairButton").Add_Click({ Invoke-NetworkRepair })
-$window.FindName("TimeRepairButton").Add_Click({ Invoke-TimeRepair })
 $window.FindName("HealthButton").Add_Click({ Show-SystemHealthReport })
-$window.FindName("UpdateDefaultButton").Add_Click({ Set-WindowsUpdateMode -Mode "Padrao" })
-$window.FindName("UpdateSecurityButton").Add_Click({ Set-WindowsUpdateMode -Mode "Seguranca" })
-$window.FindName("UpdateDisableButton").Add_Click({ Set-WindowsUpdateMode -Mode "Desativar" })
-$window.FindName("Win11CreatorButton").Add_Click({ Open-Windows11Creator })
 $window.FindName("ReloadButton").Add_Click({
     $script:Catalog = Load-AppCatalog
     $script:Tweaks = Load-TweakCatalog
