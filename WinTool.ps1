@@ -246,6 +246,14 @@ function Confirm-GLabAction {
     return $result -eq [System.Windows.MessageBoxResult]::Yes
 }
 
+function Show-GLabInfo {
+    param(
+        [Parameter(Mandatory=$true)][string]$Title,
+        [Parameter(Mandatory=$true)][string]$Message
+    )
+    [System.Windows.MessageBox]::Show($Message, $Title, [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information) | Out-Null
+}
+
 function Update-WingetSources {
     param([Parameter(Mandatory=$true)][string]$WingetPath)
     Write-Log "Atualizando lista de aplicativos disponiveis..."
@@ -609,6 +617,48 @@ function Select-SafeAppx {
     }
     Show-AppxView
     Write-Log "AppX seguros selecionados: $($script:SelectedAppxNames.Count)."
+}
+
+function Show-SelectedAppsPreview {
+    $apps = Get-SelectedApps
+    if ($apps.Count -eq 0) {
+        Show-GLabInfo -Title "Apps marcados" -Message "Nenhum app marcado no momento."
+        return
+    }
+    Show-GLabInfo -Title "Apps marcados" -Message (Get-AppListPreview -Apps $apps -Limit 40)
+}
+
+function Show-SelectedTweaksPreview {
+    $selected = @((Get-AllTweaks) | Where-Object { $script:SelectedTweakNames.Contains($_.name) } | Sort-Object category, name)
+    if ($selected.Count -eq 0) {
+        Show-GLabInfo -Title "Ajustes marcados" -Message "Nenhum ajuste marcado no momento."
+        return
+    }
+    $lines = @($selected | Select-Object -First 40 | ForEach-Object {
+        $state = if ($_.safe) { "seguro" } else { "bloqueado" }
+        "- $($_.name) ($state)"
+    })
+    if ($selected.Count -gt 40) { $lines += "... e mais $($selected.Count - 40) ajuste(s)." }
+    Show-GLabInfo -Title "Ajustes marcados" -Message ($lines -join "`n")
+}
+
+function Show-SelectedAppxPreview {
+    $selected = @($script:AppxCatalog | Where-Object {
+        $package = if ($_.package) { $_.package } else { $_.Package }
+        $script:SelectedAppxNames.Contains($package)
+    } | Sort-Object name)
+    if ($selected.Count -eq 0) {
+        Show-GLabInfo -Title "AppX marcados" -Message "Nenhum AppX marcado no momento."
+        return
+    }
+    $lines = @($selected | Select-Object -First 40 | ForEach-Object {
+        $name = if ($_.name) { $_.name } else { $_.Name }
+        $safe = if ($null -ne $_.safe) { $_.safe } else { $_.Safe }
+        $state = if ($safe) { "seguro" } else { "bloqueado" }
+        "- $name ($state)"
+    })
+    if ($selected.Count -gt 40) { $lines += "... e mais $($selected.Count - 40) item(ns)." }
+    Show-GLabInfo -Title "AppX marcados" -Message ($lines -join "`n")
 }
 
 function New-AppCard {
@@ -1002,6 +1052,7 @@ function Refresh-AppGrid {
         [pscustomobject]@{ Label = "Atualizar"; Primary = $false; Action = { Invoke-WingetForSelection -Action "upgrade" } },
         [pscustomobject]@{ Label = "Desinstalar"; Primary = $false; Action = { Invoke-WingetForSelection -Action "uninstall" } },
         [pscustomobject]@{ Label = "Marcar instalados"; Primary = $false; Action = { Select-InstalledApps } },
+        [pscustomobject]@{ Label = "Ver marcados"; Primary = $false; Action = { Show-SelectedAppsPreview } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-AppSelection } }
     ))) | Out-Null
 
@@ -1034,6 +1085,7 @@ function Show-TweaksView {
         [pscustomobject]@{ Label = "Verificar"; Primary = $false; Action = { Show-TweakStatusReport } },
         [pscustomobject]@{ Label = "Aplicar"; Primary = $true; Action = { Invoke-SafeTweaks } },
         [pscustomobject]@{ Label = "Desfazer"; Primary = $false; Action = { Invoke-UndoSelectedTweaks } },
+        [pscustomobject]@{ Label = "Ver marcados"; Primary = $false; Action = { Show-SelectedTweaksPreview } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-TweakSelection } }
     ))) | Out-Null
 
@@ -1209,6 +1261,7 @@ function Show-AppxView {
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
         [pscustomobject]@{ Label = "Marcar seguros"; Primary = $false; Action = { Select-SafeAppx } },
         [pscustomobject]@{ Label = "Remover"; Primary = $true; Action = { Invoke-AppxRemoval } },
+        [pscustomobject]@{ Label = "Ver marcados"; Primary = $false; Action = { Show-SelectedAppxPreview } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { $script:SelectedAppxNames.Clear(); Show-AppxView } }
     ))) | Out-Null
     $panel.Children.Add((New-SectionHeader -Title "Aplicativos do Windows" -Subtitle "Marque o que deseja remover. O Assistente salva um inventario e pede confirmacao antes de executar.")) | Out-Null
