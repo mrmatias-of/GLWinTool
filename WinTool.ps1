@@ -140,19 +140,35 @@ function Get-WingetPackageArguments {
 
     switch ($Action) {
         "install" {
-            return @("install", "--id", $id, "--exact", "--source", $source, "--accept-package-agreements", "--accept-source-agreements", "--silent")
+            return @("install", "--id", $id, "--exact", "--source", $source, "--accept-package-agreements", "--accept-source-agreements", "--silent", "--disable-interactivity")
         }
         "upgrade" {
-            return @("upgrade", "--id", $id, "--exact", "--source", $source, "--accept-package-agreements", "--accept-source-agreements", "--silent")
+            return @("upgrade", "--id", $id, "--exact", "--source", $source, "--accept-package-agreements", "--accept-source-agreements", "--silent", "--disable-interactivity")
         }
         "uninstall" {
-            return @("uninstall", "--id", $id, "--exact", "--source", $source, "--silent")
+            return @("uninstall", "--id", $id, "--exact", "--source", $source, "--silent", "--disable-interactivity")
         }
     }
 }
 
 function Get-WingetUpgradeAllArguments {
-    return @("upgrade", "--all", "--include-unknown", "--accept-package-agreements", "--accept-source-agreements", "--silent")
+    return @("upgrade", "--all", "--include-unknown", "--accept-package-agreements", "--accept-source-agreements", "--silent", "--disable-interactivity")
+}
+
+function Confirm-GLabAction {
+    param(
+        [Parameter(Mandatory=$true)][string]$Title,
+        [Parameter(Mandatory=$true)][string]$Message
+    )
+
+    $result = [System.Windows.MessageBox]::Show($Message, $Title, [System.Windows.MessageBoxButton]::YesNo, [System.Windows.MessageBoxImage]::Warning)
+    return $result -eq [System.Windows.MessageBoxResult]::Yes
+}
+
+function Update-WingetSources {
+    param([Parameter(Mandatory=$true)][string]$WingetPath)
+    Write-Log "Atualizando fontes do WinGet..."
+    Invoke-LoggedProcess -FilePath $WingetPath -Arguments @("source", "update", "--disable-interactivity") | Out-Null
 }
 
 function Test-AssistenteConfig {
@@ -201,6 +217,11 @@ function Test-AssistenteConfig {
         if ($tweak.safe -and $tweak.type -eq "registry") {
             if ([string]::IsNullOrWhiteSpace($tweak.path) -or [string]::IsNullOrWhiteSpace($tweak.property)) {
                 throw "Tweak de registro incompleto: $($tweak.name)"
+            }
+        }
+        if ($tweak.safe -and $tweak.type -eq "command") {
+            if ([string]::IsNullOrWhiteSpace($tweak.command)) {
+                throw "Tweak de comando sem executavel: $($tweak.name)"
             }
         }
     }
@@ -588,6 +609,8 @@ function Get-AllTweaks {
                 property = $tweak.property
                 value = $tweak.value
                 valueKind = $tweak.valueKind
+                command = $tweak.command
+                arguments = @($tweak.arguments)
             }
         }
     }
@@ -621,6 +644,10 @@ function Invoke-TweakItem {
         "registry" {
             Set-RegistryTweak -Tweak $Tweak
             Write-Log "Tweak aplicado: $($Tweak.name)"
+        }
+        "command" {
+            Invoke-LoggedProcess -FilePath $Tweak.command -Arguments @($Tweak.arguments) | Out-Null
+            Write-Log "Ajuste aplicado: $($Tweak.name)"
         }
         default {
             Write-Log "Tweak ainda nao implementado: $($Tweak.name)"
@@ -819,11 +846,21 @@ function Invoke-WingetForSelection {
             return
         }
 
+        if ($Action -eq "uninstall") {
+            $names = ($apps | Select-Object -ExpandProperty name) -join ", "
+            if (-not (Confirm-GLabAction -Title "Confirmar desinstalacao" -Message "Desinstalar os apps selecionados?`n`n$names")) {
+                Write-Log "Desinstalacao cancelada pelo usuario."
+                return
+            }
+        }
+
         $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
         if (-not $wingetCommand) {
             Write-Log "WinGet nao foi encontrado neste sistema."
             return
         }
+
+        Update-WingetSources -WingetPath $wingetCommand.Source
 
         foreach ($app in $apps) {
             Write-Log "${Action}: $($app.name)"
@@ -832,7 +869,10 @@ function Invoke-WingetForSelection {
                 Write-Log "Pacote ignorado: id vazio ou nao suportado para $($app.name)."
                 continue
             }
-            Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments $args | Out-Null
+            $exitCode = Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments $args
+            if ($exitCode -ne 0) {
+                Write-Log "Atencao: $($app.name) terminou com codigo $exitCode."
+            }
         }
     }
 }
@@ -844,6 +884,7 @@ function Invoke-UpgradeAll {
             Write-Log "WinGet nao foi encontrado neste sistema."
             return
         }
+        Update-WingetSources -WingetPath $wingetCommand.Source
         Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments (Get-WingetUpgradeAllArguments) | Out-Null
     }
 }
@@ -861,6 +902,7 @@ function Invoke-SafeTweaks {
             Invoke-TweakItem -Tweak $tweak
         }
         Write-Log "Ajustes selecionados finalizados."
+        Restart-ExplorerShell
     }
 }
 
@@ -890,9 +932,54 @@ function Invoke-SystemRepair {
     }
 }
 
+function New-GLabRestorePoint {
+    Invoke-SafeUiAction -Name "Criar ponto de restauracao" -Action {
+        if (-not (Test-IsAdmin)) {
+            Write-Log "Criar ponto de restauracao exige execucao como administrador."
+            return
+        }
+        Write-Log "Criando ponto de restauracao do sistema..."
+        Checkpoint-Computer -Description "Assistente G-LAB" -RestorePointType "MODIFY_SETTINGS"
+        Write-Log "Ponto de restauracao solicitado."
+    }
+}
+
+function Invoke-TempCleanup {
+    Invoke-SafeUiAction -Name "Limpar temporarios" -Action {
+        $targets = @($env:TEMP, (Join-Path $env:SystemRoot "Temp"))
+        foreach ($target in $targets) {
+            if (-not (Test-Path -LiteralPath $target)) { continue }
+            Write-Log "Limpando temporarios em $target"
+            Get-ChildItem -LiteralPath $target -Force -ErrorAction SilentlyContinue | ForEach-Object {
+                try {
+                    Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction Stop
+                } catch {
+                    Write-Log "Ignorado: $($_.FullName)"
+                }
+            }
+        }
+        Write-Log "Limpeza de temporarios finalizada."
+    }
+}
+
+function Restart-ExplorerShell {
+    Invoke-SafeUiAction -Name "Reiniciar Explorer" -Action {
+        Write-Log "Reiniciando Explorer para aplicar ajustes visuais."
+        Get-Process explorer -ErrorAction SilentlyContinue | Stop-Process -Force
+        Start-Process explorer.exe
+        Write-Log "Explorer reiniciado."
+    }
+}
+
 function Set-WindowsUpdateMode {
     param([ValidateSet("Padrao", "Seguranca", "Desativar")][string]$Mode)
     Invoke-SafeUiAction -Name "Configurar Windows Update" -Action {
+        if ($Mode -ne "Padrao") {
+            if (-not (Confirm-GLabAction -Title "Confirmar Windows Update" -Message "Aplicar modo '$Mode' ao Windows Update? Essa acao altera politica local do sistema.")) {
+                Write-Log "Alteracao do Windows Update cancelada pelo usuario."
+                return
+            }
+        }
         $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
         if (-not (Test-Path -LiteralPath $path)) { New-Item -Path $path -Force | Out-Null }
         switch ($Mode) {
@@ -924,6 +1011,11 @@ function Invoke-AppxRemoval {
     Invoke-SafeUiAction -Name "Remover AppX" -Action {
         $selected = @($script:AppxCatalog | Where-Object { $script:SelectedAppxNames.Contains($_.Package) -and $_.Safe })
         if ($selected.Count -eq 0) { Write-Log "Nenhum AppX seguro selecionado para remocao."; return }
+        $names = ($selected | Select-Object -ExpandProperty Name) -join ", "
+        if (-not (Confirm-GLabAction -Title "Confirmar remocao AppX" -Message "Remover os AppX selecionados?`n`n$names")) {
+            Write-Log "Remocao AppX cancelada pelo usuario."
+            return
+        }
         foreach ($appx in $selected) {
             Write-Log "Removendo AppX: $($appx.Name)"
             Get-AppxPackage -Name $appx.Package -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
@@ -944,7 +1036,7 @@ function Build-Ui {
     $xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Assistente G-LAB" Height="760" Width="1220" WindowStartupLocation="CenterScreen"
+        Title="Assistente G-LAB" Height="780" Width="1240" MinHeight="720" MinWidth="1120" WindowStartupLocation="CenterScreen"
         Background="#EEF2F7" FontFamily="Segoe UI">
     <Window.Resources>
         <Style TargetType="Button">
@@ -959,13 +1051,13 @@ function Build-Ui {
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="68"/>
+            <RowDefinition Height="82"/>
             <RowDefinition Height="46"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#070B1A" Padding="18,14">
+        <Border Grid.Row="0" Background="#070B1A" Padding="18,12">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <Border Width="48" Height="48" CornerRadius="14" Background="#111827" Margin="0,0,12,0" BorderBrush="#22D3EE" BorderThickness="1">
@@ -973,7 +1065,7 @@ function Build-Ui {
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Assistente G-LAB" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
-                        <TextBlock Text="Central de instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD"/>
+                        <TextBlock Text="Central de instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD" TextWrapping="NoWrap"/>
                     </StackPanel>
                 </StackPanel>
                 <Border DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="18" Padding="14,7">
@@ -1001,12 +1093,13 @@ function Build-Ui {
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Padding="14" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="14">
+            <Border Grid.Column="0" Padding="10" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="14">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
                     <TextBlock Text="Acoes" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,10"/>
-                    <Button x:Name="InstallButton" Content="+ Instalar selecionados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UpgradeButton" Content="↑ Atualizar selecionados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UninstallButton" Content="− Desinstalar selecionados" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="InstallButton" Content="Instalar selecionados" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="UpgradeButton" Content="Atualizar selecionados" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="UninstallButton" Content="Desinstalar selecionados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpgradeAllButton" Content="Atualizar todos os apps" Margin="0,0,0,10" Height="29"/>
                     <TextBlock Text="Predefinicoes" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <ComboBox x:Name="PresetBox" Height="29" Margin="0,0,0,5"/>
@@ -1022,6 +1115,8 @@ function Build-Ui {
                     <Button x:Name="SelectTweaksButton" Content="Selecionar ajustes seguros" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="ApplyTweaksButton" Content="Aplicar ajustes marcados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RemoveAppxButton" Content="Remover AppX marcados" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateDefaultButton" Content="Updates: padrao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateSecurityButton" Content="Updates: avisar" Margin="0,0,0,5" Height="29"/>
@@ -1035,6 +1130,7 @@ function Build-Ui {
                         </StackPanel>
                     </Border>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
 
             <DockPanel Grid.Column="1" Margin="10,0,0,0">
@@ -1126,6 +1222,8 @@ $window.FindName("ApplyDnsButton").Add_Click({
     }
 })
 $window.FindName("RemoveAppxButton").Add_Click({ Invoke-AppxRemoval })
+$window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
+$window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
 $window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
 $window.FindName("UpdateDefaultButton").Add_Click({ Set-WindowsUpdateMode -Mode "Padrao" })
 $window.FindName("UpdateSecurityButton").Add_Click({ Set-WindowsUpdateMode -Mode "Seguranca" })

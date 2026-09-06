@@ -1,50 +1,59 @@
 # Assistente G-LAB
 
-Central de manutencao para Windows feita em PowerShell/WPF, com instalacao de aplicativos via WinGet, catalogo em JSON, icones por app, tweaks seguros e suporte a inicializacao remota.
+Central Windows em PowerShell/WPF para instalacao de apps, ajustes de sistema, manutencao, AppX, DNS, Windows Update e preparacao tecnica de maquinas.
 
-O projeto segue a ideia de uma ferramenta unica para preparar, corrigir e padronizar maquinas Windows com rapidez, mantendo as acoes visiveis, auditaveis e faceis de evoluir.
+Inspirado no conceito do Chris Titus Tech WinUtil, mas com identidade e curadoria propria para o ecossistema G-LAB.
 
-## Comando Rapido
-
-Quando a rota do dominio estiver publicada:
+## Comando rapido
 
 ```powershell
 irm https://www.glabcursos.com.br/win | iex
 ```
 
-Enquanto isso, tambem e possivel chamar diretamente pelo GitHub:
+Alternativa direta pelo GitHub:
 
 ```powershell
 irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-bootstrap-template.ps1 | iex
 ```
 
-## Recursos
+## Recursos atuais
 
-- Interface grafica WPF em PowerShell.
-- Catalogo de aplicativos em `config/apps.json`.
-- Instalacao, atualizacao e remocao de apps via WinGet.
-- Busca por nome, ID, categoria, descricao e tags.
-- Categorias como Browsers, Development, Microsoft Tools, Multimedia Tools, Pro Tools e Utilities.
-- Icones locais em PNG para os cards dos aplicativos.
-- Abas dedicadas para Install, Tweaks, Config e Updates.
-- Console de log integrado para acompanhar comandos executados.
-- Bootstrap remoto que baixa o projeto completo antes de abrir a interface.
+- Interface grafica WPF.
+- Catalogo de apps em JSON.
+- Instalacao, atualizacao e desinstalacao via WinGet.
+- Suporte a pacotes `winget` e `msstore`.
+- Atualizacao automatica das fontes WinGet antes de instalar/remover.
+- Confirmacao antes de acoes destrutivas.
+- Busca por nome, categoria, id, descricao e tags.
+- Selecao persistente entre categorias.
+- Predefinicoes de apps.
+- Marcacao automatica de apps instalados.
+- Icones locais por aplicativo.
+- Ajustes do Windows seletivos por checkbox.
+- Ajustes seguros por registro e comandos controlados.
+- Reinicio do Explorer apos ajustes visuais.
+- Seletor DNS: provedor, Cloudflare, Google, Quad9 e AdGuard.
+- Modos de Windows Update: padrao, avisar e desativar.
+- Reparo do Windows com DISM e SFC.
+- Limpeza de arquivos temporarios.
+- Criacao de ponto de restauracao.
+- Aba AppX com remocoes seguras e itens sensiveis bloqueados.
+- Aba Win11 com ponto inicial para Windows 11 Creator.
+- Log integrado na interface.
 
-## Execucao Local
-
-Clone o repositorio ou abra a pasta do projeto e execute:
+## Execucao local
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\Start-Assistente-GLAB.ps1
 ```
 
-Tambem e possivel chamar diretamente o app principal:
+Ou diretamente:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1
 ```
 
-Para validar o carregamento sem abrir a janela:
+Validar sem abrir a janela:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
@@ -59,8 +68,8 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ├── bootstrap.ps1
 ├── web-bootstrap-template.ps1
 ├── config
-│   └── apps.json
-│   └── presets.json
+│   ├── apps.json
+│   ├── presets.json
 │   └── tweaks.json
 ├── assets
 │   └── icons
@@ -71,119 +80,138 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 │   └── public
 ├── pester
 ├── scripts
-├── xaml
-└── src
-    └── New-IconAssets.ps1
+├── src
+│   └── New-IconAssets.ps1
+└── xaml
 ```
 
-## Catalogo de Aplicativos
+## Catalogos
 
-Os apps ficam em `config/apps.json`. Cada item usa este formato:
+### Apps
 
-```json
-{
-  "name": "Visual Studio Code",
-  "id": "Microsoft.VisualStudioCode",
-  "category": "Development",
-  "description": "Editor de codigo da Microsoft.",
-  "icon": "VS",
-  "accent": "#007ACC",
-  "domain": "code.visualstudio.com",
-  "tags": ["code", "editor", "dev"]
-}
-```
+Arquivo: `config/apps.json`
 
-O campo `id` deve ser o identificador exato do WinGet. Para conferir um app:
+Campos principais:
 
-```powershell
-winget search "nome do app"
-```
+- `name`: nome exibido.
+- `id`: ID do WinGet. Use `msstore:<id>` para Microsoft Store.
+- `category`: categoria visivel na interface.
+- `description`: descricao curta.
+- `domain`: usado pelo gerador de icones.
+- `tags`: termos de busca.
 
-## Icones
+### Ajustes
 
-Os icones usados pela interface ficam em:
+Arquivo: `config/tweaks.json`
 
-```text
-assets/icons
-```
+Tipos suportados:
 
-Para baixar favicons reais com base nos dominios do catalogo:
+- `registry`: cria/altera uma chave de registro.
+- `command`: executa um comando controlado.
+- `planned`: aparece na interface, mas fica bloqueado.
+
+Somente ajustes com `safe: true` podem ser selecionados e aplicados.
+
+## Seguranca operacional
+
+Este projeto executa comandos administrativos no Windows. Use com criterio em maquinas de producao.
+
+Medidas ja adotadas:
+
+- acoes destrutivas pedem confirmacao;
+- AppX sensiveis ficam bloqueados;
+- ajustes planejados aparecem, mas nao executam;
+- argumentos WinGet sao montados por funcao central;
+- `ValidateOnly` valida catalogos e argumentos;
+- logs ficam visiveis para auditoria.
+
+Recomendado para ambientes profissionais:
+
+- usar ponto de restauracao antes de alteracoes amplas;
+- testar presets em VM antes de usar em bancada;
+- publicar releases versionadas;
+- assinar scripts;
+- evitar apontar o bootstrap para branches instaveis.
+
+## Plano de crescimento
+
+### Fase 1 - Base confiavel
+
+- Corrigir instalacao/remocao/atualizacao de apps.
+- Garantir compatibilidade com Windows PowerShell 5.1.
+- Validar catalogos antes de publicar.
+- Manter UI em pt-BR.
+
+Status: em andamento avancado.
+
+### Fase 2 - Ajustes Windows
+
+- Expandir ajustes seguros.
+- Criar presets de ajustes: minimo, padrao e avancado.
+- Detectar ajustes ja aplicados.
+- Adicionar desfazer ajustes selecionados.
+- Melhorar tela de preferencias.
+
+Status: proxima prioridade.
+
+### Fase 3 - Apps e AppX
+
+- Expandir catalogo de apps.
+- Melhorar deteccao de apps instalados.
+- Criar catalogo AppX externo em JSON.
+- Adicionar preview antes de remover AppX.
+- Criar restauracao/reinstalacao quando possivel.
+
+Status: iniciado.
+
+### Fase 4 - Reparos e atualizacoes
+
+- Fix WinGet.
+- Fix Windows Update.
+- Fix rede.
+- Fix horario/NTP.
+- Relatorio de saude do sistema.
+
+Status: iniciado.
+
+### Fase 5 - Windows 11 Creator
+
+- Baixar ISO oficial.
+- Criar pendrive bootavel.
+- Gerar AutoUnattend.
+- Injetar drivers.
+- Aplicar ajustes offline.
+
+Status: planejado.
+
+### Fase 6 - Arquitetura
+
+- Separar `WinTool.ps1` em modulos.
+- Mover XAML para `xaml/inputXML.xaml`.
+- Criar `Compile.ps1` completo.
+- Adicionar testes Pester.
+- Criar pipeline de release.
+
+Status: planejado.
+
+## Gerar icones
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
 ```
 
-Se algum download falhar, o script gera um fallback visual com as iniciais do app.
-
-## Bootstrap Remoto
-
-O arquivo `web-bootstrap-template.ps1` baixa o ZIP da branch `main`, extrai em uma pasta temporaria e executa o `WinTool.ps1`.
-
-Fluxo:
-
-```text
-irm dominio/win | iex
-        │
-        ├── baixa assistente-glab/main.zip
-        ├── extrai em %TEMP%\Assistente-GLAB
-        └── executa WinTool.ps1 em modo STA
-```
-
-## Seguranca
-
-Este projeto executa comandos no Windows. Leia o script antes de usar em maquinas de producao.
-
-Boas praticas recomendadas:
-
-- Usar HTTPS para qualquer bootstrap remoto.
-- Evitar comandos destrutivos na inicializacao.
-- Separar tweaks sensiveis de acoes comuns.
-- Manter logs visiveis para o usuario.
-- Preferir alteracoes reversiveis.
-- Assinar scripts em ambientes profissionais.
-- Publicar releases ou commits fixos quando precisar de previsibilidade.
-
-O MVP atual aplica somente tweaks simples no usuario atual:
-
-- Mostrar extensoes de arquivos.
-- Mostrar arquivos ocultos.
-
 ## Desenvolvimento
 
-Depois de alterar o projeto, valide:
+Antes de commitar:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ```
 
-Para gerar uma versao compilada em `dist/`:
+Commit e publicacao:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Compile.ps1
-```
-
-Depois registre as mudancas:
-
-```powershell
-git status
 git add .
-git commit -m "Describe your change"
+git commit -m "Descreva a mudanca"
 git push
 ```
-
-## Roadmap
-
-- Substituir todos os fallbacks por icones oficiais.
-- Adicionar perfis de instalacao, como tecnico, gamer, dev e escritorio.
-- Criar painel de apps instalados.
-- Adicionar backup/restore de configuracoes.
-- Criar pontos de restauracao antes de tweaks sensiveis.
-- Separar modulos em `functions`, `scripts` e `config`.
-- Mover a interface para `xaml/inputXML.xaml`.
-- Adicionar testes Pester para catalogo, bootstrap e renderizacao.
-- Publicar releases versionadas.
-- Adicionar assinatura de script.
-
-## Inspiracao
-
-Inspirado no formato de utilitarios Windows como o Chris Titus Tech WinUtil, com foco em uma identidade propria para o ecossistema G-LAB.
