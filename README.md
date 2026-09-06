@@ -1,6 +1,8 @@
 # Assistente G-LAB
 
-![Banner do Assistente G-LAB](assets/readme/hero.svg)
+<p align="center">
+  <img src="assets/readme/glab-logo.png" alt="Logo G-LAB Cursos" width="760">
+</p>
 
 <p align="center">
   <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0EA5E9?style=for-the-badge&logo=windows&logoColor=white">
@@ -27,6 +29,8 @@
 O **Assistente G-LAB** e uma ferramenta Windows em PowerShell/WPF criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
 
 O projeto reune instalacao de aplicativos, ajustes do Windows, remocao controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface unica, leve e em portugues.
+
+![Banner do Assistente G-LAB](assets/readme/hero.svg)
 
 ## Inicio rapido
 

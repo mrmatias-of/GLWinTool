@@ -10,6 +10,7 @@ $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
 $script:PresetsPath = Join-Path $script:Root "config\presets.json"
 $script:AppxPath = Join-Path $script:Root "config\appx.json"
 $script:IconRoot = Join-Path $script:Root "assets\icons"
+$script:LogoPath = Join-Path $script:Root "assets\readme\glab-mark.png"
 $script:BackupRoot = Join-Path $script:Root "backups"
 $script:ActiveView = "Install"
 $script:IsBusy = $false
@@ -1318,8 +1319,8 @@ function Build-Ui {
         <Border Grid.Row="0" Background="#070B1A" Padding="18,12">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <Border Width="48" Height="48" CornerRadius="14" Background="#111827" Margin="0,0,12,0" BorderBrush="#22D3EE" BorderThickness="1">
-                        <TextBlock Text="GL" Foreground="#FFFFFF" FontWeight="Bold" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Border Width="48" Height="48" CornerRadius="14" Background="#111827" Margin="0,0,12,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
+                        <Image x:Name="LogoImage" Stretch="UniformToFill"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Assistente G-LAB" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
@@ -1436,7 +1437,18 @@ $script:LogBox = $window.FindName("LogBox")
 $script:SelectedCountText = $window.FindName("SelectedCountText")
 $script:StatusText = $window.FindName("StatusText")
 $script:ProgressBar = $window.FindName("ProgressBar")
+$script:LogoImage = $window.FindName("LogoImage")
 $adminText = $window.FindName("AdminText")
+
+if ($script:LogoImage -and (Test-Path -LiteralPath $script:LogoPath)) {
+    $logo = [System.Windows.Media.Imaging.BitmapImage]::new()
+    $logo.BeginInit()
+    $logo.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+    $logo.UriSource = [Uri]$script:LogoPath
+    $logo.EndInit()
+    $logo.Freeze()
+    $script:LogoImage.Source = $logo
+}
 
 $categories = @([pscustomobject]@{ Label = "Todos"; Value = "All" }) + (($script:Catalog | Select-Object -ExpandProperty category -Unique | Sort-Object) | ForEach-Object {
     [pscustomobject]@{ Label = $_; Value = $_ }
