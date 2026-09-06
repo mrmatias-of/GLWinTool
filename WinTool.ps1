@@ -1822,7 +1822,7 @@ function Invoke-AppxRemoval {
 
 function Open-Windows11Creator {
     Invoke-SafeUiAction -Name "Windows 11 Creator" -Action {
-        Write-Log "Abrindo download oficial do Windows 11. Criador de ISO/USB avancado sera implementado em etapa dedicada."
+        Write-Log "Abrindo download oficial do Windows 11. A gravacao de USB permanece bloqueada ate existir selecao segura de disco."
         Start-Process "https://www.microsoft.com/software-download/windows11"
     }
 }
