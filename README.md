@@ -58,7 +58,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 | Atualizacoes | Verificacao de updates, atualizacao dos selecionados, atualizacao geral e reparo de fontes |
 | Ajustes Windows | Checkboxes seletivos, ajustes seguros, registro controlado e reinicio do Explorer |
 | AppX | Remocao controlada de apps provisionados, categorias, busca, bloqueios e inventario antes da acao |
-| Manutencao | DISM, SFC, limpeza de temporarios, ponto de restauracao e modos de Windows Update |
+| Manutencao | DISM, SFC, limpeza de temporarios, relatorio de saude, ponto de restauracao e modos de Windows Update |
 | Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
 
 ## Modulos
@@ -73,7 +73,7 @@ Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. Apenas i
 
 ### Configurar
 
-Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, reparo do Windows, reinicio do Explorer e modos de Windows Update.
+Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reinicio do Explorer e modos de Windows Update.
 
 ### Atualizar
 
@@ -175,7 +175,7 @@ powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
 | Base confiavel | Instalacao, remocao, atualizacao, validacao e compatibilidade PowerShell 5.1 | Em andamento avancado |
 | Ajustes Windows | Mais ajustes seguros, presets, deteccao de estado e desfazer | Em andamento |
 | AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
-| Reparos | Windows Update, rede, horario/NTP e relatorio de saude | Iniciado |
+| Reparos | Windows Update, rede, horario/NTP e relatorio de saude | Em andamento |
 | Windows 11 Creator | ISO, USB, AutoUnattend, drivers e ajustes offline | Planejado |
 | Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
 

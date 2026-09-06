@@ -1011,6 +1011,7 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Limpar arquivos temporarios" -Body "Remove sobras em pastas temporarias do usuario e do sistema." -ButtonText "Limpar" -Icon "LT" -Accent "#F59E0B" -ClickAction { Invoke-TempCleanup })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar imagem do Windows" -Body "Executa DISM e SFC. Pode demorar alguns minutos." -ButtonText "Reparar" -Icon "SF" -Accent "#7C3AED" -ClickAction { Invoke-SystemRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reiniciar Explorer" -Body "Aplica ajustes visuais sem reiniciar o computador." -ButtonText "Reiniciar" -Icon "EX" -Accent "#0EA5E9" -ClickAction { Restart-ExplorerShell })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Relatorio de saude" -Body "Mostra versao do Windows, memoria, discos, servicos e instalador." -ButtonText "Gerar relatorio" -Icon "RS" -Accent "#0F766E" -ClickAction { Show-SystemHealthReport })) | Out-Null
 
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows Update" -Subtitle "Escolha o comportamento das atualizacoes automaticas por politica local.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Padrao do Windows" -Body "Remove politicas locais criadas pelo assistente." -ButtonText "Restaurar padrao" -Icon "UP" -Accent "#2563EB" -ClickAction { Set-WindowsUpdateMode -Mode "Padrao" })) | Out-Null
@@ -1234,6 +1235,39 @@ function Invoke-SystemRepair {
     }
 }
 
+function Show-SystemHealthReport {
+    Invoke-SafeUiAction -Name "Relatorio de saude" -Action {
+        Write-Log "Gerando relatorio rapido de saude do sistema..."
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
+        if ($os) {
+            Write-Log "Windows: $($os.Caption) build $($os.BuildNumber)"
+            Write-Log "Ultima inicializacao: $($os.LastBootUpTime)"
+            Write-Log ("Memoria livre: {0:N1} GB" -f ($os.FreePhysicalMemory / 1MB))
+        }
+
+        Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" -ErrorAction SilentlyContinue | ForEach-Object {
+            $free = if ($_.Size) { ($_.FreeSpace / $_.Size) * 100 } else { 0 }
+            Write-Log ("Disco {0}: {1:N1} GB livres de {2:N1} GB ({3:N0}%)" -f $_.DeviceID, ($_.FreeSpace / 1GB), ($_.Size / 1GB), $free)
+        }
+
+        $services = "wuauserv", "bits", "cryptsvc"
+        foreach ($serviceName in $services) {
+            $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+            if ($service) {
+                Write-Log "Servico ${serviceName}: $($service.Status)"
+            }
+        }
+
+        $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
+        if ($wingetCommand) {
+            Write-Log "Instalador do Windows: disponivel"
+        } else {
+            Write-Log "Instalador do Windows: nao encontrado"
+        }
+        Write-Log "Relatorio rapido finalizado."
+    }
+}
+
 function New-GLabRestorePoint {
     Invoke-SafeUiAction -Name "Criar ponto de restauracao" -Action {
         if (-not (Test-IsAdmin)) {
@@ -1446,6 +1480,7 @@ function Build-Ui {
                     <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="HealthButton" Content="Relatorio de saude" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateDefaultButton" Content="Updates: padrao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateSecurityButton" Content="Updates: avisar" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateDisableButton" Content="Updates: desativar" Margin="0,0,0,5" Height="29"/>
@@ -1572,6 +1607,7 @@ $window.FindName("RemoveAppxButton").Add_Click({ Invoke-AppxRemoval })
 $window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
 $window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
 $window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
+$window.FindName("HealthButton").Add_Click({ Show-SystemHealthReport })
 $window.FindName("UpdateDefaultButton").Add_Click({ Set-WindowsUpdateMode -Mode "Padrao" })
 $window.FindName("UpdateSecurityButton").Add_Click({ Set-WindowsUpdateMode -Mode "Seguranca" })
 $window.FindName("UpdateDisableButton").Add_Click({ Set-WindowsUpdateMode -Mode "Desativar" })
