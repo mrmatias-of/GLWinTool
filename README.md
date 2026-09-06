@@ -193,6 +193,7 @@ powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
 ## Roadmap
 
 O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
+O relatorio de testes seguros esta em [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md).
 
 | Fase | Objetivo | Status |
 | --- | --- | --- |
