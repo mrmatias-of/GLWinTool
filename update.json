@@ -1,8 +1,9 @@
 {
-  "version": "0.4.1",
+  "version": "0.4.2",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip",
-  "notes": "Renomeado para GL WinTool. Cada atualizacao publicada deve alterar a versao."
+  "notes": "Nova logo oficial GL WinTool."
 }
+
 
