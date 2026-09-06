@@ -16,6 +16,10 @@
 </p>
 
 <p align="center">
+  Versao atual: <code>0.3.0-dev</code>
+</p>
+
+<p align="center">
   <a href="#inicio-rapido">Inicio rapido</a> •
   <a href="#modulos">Modulos</a> •
   <a href="#seguranca-operacional">Seguranca</a> •
@@ -56,8 +60,8 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 | --- | --- |
 | Aplicativos | Catalogo com 232 apps, busca, categorias, presets, icones e selecao persistente |
 | Atualizacoes | Verificacao de updates, atualizacao dos selecionados, atualizacao geral e reparo de fontes |
-| Ajustes Windows | Checkboxes seletivos, ajustes seguros, registro controlado e reinicio do Explorer |
-| AppX | Remocao controlada de apps provisionados, categorias, busca, bloqueios e inventario antes da acao |
+| Ajustes Windows | Checkboxes seletivos, verificacao de estado, ajustes seguros, registro controlado e reinicio do Explorer |
+| AppX | Remocao controlada de apps provisionados, categorias, busca, preview, bloqueios e inventario antes da acao |
 | Manutencao | DISM, SFC, reparo de rede, horario/NTP, limpeza de temporarios, relatorio de saude e ponto de restauracao |
 | Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
 
