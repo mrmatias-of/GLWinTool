@@ -15,7 +15,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\WinTool.ps1 -SelfTest
 - Autoteste seguro: OK.
 - Catalogo de apps: 232 de 232 em relacao a referencia WinUtil.
 - Catalogo AppX: 33 de 33 em relacao a referencia WinUtil.
-- Ajustes: 21 seguros implementados de 66 itens da referencia.
+- Ajustes: 29 seguros implementados de 66 itens da referencia.
 
 ## Cobertura do autoteste
 

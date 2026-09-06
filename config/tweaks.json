@@ -47,6 +47,18 @@
       "value": 0,
       "valueKind": "DWord",
       "undoValue": 1
+    },
+    {
+      "scope": "HKCU",
+      "name": "Desativar descoberta automatica do Explorer",
+      "valueKind": "DWord",
+      "undoValue": 0,
+      "safe": true,
+      "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+      "property": "NoNetCrawling",
+      "value": 1,
+      "description": "Evita buscas automaticas de rede que podem deixar o Explorer lento.",
+      "type": "registry"
     }
   ],
   "Barra de tarefas e menu iniciar": [
@@ -97,6 +109,42 @@
       "value": 1,
       "valueKind": "DWord",
       "undoValue": 0
+    },
+    {
+      "scope": "HKCU",
+      "name": "Ocultar botao Visao de Tarefas",
+      "valueKind": "DWord",
+      "undoValue": 1,
+      "safe": true,
+      "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+      "property": "ShowTaskViewButton",
+      "value": 0,
+      "description": "Remove o botao Visao de Tarefas da barra para uma interface mais limpa.",
+      "type": "registry"
+    },
+    {
+      "scope": "HKCU",
+      "name": "Ocultar busca da barra de tarefas",
+      "valueKind": "DWord",
+      "undoValue": 1,
+      "safe": true,
+      "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+      "property": "SearchboxTaskbarMode",
+      "value": 0,
+      "description": "Oculta a caixa/icone de busca da barra de tarefas.",
+      "type": "registry"
+    },
+    {
+      "scope": "HKCU",
+      "name": "Desativar Modo Jogo",
+      "valueKind": "DWord",
+      "undoValue": 1,
+      "safe": true,
+      "path": "HKCU:\\Software\\Microsoft\\GameBar",
+      "property": "AutoGameModeEnabled",
+      "value": 0,
+      "description": "Desativa o Modo Jogo para evitar interferencias em maquinas de trabalho.",
+      "type": "registry"
     }
   ],
   "Privacidade": [
@@ -135,6 +183,18 @@
       "value": 1,
       "valueKind": "DWord",
       "undoValue": 0
+    },
+    {
+      "scope": "HKCU",
+      "name": "Desativar notificacoes",
+      "valueKind": "DWord",
+      "undoValue": 1,
+      "safe": true,
+      "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications",
+      "property": "ToastEnabled",
+      "value": 0,
+      "description": "Reduz notificacoes de aplicativos para diminuir distracoes.",
+      "type": "registry"
     }
   ],
   "Sistema": [
@@ -221,6 +281,30 @@
         "/setactive",
         "SCHEME_MIN"
       ]
+    },
+    {
+      "scope": "HKLM",
+      "name": "Desativar tela de bloqueio",
+      "valueKind": "DWord",
+      "undoValue": 0,
+      "safe": true,
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization",
+      "property": "NoLockScreen",
+      "value": 1,
+      "description": "Vai direto para a tela de login em edicoes que respeitam essa politica.",
+      "type": "registry"
+    },
+    {
+      "scope": "HKLM",
+      "name": "Desativar otimizacao de entrega",
+      "valueKind": "DWord",
+      "undoValue": 1,
+      "safe": true,
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+      "property": "DODownloadMode",
+      "value": 0,
+      "description": "Reduz compartilhamento P2P de atualizacoes do Windows.",
+      "type": "registry"
     }
   ],
   "Aparencia": [
@@ -259,6 +343,18 @@
       "value": 0,
       "valueKind": "DWord",
       "undoValue": 1
+    },
+    {
+      "scope": "HKLM",
+      "name": "Ocultar inicio das Configuracoes",
+      "valueKind": "String",
+      "undoValue": "",
+      "safe": true,
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "property": "SettingsPageVisibility",
+      "value": "hide:home",
+      "description": "Remove a pagina inicial promocional do app Configuracoes quando suportado.",
+      "type": "registry"
     }
   ]
 }

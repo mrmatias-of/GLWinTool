@@ -615,7 +615,8 @@ function Select-TweakPreset {
                 "Mostrar arquivos ocultos",
                 "Abrir Explorer em Este Computador",
                 "Desativar ID de publicidade",
-                "Desativar teclas de aderencia"
+                "Desativar teclas de aderencia",
+                "Ocultar botao Visao de Tarefas"
             )
         }
         "Padrao" {
@@ -634,7 +635,11 @@ function Select-TweakPreset {
                 "Ativar Num Lock na inicializacao",
                 "Tema escuro para aplicativos",
                 "Tema escuro do sistema",
-                "Desativar transparencia"
+                "Desativar transparencia",
+                "Ocultar botao Visao de Tarefas",
+                "Desativar Modo Jogo",
+                "Desativar descoberta automatica do Explorer",
+                "Desativar otimizacao de entrega"
             )
         }
         "Avancado" {
