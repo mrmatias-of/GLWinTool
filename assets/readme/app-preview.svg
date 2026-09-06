@@ -1,67 +1,122 @@
-<svg width="1100" height="560" viewBox="0 0 1100 560" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1100" height="560" rx="24" fill="#EAF0F7"/>
-  <rect x="18" y="18" width="1064" height="78" rx="18" fill="#070B1A"/>
-  <rect x="38" y="35" width="44" height="44" rx="12" fill="#111827" stroke="#22D3EE"/>
-  <text x="60" y="63" text-anchor="middle" font-family="Segoe UI, Arial" font-size="16" font-weight="800" fill="white">GL</text>
-  <text x="96" y="58" font-family="Segoe UI, Arial" font-size="24" font-weight="800" fill="#F8FAFC">Assistente G-LAB</text>
-  <text x="96" y="78" font-family="Segoe UI, Arial" font-size="12" fill="#93C5FD">Central de instalacao, ajustes e manutencao Windows</text>
-  <rect x="812" y="42" width="244" height="30" rx="15" fill="#0F172A" stroke="#1E40AF"/>
-  <text x="934" y="62" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#BFDBFE">Instalar - 232 apps</text>
-  <g transform="translate(22 110)">
-    <rect x="0" y="0" width="214" height="330" rx="14" fill="white" stroke="#CBD5E1"/>
-    <text x="16" y="32" font-family="Segoe UI, Arial" font-size="16" font-weight="700" fill="#0F172A">Acoes</text>
-    <g fill="#F8FAFC" stroke="#CBD5E1">
-      <rect x="16" y="52" width="182" height="30"/>
-      <rect x="16" y="88" width="182" height="30"/>
-      <rect x="16" y="124" width="182" height="30"/>
-      <rect x="16" y="160" width="182" height="30"/>
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="page" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DCE7F5"/>
+      <stop offset="1" stop-color="#F8FAFC"/>
+    </linearGradient>
+    <linearGradient id="top" x1="40" y1="40" x2="1240" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#050816"/>
+      <stop offset="0.58" stop-color="#08111F"/>
+      <stop offset="1" stop-color="#0E7490"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1280" height="720" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="26" stdDeviation="28" flood-color="#0F172A" flood-opacity="0.20"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" rx="28" fill="url(#page)"/>
+  <g filter="url(#shadow)">
+    <rect x="40" y="34" width="1200" height="652" rx="24" fill="#E8EEF6" stroke="#CBD5E1"/>
+    <rect x="40" y="34" width="1200" height="86" rx="24" fill="url(#top)"/>
+    <path d="M40 96H1240V120H40V96Z" fill="url(#top)"/>
+    <rect x="68" y="56" width="50" height="50" rx="14" fill="#0F172A" stroke="#22D3EE"/>
+    <text x="93" y="88" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" font-weight="900" fill="#FFFFFF">GL</text>
+    <text x="136" y="76" font-family="Segoe UI, Arial" font-size="24" font-weight="800" fill="#F8FAFC">Assistente G-LAB</text>
+    <text x="137" y="99" font-family="Segoe UI, Arial" font-size="13" fill="#93C5FD">Instalacao, ajustes e manutencao Windows</text>
+    <rect x="982" y="62" width="214" height="34" rx="17" fill="#0F172A" stroke="#22D3EE" opacity="0.95"/>
+    <text x="1089" y="84" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" fill="#BFDBFE">Instalar - 232 apps</text>
+
+    <g transform="translate(58 136)" font-family="Segoe UI, Arial">
+      <rect width="116" height="32" rx="8" fill="#0F172A" stroke="#22D3EE"/>
+      <text x="58" y="21" text-anchor="middle" font-size="12" font-weight="800" fill="#FFFFFF">Instalar</text>
+      <rect x="126" width="116" height="32" rx="8" fill="#FFFFFF" stroke="#B8C4D6"/>
+      <text x="184" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">Ajustes</text>
+      <rect x="252" width="116" height="32" rx="8" fill="#FFFFFF" stroke="#B8C4D6"/>
+      <text x="310" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">Configurar</text>
+      <rect x="378" width="116" height="32" rx="8" fill="#FFFFFF" stroke="#B8C4D6"/>
+      <text x="436" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">Atualizar</text>
+      <rect x="504" width="82" height="32" rx="8" fill="#FFFFFF" stroke="#B8C4D6"/>
+      <text x="545" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">AppX</text>
+      <rect x="596" width="82" height="32" rx="8" fill="#FFFFFF" stroke="#B8C4D6"/>
+      <text x="637" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">Win11</text>
+      <rect x="704" width="458" height="32" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="724" y="21" font-size="12" fill="#94A3B8">Buscar por nome, categoria, id ou tag</text>
     </g>
-    <g font-family="Segoe UI, Arial" font-size="12" fill="#0F172A" text-anchor="middle">
-      <text x="107" y="72">Instalar selecionados</text>
-      <text x="107" y="108">Atualizar selecionados</text>
-      <text x="107" y="144">Desinstalar selecionados</text>
-      <text x="107" y="180">Atualizar todos</text>
+
+    <g transform="translate(58 184)">
+      <rect width="230" height="378" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+      <text x="18" y="32" font-family="Segoe UI, Arial" font-size="17" font-weight="800" fill="#0F172A">Acoes</text>
+      <g font-family="Segoe UI, Arial" font-size="12" font-weight="700" fill="#0F172A">
+        <rect x="18" y="52" width="194" height="30" rx="7" fill="#FFFFFF" stroke="#B8C4D6"/>
+        <text x="115" y="72" text-anchor="middle">Instalar selecionados</text>
+        <rect x="18" y="90" width="194" height="30" rx="7" fill="#FFFFFF" stroke="#B8C4D6"/>
+        <text x="115" y="110" text-anchor="middle">Atualizar selecionados</text>
+        <rect x="18" y="128" width="194" height="30" rx="7" fill="#FFFFFF" stroke="#B8C4D6"/>
+        <text x="115" y="148" text-anchor="middle">Desinstalar selecionados</text>
+        <rect x="18" y="166" width="194" height="30" rx="7" fill="#FFFFFF" stroke="#B8C4D6"/>
+        <text x="115" y="186" text-anchor="middle">Atualizar todos</text>
+      </g>
+      <text x="18" y="226" font-family="Segoe UI, Arial" font-size="13" font-weight="800" fill="#334155">Predefinicoes</text>
+      <rect x="18" y="238" width="194" height="30" rx="7" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="28" y="258" font-family="Segoe UI, Arial" font-size="11" fill="#475569">Padrao - apps essenciais</text>
+      <text x="18" y="298" font-family="Segoe UI, Arial" font-size="13" font-weight="800" fill="#334155">Selecao e sistema</text>
+      <rect x="18" y="314" width="194" height="30" rx="7" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="115" y="334" text-anchor="middle" font-family="Segoe UI, Arial" font-size="12" font-weight="700" fill="#0F172A">Marcar instalados</text>
     </g>
-    <text x="16" y="218" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#334155">Selecao e sistema</text>
-    <rect x="16" y="236" width="182" height="30" fill="#F8FAFC" stroke="#CBD5E1"/>
-    <text x="107" y="256" font-family="Segoe UI, Arial" font-size="12" text-anchor="middle" fill="#0F172A">Marcar instalados</text>
+
+    <g transform="translate(308 184)" font-family="Segoe UI, Arial">
+      <rect width="884" height="32" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="16" y="21" font-size="12" fill="#334155">Todos</text>
+      <rect x="0" y="48" width="884" height="34" rx="10" fill="#DDE7FF"/>
+      <text x="16" y="70" font-size="14" font-weight="800" fill="#0F172A">Multimidia</text>
+      <text x="120" y="70" font-size="12" fill="#64748B">Aplicativos disponiveis para instalacao, atualizacao ou remocao.</text>
+
+      <g transform="translate(0 98)">
+        <rect width="270" height="76" rx="14" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <rect x="16" y="16" width="44" height="44" rx="11" fill="#2563EB"/>
+        <text x="38" y="44" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFFFF">VL</text>
+        <text x="76" y="30" font-size="13" font-weight="800" fill="#0F172A">VLC</text>
+        <text x="76" y="50" font-size="11" fill="#475569">Multimidia</text>
+        <rect x="244" y="32" width="12" height="12" fill="#FFFFFF" stroke="#64748B"/>
+      </g>
+      <g transform="translate(286 98)">
+        <rect width="270" height="76" rx="14" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <rect x="16" y="16" width="44" height="44" rx="11" fill="#111827"/>
+        <text x="38" y="44" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFFFF">OB</text>
+        <text x="76" y="30" font-size="13" font-weight="800" fill="#0F172A">OBS Studio</text>
+        <text x="76" y="50" font-size="11" fill="#475569">Multimidia</text>
+        <rect x="244" y="32" width="12" height="12" fill="#FFFFFF" stroke="#64748B"/>
+      </g>
+      <g transform="translate(572 98)">
+        <rect width="270" height="76" rx="14" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <rect x="16" y="16" width="44" height="44" rx="11" fill="#F59E0B"/>
+        <text x="38" y="44" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFFFF">AU</text>
+        <text x="76" y="30" font-size="13" font-weight="800" fill="#0F172A">Audacity</text>
+        <text x="76" y="50" font-size="11" fill="#475569">Multimidia</text>
+        <rect x="244" y="32" width="12" height="12" fill="#FFFFFF" stroke="#64748B"/>
+      </g>
+
+      <rect x="0" y="198" width="884" height="34" rx="10" fill="#DDE7FF"/>
+      <text x="16" y="220" font-size="14" font-weight="800" fill="#0F172A">Sistema</text>
+      <g transform="translate(0 248)">
+        <rect width="270" height="76" rx="14" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <rect x="16" y="16" width="44" height="44" rx="11" fill="#7C3AED"/>
+        <text x="38" y="44" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFFFF">PT</text>
+        <text x="76" y="30" font-size="13" font-weight="800" fill="#0F172A">PowerToys</text>
+        <text x="76" y="50" font-size="11" fill="#475569">Microsoft Tools</text>
+        <rect x="244" y="32" width="12" height="12" fill="#FFFFFF" stroke="#64748B"/>
+      </g>
+      <g transform="translate(286 248)">
+        <rect width="270" height="76" rx="14" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <rect x="16" y="16" width="44" height="44" rx="11" fill="#16A34A"/>
+        <text x="38" y="44" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFFFF">7Z</text>
+        <text x="76" y="30" font-size="13" font-weight="800" fill="#0F172A">7-Zip</text>
+        <text x="76" y="50" font-size="11" fill="#475569">Utilitarios</text>
+        <rect x="244" y="32" width="12" height="12" fill="#FFFFFF" stroke="#64748B"/>
+      </g>
+    </g>
+
+    <rect x="58" y="582" width="1134" height="72" rx="16" fill="#0B1020"/>
+    <text x="78" y="614" font-family="Cascadia Code, Consolas, monospace" font-size="13" fill="#E5E7EB">[10:23:44] Assistente G-LAB iniciado. Catalogo carregado: 232 apps.</text>
+    <text x="78" y="638" font-family="Cascadia Code, Consolas, monospace" font-size="13" fill="#93C5FD">[10:23:55] Verificacao de ajustes finalizada.</text>
   </g>
-  <g transform="translate(252 110)">
-    <rect x="0" y="0" width="826" height="30" fill="#F8FAFC" stroke="#CBD5E1"/>
-    <text x="14" y="20" font-family="Segoe UI, Arial" font-size="13" fill="#334155">Todos</text>
-    <rect x="0" y="48" width="826" height="28" fill="#E0E7FF"/>
-    <text x="14" y="67" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#0F172A">Multimidia</text>
-    <g transform="translate(0 92)">
-      <rect width="254" height="72" rx="12" fill="white" stroke="#CBD5E1"/>
-      <circle cx="36" cy="36" r="23" fill="#2563EB"/>
-      <text x="76" y="31" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#0F172A">VLC</text>
-      <text x="76" y="51" font-family="Segoe UI, Arial" font-size="12" fill="#475569">Player de video e audio.</text>
-      <rect x="228" y="31" width="12" height="12" fill="white" stroke="#64748B"/>
-    </g>
-    <g transform="translate(274 92)">
-      <rect width="254" height="72" rx="12" fill="white" stroke="#CBD5E1"/>
-      <circle cx="36" cy="36" r="23" fill="#16A34A"/>
-      <text x="76" y="31" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#0F172A">OBS Studio</text>
-      <text x="76" y="51" font-family="Segoe UI, Arial" font-size="12" fill="#475569">Gravacao e transmissao.</text>
-      <rect x="228" y="31" width="12" height="12" fill="white" stroke="#64748B"/>
-    </g>
-    <g transform="translate(548 92)">
-      <rect width="254" height="72" rx="12" fill="white" stroke="#CBD5E1"/>
-      <circle cx="36" cy="36" r="23" fill="#F59E0B"/>
-      <text x="76" y="31" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#0F172A">Audacity</text>
-      <text x="76" y="51" font-family="Segoe UI, Arial" font-size="12" fill="#475569">Editor e gravador de audio.</text>
-      <rect x="228" y="31" width="12" height="12" fill="white" stroke="#64748B"/>
-    </g>
-    <rect x="0" y="188" width="826" height="28" fill="#E0E7FF"/>
-    <text x="14" y="207" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#0F172A">Sistema</text>
-    <g transform="translate(0 232)">
-      <rect width="254" height="72" rx="12" fill="white" stroke="#CBD5E1"/>
-      <circle cx="36" cy="36" r="23" fill="#7C3AED"/>
-      <text x="76" y="31" font-family="Segoe UI, Arial" font-size="13" font-weight="700" fill="#0F172A">PowerToys</text>
-      <text x="76" y="51" font-family="Segoe UI, Arial" font-size="12" fill="#475569">Utilitarios avancados.</text>
-      <rect x="228" y="31" width="12" height="12" fill="white" stroke="#64748B"/>
-    </g>
-  </g>
-  <rect x="22" y="458" width="1056" height="78" rx="14" fill="#0F172A"/>
-  <text x="42" y="490" font-family="Cascadia Code, Consolas, monospace" font-size="13" fill="#E5E7EB">[09:27:25] Assistente G-LAB iniciado. Catalogo carregado: 232 apps.</text>
 </svg>
