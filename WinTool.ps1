@@ -1010,6 +1010,7 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Criar ponto de restauracao" -Body "Recomendado antes de ajustes maiores no Windows." -ButtonText "Criar agora" -Icon "PR" -Accent "#16A34A" -ClickAction { New-GLabRestorePoint })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Limpar arquivos temporarios" -Body "Remove sobras em pastas temporarias do usuario e do sistema." -ButtonText "Limpar" -Icon "LT" -Accent "#F59E0B" -ClickAction { Invoke-TempCleanup })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar imagem do Windows" -Body "Executa DISM e SFC. Pode demorar alguns minutos." -ButtonText "Reparar" -Icon "SF" -Accent "#7C3AED" -ClickAction { Invoke-SystemRepair })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar rede" -Body "Limpa DNS, renova IP e redefine Winsock/IP com backup previo." -ButtonText "Reparar rede" -Icon "RD" -Accent "#0284C7" -ClickAction { Invoke-NetworkRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reiniciar Explorer" -Body "Aplica ajustes visuais sem reiniciar o computador." -ButtonText "Reiniciar" -Icon "EX" -Accent "#0EA5E9" -ClickAction { Restart-ExplorerShell })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Relatorio de saude" -Body "Mostra versao do Windows, memoria, discos, servicos e instalador." -ButtonText "Gerar relatorio" -Icon "RS" -Accent "#0F766E" -ClickAction { Show-SystemHealthReport })) | Out-Null
 
@@ -1268,6 +1269,26 @@ function Show-SystemHealthReport {
     }
 }
 
+function Invoke-NetworkRepair {
+    Invoke-SafeUiAction -Name "Reparar rede" -Action {
+        if (-not (Confirm-GLabAction -Title "Confirmar reparo de rede" -Message "Executar reparo basico de rede?`n`nSerao aplicados flushdns, renovacao de IP e reset de Winsock/IP. Pode ser necessario reiniciar o computador depois.")) {
+            Write-Log "Reparo de rede cancelado pelo usuario."
+            return
+        }
+        $backupDir = New-BackupSession -Reason "rede"
+        Get-NetIPConfiguration |
+            ConvertTo-Json -Depth 6 |
+            Set-Content -LiteralPath (Join-Path $backupDir "rede-atual.json") -Encoding UTF8
+        Write-Log "Configuracao de rede atual salva."
+        Invoke-LoggedProcess -FilePath "ipconfig.exe" -Arguments @("/flushdns") | Out-Null
+        Invoke-LoggedProcess -FilePath "ipconfig.exe" -Arguments @("/release") | Out-Null
+        Invoke-LoggedProcess -FilePath "ipconfig.exe" -Arguments @("/renew") | Out-Null
+        Invoke-LoggedProcess -FilePath "netsh.exe" -Arguments @("winsock", "reset") | Out-Null
+        Invoke-LoggedProcess -FilePath "netsh.exe" -Arguments @("int", "ip", "reset") | Out-Null
+        Write-Log "Reparo de rede finalizado. Reinicie o computador se a conexao continuar instavel."
+    }
+}
+
 function New-GLabRestorePoint {
     Invoke-SafeUiAction -Name "Criar ponto de restauracao" -Action {
         if (-not (Test-IsAdmin)) {
@@ -1480,6 +1501,7 @@ function Build-Ui {
                     <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="NetworkRepairButton" Content="Reparar rede" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="HealthButton" Content="Relatorio de saude" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateDefaultButton" Content="Updates: padrao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateSecurityButton" Content="Updates: avisar" Margin="0,0,0,5" Height="29"/>
@@ -1607,6 +1629,7 @@ $window.FindName("RemoveAppxButton").Add_Click({ Invoke-AppxRemoval })
 $window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
 $window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
 $window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
+$window.FindName("NetworkRepairButton").Add_Click({ Invoke-NetworkRepair })
 $window.FindName("HealthButton").Add_Click({ Show-SystemHealthReport })
 $window.FindName("UpdateDefaultButton").Add_Click({ Set-WindowsUpdateMode -Mode "Padrao" })
 $window.FindName("UpdateSecurityButton").Add_Click({ Set-WindowsUpdateMode -Mode "Seguranca" })
