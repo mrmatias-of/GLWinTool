@@ -218,6 +218,24 @@ function Get-WingetUpgradeAllArguments {
     return @("upgrade", "--all", "--include-unknown", "--accept-package-agreements", "--accept-source-agreements", "--silent", "--disable-interactivity")
 }
 
+function Get-ActionLabel {
+    param([ValidateSet("install", "uninstall", "upgrade")][string]$Action)
+    switch ($Action) {
+        "install" { return "Instalar" }
+        "uninstall" { return "Desinstalar" }
+        "upgrade" { return "Atualizar" }
+    }
+}
+
+function Get-AppListPreview {
+    param([object[]]$Apps, [int]$Limit = 12)
+    $names = @($Apps | Select-Object -First $Limit | ForEach-Object { "- $($_.name)" })
+    if ($Apps.Count -gt $Limit) {
+        $names += "... e mais $($Apps.Count - $Limit) app(s)."
+    }
+    return ($names -join "`n")
+}
+
 function Confirm-GLabAction {
     param(
         [Parameter(Mandatory=$true)][string]$Title,
@@ -1247,10 +1265,11 @@ function Invoke-WingetForSelection {
             return
         }
 
-        if ($Action -eq "uninstall") {
-            $names = ($apps | Select-Object -ExpandProperty name) -join ", "
-            if (-not (Confirm-GLabAction -Title "Confirmar desinstalacao" -Message "Desinstalar os apps selecionados?`n`n$names")) {
-                Write-Log "Desinstalacao cancelada pelo usuario."
+        $actionLabel = Get-ActionLabel -Action $Action
+        if ($Action -eq "uninstall" -or $apps.Count -ge 5) {
+            $preview = Get-AppListPreview -Apps $apps
+            if (-not (Confirm-GLabAction -Title "Confirmar $($actionLabel.ToLower())" -Message "$actionLabel os apps selecionados?`n`n$preview")) {
+                Write-Log "$actionLabel cancelado pelo usuario."
                 return
             }
         }
@@ -1265,7 +1284,7 @@ function Invoke-WingetForSelection {
         Write-Log "Aplicativos na fila: $($apps.Count)."
 
         foreach ($app in $apps) {
-            Write-Log "${Action}: $($app.name)"
+            Write-Log "${actionLabel}: $($app.name)"
             $args = Get-WingetPackageArguments -Action $Action -PackageId $app.id
             if ($args.Count -eq 0) {
                 Write-Log "Pacote ignorado: id vazio ou nao suportado para $($app.name)."
