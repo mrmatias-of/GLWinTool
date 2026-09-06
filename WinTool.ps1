@@ -273,19 +273,31 @@ function New-AppIcon {
 
     $path = Get-AppIconPath -App $App
     if (Test-Path -LiteralPath $path) {
-        $border = [System.Windows.Controls.Border]::new()
-        $border.Width = 40
-        $border.Height = 40
-        $border.CornerRadius = "7"
-        $border.Margin = "0,0,10,0"
-        $border.Background = "#E2E8F0"
+        try {
+            $bitmap = [System.Windows.Media.Imaging.BitmapImage]::new()
+            $bitmap.BeginInit()
+            $bitmap.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+            $bitmap.UriSource = [Uri]$path
+            $bitmap.EndInit()
+            $bitmap.Freeze()
 
-        $image = [System.Windows.Controls.Image]::new()
-        $image.Width = 40
-        $image.Height = 40
-        $image.Source = [System.Windows.Media.Imaging.BitmapImage]::new([Uri]$path)
-        $border.Child = $image
-        return $border
+            $border = [System.Windows.Controls.Border]::new()
+            $border.Width = 40
+            $border.Height = 40
+            $border.CornerRadius = "7"
+            $border.Margin = "0,0,10,0"
+            $border.Background = "#E2E8F0"
+
+            $image = [System.Windows.Controls.Image]::new()
+            $image.Width = 40
+            $image.Height = 40
+            $image.Source = $bitmap
+            $border.Child = $image
+            return $border
+        }
+        catch {
+            Write-Log "Icone invalido ignorado: $($App.name)"
+        }
     }
 
     return New-IconBadge -Text $App.icon -Accent $App.accent
