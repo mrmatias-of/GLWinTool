@@ -80,6 +80,13 @@ Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba in
 
 Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer, modos de Windows Update e reparo dedicado de componentes de atualizacao.
 
+No topo da aba existem fluxos por problema real:
+
+- **Meu PC esta lento**: manutencao segura, limpeza de temporarios e reinicio do Explorer.
+- **Apps nao instalam**: reparo das fontes do instalador e verificacao de atualizacoes.
+- **Internet com problema**: limpeza de DNS, renovacao de IP e reset basico de rede.
+- **Windows Update travou**: backup, reconstrucao de caches e reinicio dos servicos de atualizacao.
+
 Tambem oferece atalhos para abrir backups, a pasta local do assistente e configuracoes oficiais do Windows.
 
 ### Atualizar
@@ -186,6 +193,7 @@ O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 | Ajustes Windows | Mais ajustes seguros, deteccao de estado refinada e reversoes adicionais | Em andamento |
 | AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
 | Reparos | Windows Update, rede, horario/NTP, imagem do Windows e relatorio de saude | Em andamento avancado |
+| Experiencia | Fluxos por problema real, textos mais claros e menos dependencia do menu lateral | Em andamento avancado |
 | Windows 11 Creator | Download oficial, preparacao inicial, USB, AutoUnattend, drivers e ajustes offline | Iniciado |
 | Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
 

@@ -1113,6 +1113,13 @@ function Show-ConfigView {
     $osText = if ($os) { "$($os.Caption) build $($os.BuildNumber)" } else { "Nao foi possivel ler a versao do Windows." }
     $disk = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction SilentlyContinue
     $diskText = if ($disk -and $disk.Size) { "Livre em C: {0:N1} GB de {1:N1} GB" -f ($disk.FreeSpace / 1GB), ($disk.Size / 1GB) } else { "Disco principal nao identificado." }
+
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "O que voce quer resolver?" -Subtitle "Atalhos pensados para pessoas: escolha o sintoma e o Assistente executa o fluxo seguro correspondente.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Meu PC esta lento" -Body "Limpa temporarios, reinicia a interface e prepara uma base segura para manutencao." -ButtonText "Melhorar agora" -Icon "PC" -Accent "#16A34A" -ClickAction { Invoke-SlowPcRescue })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Apps nao instalam" -Body "Repara a lista do instalador, atualiza fontes e mostra atualizacoes disponiveis." -ButtonText "Corrigir apps" -Icon "AP" -Accent "#2563EB" -ClickAction { Invoke-AppInstallRescue })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Internet com problema" -Body "Limpa DNS, renova IP e redefine componentes basicos de rede." -ButtonText "Corrigir internet" -Icon "NET" -Accent "#0284C7" -ClickAction { Invoke-NetworkRepair })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Windows Update travou" -Body "Refaz caches de atualizacao com backup e reinicia servicos essenciais." -ButtonText "Reparar updates" -Icon "WU" -Accent "#7C3AED" -ClickAction { Invoke-WindowsUpdateRepair })) | Out-Null
+
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Antes de mexer" -Subtitle "Use estas acoes para criar uma trilha de recuperacao antes de ajustes maiores.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Criar ponto de restauracao" -Body "Recomendado antes de ajustes maiores no Windows." -ButtonText "Criar agora" -Icon "PR" -Accent "#16A34A" -ClickAction { New-GLabRestorePoint })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Abrir backups" -Body "Mostra os backups e inventarios salvos pelo Assistente." -ButtonText "Abrir pasta" -Icon "BK" -Accent "#2563EB" -ClickAction { Open-BackupFolder })) | Out-Null
@@ -1313,6 +1320,61 @@ function Invoke-RepairPackageManager {
         Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("source", "reset", "--force", "--disable-interactivity") | Out-Null
         Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("source", "update", "--disable-interactivity") | Out-Null
         Write-Log "Reparo das fontes concluido."
+    }
+}
+
+function Invoke-AppInstallRescue {
+    Invoke-SafeUiAction -Name "Corrigir instalacao de apps" -Action {
+        $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
+        if (-not $wingetCommand) {
+            Write-Log "Instalador de apps nao encontrado nesta sessao."
+            Write-Log "Abra a Microsoft Store e atualize o 'Instalador de Aplicativo'."
+            return
+        }
+
+        if (-not (Confirm-GLabAction -Title "Corrigir instalacao de apps" -Message "Reparar a lista do instalador e verificar atualizacoes disponiveis?`n`nUse quando apps nao aparecem, falham ao baixar ou o Assistente nao encontra pacotes conhecidos.")) {
+            Write-Log "Correcao do instalador cancelada pelo usuario."
+            return
+        }
+
+        Write-Log "Corrigindo instalador de apps..."
+        Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("source", "reset", "--force", "--disable-interactivity") | Out-Null
+        Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("source", "update", "--disable-interactivity") | Out-Null
+        Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("upgrade", "--accept-source-agreements", "--disable-interactivity") | Out-Null
+        Write-Log "Instalador de apps corrigido e lista de atualizacoes verificada."
+    }
+}
+
+function Invoke-SlowPcRescue {
+    Invoke-SafeUiAction -Name "Melhorar PC lento" -Action {
+        if (-not (Confirm-GLabAction -Title "Melhorar PC lento" -Message "Executar uma manutencao segura para PC lento?`n`nO Assistente vai criar um ponto de restauracao quando possivel, limpar temporarios, reiniciar o Explorer e gerar um relatorio rapido no log.")) {
+            Write-Log "Manutencao para PC lento cancelada pelo usuario."
+            return
+        }
+
+        if (Test-IsAdmin) {
+            New-SafeRestorePoint -Description "Assistente G-LAB - manutencao"
+        } else {
+            Write-Log "Ponto de restauracao ignorado: execute como administrador para habilitar."
+        }
+
+        $targets = @($env:TEMP, (Join-Path $env:SystemRoot "Temp"))
+        foreach ($target in $targets) {
+            if (-not (Test-Path -LiteralPath $target)) { continue }
+            Write-Log "Limpando temporarios em $target"
+            Get-ChildItem -LiteralPath $target -Force -ErrorAction SilentlyContinue | ForEach-Object {
+                try {
+                    Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction Stop
+                } catch {
+                    Write-Log "Ignorado: $($_.FullName)"
+                }
+            }
+        }
+
+        Write-Log "Reiniciando Explorer para renovar a interface."
+        Get-Process explorer -ErrorAction SilentlyContinue | Stop-Process -Force
+        Start-Process explorer.exe
+        Write-Log "Manutencao para PC lento finalizada. Veja o relatorio de saude para proximos passos."
     }
 }
 
