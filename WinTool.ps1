@@ -850,6 +850,7 @@ function Get-AllTweaks {
                 path = $tweak.path
                 property = $tweak.property
                 value = $tweak.value
+                undoValue = $tweak.undoValue
                 valueKind = $tweak.valueKind
                 command = $tweak.command
                 arguments = @($tweak.arguments)
@@ -907,6 +908,28 @@ function Invoke-TweakItem {
     }
 }
 
+function Undo-TweakItem {
+    param(
+        [Parameter(Mandatory=$true)][psobject]$Tweak,
+        [string]$BackupDir = ""
+    )
+
+    if ($Tweak.type -ne "registry" -or $null -eq $Tweak.undoValue) {
+        Write-Log "Sem reversao automatica para: $($Tweak.name)"
+        return
+    }
+
+    $undoTweak = [pscustomobject]@{
+        name = $Tweak.name
+        path = $Tweak.path
+        property = $Tweak.property
+        value = $Tweak.undoValue
+        valueKind = $Tweak.valueKind
+    }
+    Set-RegistryTweak -Tweak $undoTweak -BackupDir $BackupDir
+    Write-Log "Ajuste desfeito: $($Tweak.name)"
+}
+
 function Clear-MainPanel {
     $script:AppsPanel.Children.Clear()
 }
@@ -957,17 +980,20 @@ function Refresh-AppGrid {
     } | Sort-Object category, name
 
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
-        [pscustomobject]@{ Label = "Instalar marcados"; Primary = $true; Action = { Invoke-WingetForSelection -Action "install" } },
-        [pscustomobject]@{ Label = "Atualizar marcados"; Primary = $false; Action = { Invoke-WingetForSelection -Action "upgrade" } },
-        [pscustomobject]@{ Label = "Desinstalar marcados"; Primary = $false; Action = { Invoke-WingetForSelection -Action "uninstall" } },
+        [pscustomobject]@{ Label = "Instalar"; Primary = $true; Action = { Invoke-WingetForSelection -Action "install" } },
+        [pscustomobject]@{ Label = "Atualizar"; Primary = $false; Action = { Invoke-WingetForSelection -Action "upgrade" } },
+        [pscustomobject]@{ Label = "Desinstalar"; Primary = $false; Action = { Invoke-WingetForSelection -Action "uninstall" } },
         [pscustomobject]@{ Label = "Marcar instalados"; Primary = $false; Action = { Select-InstalledApps } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-AppSelection } }
     ))) | Out-Null
 
     $lastCategory = $null
+    if (@($apps).Count -eq 0) {
+        $script:AppsPanel.Children.Add((New-InfoCard -Title "Nada encontrado" -Body "Tente buscar por outro nome, categoria ou ID do aplicativo." -Icon "?" -Accent "#64748B")) | Out-Null
+    }
     foreach ($app in $apps) {
         if ($app.category -ne $lastCategory) {
-            $script:AppsPanel.Children.Add((New-SectionHeader -Title $app.category -Subtitle "Aplicativos disponiveis para instalacao, atualizacao ou remocao.")) | Out-Null
+            $script:AppsPanel.Children.Add((New-SectionHeader -Title $app.category -Subtitle "Marque os apps e escolha uma acao acima.")) | Out-Null
             $lastCategory = $app.category
         }
         $script:AppsPanel.Children.Add((New-AppCard -App $app)) | Out-Null
@@ -987,8 +1013,9 @@ function Show-TweaksView {
         [pscustomobject]@{ Label = "Minimo"; Primary = $false; Action = { Select-TweakPreset -Preset "Minimo" } },
         [pscustomobject]@{ Label = "Padrao"; Primary = $false; Action = { Select-TweakPreset -Preset "Padrao" } },
         [pscustomobject]@{ Label = "Avancado"; Primary = $false; Action = { Select-TweakPreset -Preset "Avancado" } },
-        [pscustomobject]@{ Label = "Verificar ajustes"; Primary = $false; Action = { Show-TweakStatusReport } },
-        [pscustomobject]@{ Label = "Aplicar marcados"; Primary = $true; Action = { Invoke-SafeTweaks } },
+        [pscustomobject]@{ Label = "Verificar"; Primary = $false; Action = { Show-TweakStatusReport } },
+        [pscustomobject]@{ Label = "Aplicar"; Primary = $true; Action = { Invoke-SafeTweaks } },
+        [pscustomobject]@{ Label = "Desfazer"; Primary = $false; Action = { Invoke-UndoSelectedTweaks } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-TweakSelection } }
     ))) | Out-Null
 
@@ -1148,10 +1175,10 @@ function Show-AppxView {
     $query = $script:SearchBox.Text.Trim().ToLowerInvariant()
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
         [pscustomobject]@{ Label = "Marcar seguros"; Primary = $false; Action = { Select-SafeAppx } },
-        [pscustomobject]@{ Label = "Remover marcados"; Primary = $true; Action = { Invoke-AppxRemoval } },
+        [pscustomobject]@{ Label = "Remover"; Primary = $true; Action = { Invoke-AppxRemoval } },
         [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { $script:SelectedAppxNames.Clear(); Show-AppxView } }
     ))) | Out-Null
-    $panel.Children.Add((New-SectionHeader -Title "Remocao de aplicativos do Windows" -Subtitle "Marque apenas o que deseja remover. Antes da remocao, o app salva inventario e pede confirmacao.")) | Out-Null
+    $panel.Children.Add((New-SectionHeader -Title "Aplicativos do Windows" -Subtitle "Marque o que deseja remover. O Assistente salva um inventario e pede confirmacao antes de executar.")) | Out-Null
 
     $items = @($script:AppxCatalog | Where-Object {
         if (-not $query) { return $true }
@@ -1162,10 +1189,14 @@ function Show-AppxView {
     })
 
     foreach ($group in ($items | Group-Object { Get-AppxCategory -Appx $_ } | Sort-Object Name)) {
+        if ($group.Count -eq 0) { continue }
         $panel.Children.Add((New-SectionHeader -Title $group.Name -Subtitle "$($group.Count) itens nesta categoria.")) | Out-Null
         foreach ($appx in ($group.Group | Sort-Object name)) {
             $panel.Children.Add((New-AppxRow -Appx $appx)) | Out-Null
         }
+    }
+    if ($items.Count -eq 0) {
+        $panel.Children.Add((New-InfoCard -Title "Nada encontrado" -Body "Tente buscar por outro nome ou pacote do Windows." -Icon "?" -Accent "#64748B")) | Out-Null
     }
     $script:AppsPanel.Children.Add($panel) | Out-Null
     Update-SelectedCount
@@ -1286,6 +1317,32 @@ function Invoke-SafeTweaks {
             Invoke-TweakItem -Tweak $tweak -BackupDir $backupDir
         }
         Write-Log "Ajustes selecionados finalizados."
+        Restart-ExplorerShell
+    }
+}
+
+function Invoke-UndoSelectedTweaks {
+    Invoke-SafeUiAction -Name "Desfazer ajustes" -Action {
+        $selectedTweaks = @((Get-AllTweaks) | Where-Object { $_.safe -and $script:SelectedTweakNames.Contains($_.name) })
+        if ($selectedTweaks.Count -eq 0) {
+            Write-Log "Nenhum ajuste selecionado para desfazer."
+            return
+        }
+        $reversible = @($selectedTweaks | Where-Object { $_.type -eq "registry" -and $null -ne $_.undoValue })
+        if ($reversible.Count -eq 0) {
+            Write-Log "Nenhum dos ajustes marcados possui reversao automatica."
+            return
+        }
+        $names = ($reversible | ForEach-Object { "- " + $_.name }) -join "`n"
+        if (-not (Confirm-GLabAction -Title "Desfazer ajustes" -Message "Desfazer $($reversible.Count) ajustes selecionados?`n`n$names`n`nUm backup sera salvo antes da reversao.")) {
+            Write-Log "Reversao de ajustes cancelada."
+            return
+        }
+        $backupDir = New-BackupSession -Reason "desfazer-ajustes"
+        foreach ($tweak in $reversible) {
+            Undo-TweakItem -Tweak $tweak -BackupDir $backupDir
+        }
+        Write-Log "Reversao finalizada."
         Restart-ExplorerShell
     }
 }

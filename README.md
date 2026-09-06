@@ -60,7 +60,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 | --- | --- |
 | Aplicativos | Catalogo com 232 apps, busca, categorias, presets, icones e selecao persistente |
 | Atualizacoes | Verificacao de updates, atualizacao dos selecionados, atualizacao geral e reparo de fontes |
-| Ajustes Windows | Presets Minimo/Padrao/Avancado, checkboxes seletivos, verificacao de estado e backups |
+| Ajustes Windows | Presets Minimo/Padrao/Avancado, checkboxes seletivos, verificacao, aplicacao, desfazer e backups |
 | AppX | Remocao controlada de apps provisionados, categorias, busca, preview, bloqueios e inventario antes da acao |
 | Manutencao | DISM, SFC, reparo de rede, horario/NTP, limpeza de temporarios, relatorio de saude e ponto de restauracao |
 | Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
@@ -73,7 +73,7 @@ Catalogo de aplicativos organizado por categoria, com busca por nome, id, descri
 
 ### Ajustes
 
-Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba inclui presets **Minimo**, **Padrao** e **Avancado**, alem de verificacao de estado antes de aplicar mudancas. Apenas itens marcados como seguros podem ser aplicados diretamente; itens planejados ou sensiveis permanecem bloqueados ate receberem tratamento dedicado.
+Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba inclui presets **Minimo**, **Padrao** e **Avancado**, verificacao de estado, aplicacao e reversao dos ajustes compativeis. Apenas itens marcados como seguros podem ser aplicados diretamente; itens planejados ou sensiveis permanecem bloqueados ate receberem tratamento dedicado.
 
 ### Configurar
 
@@ -177,7 +177,7 @@ powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
 | Fase | Objetivo | Status |
 | --- | --- | --- |
 | Base confiavel | Instalacao, remocao, atualizacao, validacao e compatibilidade PowerShell 5.1 | Em andamento avancado |
-| Ajustes Windows | Mais ajustes seguros, deteccao de estado refinada e desfazer | Em andamento |
+| Ajustes Windows | Mais ajustes seguros, deteccao de estado refinada e reversoes adicionais | Em andamento |
 | AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
 | Reparos | Windows Update, rede, horario/NTP e relatorio de saude | Em andamento |
 | Windows 11 Creator | ISO, USB, AutoUnattend, drivers e ajustes offline | Planejado |
