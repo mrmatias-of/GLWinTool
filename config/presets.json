@@ -15,7 +15,7 @@
       "Git.Git",
       "Microsoft.VisualStudioCode",
       "OpenJS.NodeJS.LTS",
-      "Python.Python.3.12",
+      "Python.Python.3.14",
       "Docker.DockerDesktop",
       "Microsoft.WindowsTerminal"
     ]

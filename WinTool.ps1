@@ -8,6 +8,7 @@ $script:Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $script:ConfigPath = Join-Path $script:Root "config\apps.json"
 $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
 $script:PresetsPath = Join-Path $script:Root "config\presets.json"
+$script:AppxPath = Join-Path $script:Root "config\appx.json"
 $script:IconRoot = Join-Path $script:Root "assets\icons"
 $script:ActiveView = "Install"
 $script:SelectedAppIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -19,18 +20,6 @@ $script:DnsPresets = @(
     [pscustomobject]@{ Name = "Google"; Primary = "8.8.8.8"; Secondary = "8.8.4.4"; Description = "DNS publico do Google." },
     [pscustomobject]@{ Name = "Quad9"; Primary = "9.9.9.9"; Secondary = "149.112.112.112"; Description = "DNS com bloqueio de dominios maliciosos." },
     [pscustomobject]@{ Name = "AdGuard"; Primary = "94.140.14.14"; Secondary = "94.140.15.15"; Description = "DNS com bloqueio de anuncios e rastreadores." }
-)
-$script:AppxCatalog = @(
-    [pscustomobject]@{ Name = "Clipchamp"; Package = "Clipchamp.Clipchamp"; Safe = $true },
-    [pscustomobject]@{ Name = "Microsoft News"; Package = "Microsoft.BingNews"; Safe = $true },
-    [pscustomobject]@{ Name = "Microsoft Weather"; Package = "Microsoft.BingWeather"; Safe = $true },
-    [pscustomobject]@{ Name = "Xbox App"; Package = "Microsoft.GamingApp"; Safe = $true },
-    [pscustomobject]@{ Name = "Xbox Game Bar"; Package = "Microsoft.XboxGamingOverlay"; Safe = $true },
-    [pscustomobject]@{ Name = "Solitaire Collection"; Package = "Microsoft.MicrosoftSolitaireCollection"; Safe = $true },
-    [pscustomobject]@{ Name = "Teams pessoal"; Package = "MicrosoftTeams"; Safe = $true },
-    [pscustomobject]@{ Name = "OneNote"; Package = "Microsoft.Office.OneNote"; Safe = $false },
-    [pscustomobject]@{ Name = "Fotos"; Package = "Microsoft.Windows.Photos"; Safe = $false },
-    [pscustomobject]@{ Name = "Calculadora"; Package = "Microsoft.WindowsCalculator"; Safe = $false }
 )
 
 if (-not $ValidateOnly -and [System.Threading.Thread]::CurrentThread.GetApartmentState() -ne "STA") {
@@ -71,6 +60,10 @@ function Load-TweakCatalog {
 
 function Load-PresetCatalog {
     return Load-JsonFile -Path $script:PresetsPath -Name "Catalogo de presets"
+}
+
+function Load-AppxCatalog {
+    return Load-JsonFile -Path $script:AppxPath -Name "Catalogo AppX"
 }
 
 function Write-Log {
@@ -460,7 +453,7 @@ function New-AppCard {
     $name.TextWrapping = "Wrap"
 
     $desc = [System.Windows.Controls.TextBlock]::new()
-    $desc.Text = $App.description
+    $desc.Text = "Categoria: $($App.category)"
     $desc.Foreground = "#475569"
     $desc.Margin = "0,3,0,0"
     $desc.FontSize = 12
@@ -810,20 +803,23 @@ function Show-AppxView {
     $panel.Margin = "6"
     $panel.Children.Add((New-SectionHeader -Title "Remocao de AppX" -Subtitle "Marque apps provisionados seguros para remocao. Itens sensiveis ficam bloqueados.")) | Out-Null
     foreach ($appx in $script:AppxCatalog) {
+        $name = if ($appx.name) { $appx.name } else { $appx.Name }
+        $package = if ($appx.package) { $appx.package } else { $appx.Package }
+        $safe = if ($null -ne $appx.safe) { $appx.safe } else { $appx.Safe }
         $checkbox = [System.Windows.Controls.CheckBox]::new()
-        $checkbox.Content = if ($appx.Safe) { "$($appx.Name) ($($appx.Package))" } else { "$($appx.Name) - sensivel/bloqueado" }
+        $checkbox.Content = if ($safe) { "$name ($package)" } else { "$name - sensivel/bloqueado" }
         $checkbox.Margin = "8,2,0,2"
         $checkbox.FontSize = 12
         $checkbox.Tag = $appx
-        $checkbox.IsEnabled = [bool]$appx.Safe
-        $checkbox.IsChecked = $script:SelectedAppxNames.Contains($appx.Package)
+        $checkbox.IsEnabled = [bool]$safe
+        $checkbox.IsChecked = $script:SelectedAppxNames.Contains($package)
         $checkbox.Add_Checked({ Set-AppxSelection -Appx $this.Tag -Selected $true })
         $checkbox.Add_Unchecked({ Set-AppxSelection -Appx $this.Tag -Selected $false })
         $panel.Children.Add($checkbox) | Out-Null
     }
     $script:AppsPanel.Children.Add($panel) | Out-Null
     Update-SelectedCount
-    Write-Status "AppX" "$(@($script:AppxCatalog | Where-Object Safe).Count) remocoes seguras disponiveis"
+    Write-Status "AppX" "$(@($script:AppxCatalog | Where-Object { if ($null -ne $_.safe) { $_.safe } else { $_.Safe } }).Count) remocoes seguras disponiveis"
 }
 
 function Show-Win11View {
@@ -1003,23 +999,30 @@ function Set-WindowsUpdateMode {
 function Set-AppxSelection {
     param([object]$Appx, [bool]$Selected)
     if (-not $Appx) { return }
-    if ($Selected) { [void]$script:SelectedAppxNames.Add($Appx.Package) } else { [void]$script:SelectedAppxNames.Remove($Appx.Package) }
+    $package = if ($Appx.package) { $Appx.package } else { $Appx.Package }
+    if ($Selected) { [void]$script:SelectedAppxNames.Add($package) } else { [void]$script:SelectedAppxNames.Remove($package) }
     Update-SelectedCount
 }
 
 function Invoke-AppxRemoval {
     Invoke-SafeUiAction -Name "Remover AppX" -Action {
-        $selected = @($script:AppxCatalog | Where-Object { $script:SelectedAppxNames.Contains($_.Package) -and $_.Safe })
+        $selected = @($script:AppxCatalog | Where-Object {
+            $package = if ($_.package) { $_.package } else { $_.Package }
+            $safe = if ($null -ne $_.safe) { $_.safe } else { $_.Safe }
+            $script:SelectedAppxNames.Contains($package) -and $safe
+        })
         if ($selected.Count -eq 0) { Write-Log "Nenhum AppX seguro selecionado para remocao."; return }
-        $names = ($selected | Select-Object -ExpandProperty Name) -join ", "
+        $names = ($selected | ForEach-Object { if ($_.name) { $_.name } else { $_.Name } }) -join ", "
         if (-not (Confirm-GLabAction -Title "Confirmar remocao AppX" -Message "Remover os AppX selecionados?`n`n$names")) {
             Write-Log "Remocao AppX cancelada pelo usuario."
             return
         }
         foreach ($appx in $selected) {
-            Write-Log "Removendo AppX: $($appx.Name)"
-            Get-AppxPackage -Name $appx.Package -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-            Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $appx.Package } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Out-Null
+            $name = if ($appx.name) { $appx.name } else { $appx.Name }
+            $package = if ($appx.package) { $appx.package } else { $appx.Package }
+            Write-Log "Removendo AppX: $name"
+            Get-AppxPackage -Name $package -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+            Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $package } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Out-Null
         }
         Write-Log "Remocao AppX finalizada."
     }
@@ -1161,6 +1164,7 @@ function Build-Ui {
 $script:Catalog = Load-AppCatalog
 $script:Tweaks = Load-TweakCatalog
 $script:Presets = Load-PresetCatalog
+$script:AppxCatalog = Load-AppxCatalog
 $script:ValidationRan = $false
 $window = Build-Ui
 if (-not $window) {
@@ -1237,6 +1241,7 @@ $window.FindName("ReloadButton").Add_Click({
     $script:Catalog = Load-AppCatalog
     $script:Tweaks = Load-TweakCatalog
     $script:Presets = Load-PresetCatalog
+    $script:AppxCatalog = Load-AppxCatalog
     Test-AssistenteConfig
     Write-Log "Configuracoes recarregadas: $($script:Catalog.Count) apps, $(@((Get-AllTweaks)).Count) tweaks, $(@($script:Presets.PSObject.Properties).Count) presets."
     if ($script:ActiveView -eq "Tweaks") {

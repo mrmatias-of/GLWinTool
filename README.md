@@ -19,7 +19,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 ## Recursos atuais
 
 - Interface grafica WPF.
-- Catalogo de apps em JSON.
+- Catalogo de apps em JSON com 232 entradas importadas da referencia WinUtil.
 - Instalacao, atualizacao e desinstalacao via WinGet.
 - Suporte a pacotes `winget` e `msstore`.
 - Atualizacao automatica das fontes WinGet antes de instalar/remover.
@@ -37,7 +37,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 - Reparo do Windows com DISM e SFC.
 - Limpeza de arquivos temporarios.
 - Criacao de ponto de restauracao.
-- Aba AppX com remocoes seguras e itens sensiveis bloqueados.
+- Aba AppX com catalogo externo em JSON, remocoes seguras e itens sensiveis bloqueados.
 - Aba Win11 com ponto inicial para Windows 11 Creator.
 - Log integrado na interface.
 
@@ -69,6 +69,7 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ├── web-bootstrap-template.ps1
 ├── config
 │   ├── apps.json
+│   ├── appx.json
 │   ├── presets.json
 │   └── tweaks.json
 ├── assets
@@ -111,6 +112,12 @@ Tipos suportados:
 - `planned`: aparece na interface, mas fica bloqueado.
 
 Somente ajustes com `safe: true` podem ser selecionados e aplicados.
+
+### AppX
+
+Arquivo: `config/appx.json`
+
+Contem apps provisionados/removiveis inspirados na referencia WinUtil. A remocao pede confirmacao antes de executar.
 
 ## Seguranca operacional
 
@@ -156,13 +163,13 @@ Status: proxima prioridade.
 
 ### Fase 3 - Apps e AppX
 
-- Expandir catalogo de apps.
+- Expandir e revisar catalogo de apps.
 - Melhorar deteccao de apps instalados.
-- Criar catalogo AppX externo em JSON.
+- Manter catalogo AppX externo em JSON.
 - Adicionar preview antes de remover AppX.
 - Criar restauracao/reinstalacao quando possivel.
 
-Status: iniciado.
+Status: iniciado com catalogos importados.
 
 ### Fase 4 - Reparos e atualizacoes
 
