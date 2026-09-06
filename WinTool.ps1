@@ -5,7 +5,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$script:Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+function Get-AssistenteRoot {
+    if ($PSScriptRoot) { return $PSScriptRoot }
+    if ($MyInvocation.MyCommand.Path) { return (Split-Path -Parent $MyInvocation.MyCommand.Path) }
+    $processPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    if ($processPath) { return (Split-Path -Parent $processPath) }
+    return (Get-Location).Path
+}
+
+$script:Root = Get-AssistenteRoot
 $script:ConfigPath = Join-Path $script:Root "config\apps.json"
 $script:VersionPath = Join-Path $script:Root "VERSION"
 $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
@@ -29,8 +37,12 @@ $script:DnsPresets = @(
 )
 $script:AppVersion = if (Test-Path -LiteralPath $script:VersionPath) { (Get-Content -LiteralPath $script:VersionPath -Raw).Trim() } else { "dev" }
 
-if (-not $ValidateOnly -and [System.Threading.Thread]::CurrentThread.GetApartmentState() -ne "STA") {
-    powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path
+if (-not $ValidateOnly -and -not $SelfTest -and [System.Threading.Thread]::CurrentThread.GetApartmentState() -ne "STA") {
+    if ($MyInvocation.MyCommand.Path) {
+        powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path
+    } else {
+        Start-Process -FilePath ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) -ArgumentList @("-STA")
+    }
     return
 }
 

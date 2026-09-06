@@ -57,6 +57,14 @@ Autoteste seguro para desenvolvimento:
 powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -SelfTest
 ```
 
+Gerar executavel local:
+
+```powershell
+Install-Module ps2exe -Scope CurrentUser
+powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
+.\dist\Assistente-G-LAB.exe -SelfTest
+```
+
 ## Preview
 
 ![Preview da interface](assets/readme/app-preview.svg)

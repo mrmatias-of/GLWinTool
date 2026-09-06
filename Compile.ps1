@@ -23,6 +23,18 @@ Set-Content -LiteralPath $outputFullPath -Value ($header + $script) -Encoding UT
 
 Write-Host "Compiled: $outputFullPath"
 
+foreach ($folder in @("config", "assets")) {
+    $source = Join-Path $projectRoot $folder
+    $target = Join-Path $outputDir $folder
+    if (Test-Path -LiteralPath $target) {
+        Remove-Item -LiteralPath $target -Recurse -Force
+    }
+    Copy-Item -LiteralPath $source -Destination $target -Recurse -Force
+}
+
+Copy-Item -LiteralPath (Join-Path $projectRoot "VERSION") -Destination (Join-Path $outputDir "VERSION") -Force
+Write-Host "Release assets copied to: $outputDir"
+
 if ($Run) {
     powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File $outputFullPath
 }
