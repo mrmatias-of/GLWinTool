@@ -260,42 +260,5 @@
       "valueKind": "DWord",
       "undoValue": 1
     }
-  ],
-  "Avancado - exige revisao": [
-    {
-      "name": "Remover OneDrive",
-      "description": "Planejado: remocao do OneDrive exige confirmacao dedicada.",
-      "scope": "Sistema",
-      "safe": false,
-      "type": "planned"
-    },
-    {
-      "name": "Remover Microsoft Edge",
-      "description": "Planejado: remocao do Edge exige confirmacao dedicada e tratamento por versao.",
-      "scope": "Sistema",
-      "safe": false,
-      "type": "planned"
-    },
-    {
-      "name": "Remover AppX selecionados",
-      "description": "Planejado: tela dedicada para remover aplicativos provisionados.",
-      "scope": "Sistema",
-      "safe": false,
-      "type": "planned"
-    },
-    {
-      "name": "Criar ponto de restauracao",
-      "description": "Planejado: criar ponto de restauracao antes de ajustes sensiveis.",
-      "scope": "Sistema",
-      "safe": false,
-      "type": "planned"
-    },
-    {
-      "name": "Windows 11 Creator",
-      "description": "Planejado: criador de ISO/USB inspirado na aba Win11 Creator.",
-      "scope": "Sistema",
-      "safe": false,
-      "type": "planned"
-    }
   ]
 }
