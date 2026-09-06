@@ -687,6 +687,33 @@ function New-ActionCard {
     return $card
 }
 
+function New-ActionBar {
+    param([object[]]$Actions)
+
+    $bar = [System.Windows.Controls.WrapPanel]::new()
+    $bar.Margin = "4,0,4,8"
+    foreach ($action in $Actions) {
+        $button = [System.Windows.Controls.Button]::new()
+        $button.Content = $action.Label
+        $button.Height = 31
+        $button.MinWidth = 128
+        $button.Margin = "0,0,7,6"
+        $button.Tag = $action.Action
+        if ($action.Primary) {
+            $button.Background = "#0F172A"
+            $button.Foreground = "#FFFFFF"
+            $button.BorderBrush = "#22D3EE"
+        }
+        $button.Add_Click({
+            if ($this.Tag) {
+                & ([scriptblock]$this.Tag)
+            }
+        })
+        $bar.Children.Add($button) | Out-Null
+    }
+    return $bar
+}
+
 function New-TweakCard {
     param([object]$Tweak)
 
@@ -864,21 +891,7 @@ function Set-ActiveTab {
 
 function Update-SidebarForView {
     if (-not $window) { return }
-    $installedButton = $window.FindName("InstalledButton")
-    $applyTweaksButton = $window.FindName("ApplyTweaksButton")
-    $removeAppxButton = $window.FindName("RemoveAppxButton")
-
-    if ($installedButton) {
-        $installedButton.Content = if ($script:ActiveView -eq "Appx") { "Marcar AppX seguros" } else { "Marcar instalados" }
-    }
-    if ($applyTweaksButton) {
-        $applyTweaksButton.IsEnabled = $script:ActiveView -eq "Tweaks"
-        $applyTweaksButton.Opacity = if ($script:ActiveView -eq "Tweaks") { 1 } else { 0.55 }
-    }
-    if ($removeAppxButton) {
-        $removeAppxButton.IsEnabled = $script:ActiveView -eq "Appx"
-        $removeAppxButton.Opacity = if ($script:ActiveView -eq "Appx") { 1 } else { 0.55 }
-    }
+    Update-SelectedCount
 }
 
 function Refresh-AppGrid {
@@ -896,6 +909,14 @@ function Refresh-AppGrid {
         $haystack = "$($_.name) $($_.id) $($_.category) $($_.description) $($_.tags -join ' ')".ToLowerInvariant()
         return $haystack.Contains($query)
     } | Sort-Object category, name
+
+    $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
+        [pscustomobject]@{ Label = "Instalar marcados"; Primary = $true; Action = { Invoke-WingetForSelection -Action "install" } },
+        [pscustomobject]@{ Label = "Atualizar marcados"; Primary = $false; Action = { Invoke-WingetForSelection -Action "upgrade" } },
+        [pscustomobject]@{ Label = "Desinstalar marcados"; Primary = $false; Action = { Invoke-WingetForSelection -Action "uninstall" } },
+        [pscustomobject]@{ Label = "Marcar instalados"; Primary = $false; Action = { Select-InstalledApps } },
+        [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-AppSelection } }
+    ))) | Out-Null
 
     $lastCategory = $null
     foreach ($app in $apps) {
@@ -915,6 +936,13 @@ function Show-TweaksView {
     Set-ActiveTab -TabName "TweaksTab"
     Update-SidebarForView
     Clear-MainPanel
+
+    $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
+        [pscustomobject]@{ Label = "Selecionar seguros"; Primary = $false; Action = { Select-SafeTweaks } },
+        [pscustomobject]@{ Label = "Verificar ajustes"; Primary = $false; Action = { Show-TweakStatusReport } },
+        [pscustomobject]@{ Label = "Aplicar marcados"; Primary = $true; Action = { Invoke-SafeTweaks } },
+        [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { Clear-TweakSelection } }
+    ))) | Out-Null
 
     $grid = [System.Windows.Controls.Grid]::new()
     $grid.Width = 930
@@ -1070,6 +1098,11 @@ function Show-AppxView {
     $panel.Width = 930
     $panel.Margin = "6"
     $query = $script:SearchBox.Text.Trim().ToLowerInvariant()
+    $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
+        [pscustomobject]@{ Label = "Marcar seguros"; Primary = $false; Action = { Select-SafeAppx } },
+        [pscustomobject]@{ Label = "Remover marcados"; Primary = $true; Action = { Invoke-AppxRemoval } },
+        [pscustomobject]@{ Label = "Limpar selecao"; Primary = $false; Action = { $script:SelectedAppxNames.Clear(); Show-AppxView } }
+    ))) | Out-Null
     $panel.Children.Add((New-SectionHeader -Title "Remocao de aplicativos do Windows" -Subtitle "Marque apenas o que deseja remover. Antes da remocao, o app salva inventario e pede confirmacao.")) | Out-Null
 
     $items = @($script:AppxCatalog | Where-Object {
@@ -1529,11 +1562,7 @@ function Build-Ui {
             <Border Grid.Column="0" Padding="10" Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="14">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
-                    <TextBlock Text="Acoes" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,8"/>
-                    <Button x:Name="InstallButton" Content="Instalar selecionados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UpgradeButton" Content="Atualizar selecionados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UninstallButton" Content="Desinstalar selecionados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="UpgradeAllButton" Content="Atualizar todos os apps" Margin="0,0,0,10" Height="29"/>
+                    <TextBlock Text="Painel rapido" FontSize="16" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,0,0,8"/>
                     <TextBlock Text="Predefinicoes" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <ComboBox x:Name="PresetBox" Height="29" Margin="0,0,0,5"/>
                     <Button x:Name="ApplyPresetButton" Content="Aplicar predefinicao" Margin="0,0,0,10" Height="29"/>
@@ -1542,11 +1571,6 @@ function Build-Ui {
                     <Button x:Name="ApplyDnsButton" Content="Aplicar DNS" Margin="0,0,0,10" Height="29"/>
                     <TextBlock Text="Selecao e sistema" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <Button x:Name="ClearButton" Content="Limpar selecao" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="InstalledButton" Content="Marcar instalados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="SelectTweaksButton" Content="Selecionar ajustes seguros" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="CheckTweaksButton" Content="Verificar ajustes" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="ApplyTweaksButton" Content="Aplicar ajustes marcados" Margin="0,0,0,5" Height="29"/>
-                    <Button x:Name="RemoveAppxButton" Content="Remover AppX marcados" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
@@ -1656,31 +1680,16 @@ if ($script:DnsBox.Items.Count -gt 0) {
     $script:DnsBox.SelectedIndex = 0
 }
 
-$window.FindName("InstallButton").Add_Click({ Invoke-SafeUiAction -Name "Instalar selecionados" -Action { Invoke-WingetForSelection -Action "install" } })
-$window.FindName("UpgradeButton").Add_Click({ Invoke-SafeUiAction -Name "Atualizar selecionados" -Action { Invoke-WingetForSelection -Action "upgrade" } })
-$window.FindName("UninstallButton").Add_Click({ Invoke-SafeUiAction -Name "Desinstalar selecionados" -Action { Invoke-WingetForSelection -Action "uninstall" } })
-$window.FindName("UpgradeAllButton").Add_Click({ Invoke-SafeUiAction -Name "Atualizar todos os apps" -Action { Invoke-UpgradeAll } })
 $window.FindName("ApplyPresetButton").Add_Click({
     if ($script:PresetBox.SelectedItem) {
         Select-PresetApps -PresetName $script:PresetBox.SelectedItem.Tag
     }
 })
-$window.FindName("InstalledButton").Add_Click({
-    if ($script:ActiveView -eq "Appx") {
-        Select-SafeAppx
-    } else {
-        Select-InstalledApps
-    }
-})
-$window.FindName("SelectTweaksButton").Add_Click({ Select-SafeTweaks })
-$window.FindName("CheckTweaksButton").Add_Click({ Show-TweakStatusReport })
-$window.FindName("ApplyTweaksButton").Add_Click({ Invoke-SafeUiAction -Name "Aplicar ajustes seguros" -Action { Invoke-SafeTweaks } })
 $window.FindName("ApplyDnsButton").Add_Click({
     if ($script:DnsBox.SelectedItem) {
         Set-GLabDns -Preset $script:DnsBox.SelectedItem.Tag
     }
 })
-$window.FindName("RemoveAppxButton").Add_Click({ Invoke-AppxRemoval })
 $window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
 $window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
 $window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
