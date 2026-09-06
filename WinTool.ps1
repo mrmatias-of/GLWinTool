@@ -1555,32 +1555,50 @@ function Invoke-SystemRepair {
 function Show-SystemHealthReport {
     Invoke-SafeUiAction -Name "Relatorio de saude" -Action {
         Write-Log "Gerando relatorio rapido de saude do sistema..."
+        $backupDir = New-BackupSession -Reason "relatorio-saude"
+        $reportPath = Join-Path $backupDir "relatorio-saude.txt"
+        $report = [System.Collections.Generic.List[string]]::new()
+        $report.Add("Assistente G-LAB - Relatorio de saude")
+        $report.Add("Gerado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
+        $report.Add("")
+
         $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
         if ($os) {
-            Write-Log "Windows: $($os.Caption) build $($os.BuildNumber)"
-            Write-Log "Ultima inicializacao: $($os.LastBootUpTime)"
-            Write-Log ("Memoria livre: {0:N1} GB" -f ($os.FreePhysicalMemory / 1MB))
+            $report.Add("Windows: $($os.Caption) build $($os.BuildNumber)")
+            $report.Add("Ultima inicializacao: $($os.LastBootUpTime)")
+            $report.Add(("Memoria livre: {0:N1} GB" -f ($os.FreePhysicalMemory / 1MB)))
         }
 
+        $report.Add("")
+        $report.Add("Discos:")
         Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" -ErrorAction SilentlyContinue | ForEach-Object {
             $free = if ($_.Size) { ($_.FreeSpace / $_.Size) * 100 } else { 0 }
-            Write-Log ("Disco {0}: {1:N1} GB livres de {2:N1} GB ({3:N0}%)" -f $_.DeviceID, ($_.FreeSpace / 1GB), ($_.Size / 1GB), $free)
+            $report.Add(("- {0}: {1:N1} GB livres de {2:N1} GB ({3:N0}%)" -f $_.DeviceID, ($_.FreeSpace / 1GB), ($_.Size / 1GB), $free))
         }
 
+        $report.Add("")
+        $report.Add("Servicos:")
         $services = "wuauserv", "bits", "cryptsvc"
         foreach ($serviceName in $services) {
             $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
             if ($service) {
-                Write-Log "Servico ${serviceName}: $($service.Status)"
+                $report.Add("- ${serviceName}: $($service.Status)")
             }
         }
 
         $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
         if ($wingetCommand) {
-            Write-Log "Instalador do Windows: disponivel"
+            $report.Add("")
+            $report.Add("Instalador de apps: disponivel em $($wingetCommand.Source)")
         } else {
-            Write-Log "Instalador do Windows: nao encontrado"
+            $report.Add("")
+            $report.Add("Instalador de apps: nao encontrado")
         }
+        $report | Set-Content -LiteralPath $reportPath -Encoding UTF8
+        foreach ($line in $report) {
+            if (-not [string]::IsNullOrWhiteSpace($line)) { Write-Log $line }
+        }
+        Start-Process explorer.exe $backupDir
         Write-Log "Relatorio rapido finalizado."
     }
 }
