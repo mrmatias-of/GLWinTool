@@ -936,11 +936,25 @@ function Show-ConfigView {
 function Show-UpdatesView {
     $script:ActiveView = "Updates"
     Clear-MainPanel
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizacoes" -Subtitle "Fluxos de atualizacao usando o instalador padrao do Windows com argumentos validados.")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "Atualizar selecionados" -Body "Usa o mesmo fluxo validado de pacotes, com fonte winget/msstore por app." -Icon "AT" -Accent "#2563EB")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "Atualizar todos" -Body "Executa winget upgrade --all --include-unknown com aceite de acordos e modo silencioso." -Icon "ALL" -Accent "#DC2626")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "Registro" -Body "O resultado aparece no console de log abaixo." -Icon "LOG" -Accent "#111827")) | Out-Null
-    Write-Status "Atualizar" "Acoes de atualizacao disponiveis"
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizar aplicativos" -Subtitle "Verifique, atualize selecionados ou rode uma atualizacao geral com confirmacao.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Verificar atualizacoes" -Body "Lista no log quais aplicativos possuem atualizacao disponivel." -ButtonText "Verificar" -Icon "VR" -Accent "#2563EB" -ClickAction { Invoke-CheckAppUpdates })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Atualizar selecionados" -Body "Atualiza apenas os aplicativos marcados na aba Instalar." -ButtonText "Atualizar marcados" -Icon "AT" -Accent "#16A34A" -ClickAction { Invoke-WingetForSelection -Action "upgrade" })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Atualizar todos" -Body "Atualiza todos os aplicativos detectados. Pede confirmacao antes de iniciar." -ButtonText "Atualizar tudo" -Icon "TD" -Accent "#DC2626" -ClickAction { Invoke-UpgradeAll })) | Out-Null
+
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Manutencao do instalador" -Subtitle "Use quando a lista de apps falhar, ficar lenta ou nao encontrar pacotes conhecidos.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Atualizar lista de apps" -Body "Sincroniza as fontes do instalador padrao do Windows." -ButtonText "Atualizar lista" -Icon "LI" -Accent "#0EA5E9" -ClickAction {
+        Invoke-SafeUiAction -Name "Atualizar lista de apps" -Action {
+            $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
+            if (-not $wingetCommand) {
+                Write-Log "Instalador padrao do Windows nao foi encontrado neste sistema."
+                return
+            }
+            Update-WingetSources -WingetPath $wingetCommand.Source
+        }
+    })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar fontes" -Body "Restaura e sincroniza as fontes usadas para encontrar aplicativos." -ButtonText "Reparar fontes" -Icon "RF" -Accent "#7C3AED" -ClickAction { Invoke-RepairPackageManager })) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Registro" -Body "Todos os resultados aparecem no console inferior do Assistente G-LAB." -Icon "LOG" -Accent "#111827")) | Out-Null
+    Write-Status "Atualizar" "Verificacao e manutencao disponiveis"
 }
 
 function Show-AppxView {
@@ -1035,6 +1049,34 @@ function Invoke-UpgradeAll {
         }
         Update-WingetSources -WingetPath $wingetCommand.Source
         Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments (Get-WingetUpgradeAllArguments) | Out-Null
+    }
+}
+
+function Invoke-CheckAppUpdates {
+    Invoke-SafeUiAction -Name "Verificar atualizacoes" -Action {
+        $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
+        if (-not $wingetCommand) {
+            Write-Log "Instalador padrao do Windows nao foi encontrado neste sistema."
+            return
+        }
+        Update-WingetSources -WingetPath $wingetCommand.Source
+        Write-Log "Verificando atualizacoes disponiveis..."
+        Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("upgrade", "--accept-source-agreements", "--disable-interactivity") | Out-Null
+    }
+}
+
+function Invoke-RepairPackageManager {
+    Invoke-SafeUiAction -Name "Reparar instalador" -Action {
+        $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
+        if (-not $wingetCommand) {
+            Write-Log "Instalador padrao do Windows nao foi encontrado nesta sessao."
+            Write-Log "Abra a Microsoft Store e atualize o 'Instalador de Aplicativo'."
+            return
+        }
+        Write-Log "Reparando fontes do instalador padrao do Windows..."
+        Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("source", "reset", "--force", "--disable-interactivity") | Out-Null
+        Invoke-LoggedProcess -FilePath $wingetCommand.Source -Arguments @("source", "update", "--disable-interactivity") | Out-Null
+        Write-Log "Reparo das fontes concluido."
     }
 }
 

@@ -23,6 +23,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 - Instalacao, atualizacao e desinstalacao via WinGet.
 - Suporte a pacotes `winget` e `msstore`.
 - Atualizacao automatica das fontes WinGet antes de instalar/remover.
+- Aba Atualizar com verificacao de updates, atualizacao de selecionados, atualizacao geral e reparo de fontes.
 - Confirmacao antes de acoes destrutivas.
 - Busca por nome, categoria, id, descricao e tags.
 - Selecao persistente entre categorias.
@@ -181,13 +182,13 @@ Status: iniciado com catalogos importados.
 
 ### Fase 4 - Reparos e atualizacoes
 
-- Fix WinGet.
+- Reparar fontes do instalador padrao do Windows.
 - Fix Windows Update.
 - Fix rede.
 - Fix horario/NTP.
 - Relatorio de saude do sistema.
 
-Status: iniciado com backups preventivos e acoes de manutencao.
+Status: iniciado com verificacao de updates, reparo de fontes, backups preventivos e acoes de manutencao.
 
 ### Fase 5 - Windows 11 Creator
 
