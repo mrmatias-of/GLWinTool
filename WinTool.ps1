@@ -227,7 +227,7 @@ function Confirm-GLabAction {
 
 function Update-WingetSources {
     param([Parameter(Mandatory=$true)][string]$WingetPath)
-    Write-Log "Atualizando fontes do WinGet..."
+    Write-Log "Atualizando lista de aplicativos disponiveis..."
     Invoke-LoggedProcess -FilePath $WingetPath -Arguments @("source", "update", "--disable-interactivity") | Out-Null
 }
 
@@ -457,11 +457,11 @@ function Select-InstalledApps {
     Invoke-SafeUiAction -Name "mostrar apps instalados" -Action {
         $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
         if (-not $wingetCommand) {
-            Write-Log "WinGet nao foi encontrado neste sistema."
+            Write-Log "Instalador padrao do Windows nao foi encontrado neste sistema."
             return
         }
 
-        Write-Log "Lendo apps instalados pelo WinGet..."
+        Write-Log "Lendo aplicativos instalados..."
         $originalEncoding = [Console]::OutputEncoding
         try {
             [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
@@ -927,7 +927,7 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB.")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Catalogo JSON" -Body $script:ConfigPath -Icon "JS" -Accent "#2563EB")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Administrador" -Body $adminStatus -Icon "AD" -Accent "#64748B")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "WinGet" -Body $wingetStatus -Icon "WG" -Accent "#7C3AED")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Instalador do Windows" -Body $wingetStatus -Icon "IN" -Accent "#7C3AED")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Predefinicoes" -Body "$presetCount predefinicoes carregadas de $script:PresetsPath" -Icon "PR" -Accent "#0EA5E9")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Ajustes" -Body "$tweakCount ajustes carregados de $script:TweaksPath" -Icon "AJ" -Accent "#16A34A")) | Out-Null
     Write-Status "Configurar" "Ambiente e configuracoes inspecionados"
@@ -936,7 +936,7 @@ function Show-ConfigView {
 function Show-UpdatesView {
     $script:ActiveView = "Updates"
     Clear-MainPanel
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizacoes" -Subtitle "Fluxos de atualizacao usando WinGet com argumentos validados.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Atualizacoes" -Subtitle "Fluxos de atualizacao usando o instalador padrao do Windows com argumentos validados.")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Atualizar selecionados" -Body "Usa o mesmo fluxo validado de pacotes, com fonte winget/msstore por app." -Icon "AT" -Accent "#2563EB")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Atualizar todos" -Body "Executa winget upgrade --all --include-unknown com aceite de acordos e modo silencioso." -Icon "ALL" -Accent "#DC2626")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Registro" -Body "O resultado aparece no console de log abaixo." -Icon "LOG" -Accent "#111827")) | Out-Null
@@ -1000,11 +1000,12 @@ function Invoke-WingetForSelection {
 
         $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
         if (-not $wingetCommand) {
-            Write-Log "WinGet nao foi encontrado neste sistema."
+            Write-Log "Instalador padrao do Windows nao foi encontrado neste sistema."
             return
         }
 
         Update-WingetSources -WingetPath $wingetCommand.Source
+        Write-Log "Aplicativos na fila: $($apps.Count)."
 
         foreach ($app in $apps) {
             Write-Log "${Action}: $($app.name)"
@@ -1023,9 +1024,13 @@ function Invoke-WingetForSelection {
 
 function Invoke-UpgradeAll {
     Invoke-SafeUiAction -Name "winget upgrade --all" -Action {
+        if (-not (Confirm-GLabAction -Title "Confirmar atualizacao geral" -Message "Atualizar todos os aplicativos detectados pelo instalador do Windows?`n`nIsso pode demorar e alguns programas podem reiniciar componentes em segundo plano.")) {
+            Write-Log "Atualizacao geral cancelada pelo usuario."
+            return
+        }
         $wingetCommand = Get-Command winget -ErrorAction SilentlyContinue
         if (-not $wingetCommand) {
-            Write-Log "WinGet nao foi encontrado neste sistema."
+            Write-Log "Instalador padrao do Windows nao foi encontrado neste sistema."
             return
         }
         Update-WingetSources -WingetPath $wingetCommand.Source
@@ -1277,8 +1282,6 @@ function Build-Ui {
                     <TextBlock Text="DNS" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <ComboBox x:Name="DnsBox" Height="29" Margin="0,0,0,5"/>
                     <Button x:Name="ApplyDnsButton" Content="Aplicar DNS" Margin="0,0,0,10" Height="29"/>
-                    <TextBlock Text="Gerenciador" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
-                    <RadioButton Content="WinGet" IsChecked="True" Margin="12,0,0,12"/>
                     <TextBlock Text="Selecao e sistema" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <Button x:Name="ClearButton" Content="Limpar selecao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="InstalledButton" Content="Marcar instalados" Margin="0,0,0,5" Height="29"/>
