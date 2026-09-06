@@ -6,6 +6,7 @@ $zipPath = Join-Path $tempRoot "assistente-glab-main.zip"
 $extractRoot = Join-Path $tempRoot "repo"
 $appRoot = Join-Path $extractRoot "assistente-glab-main"
 $scriptPath = Join-Path $appRoot "WinTool.ps1"
+$versionPath = Join-Path $appRoot "VERSION"
 
 function Write-GLabStep {
     param([string]$Message)
@@ -22,7 +23,9 @@ function Write-GLabError {
     Write-Host "irm https://www.glabcursos.com.br/win | iex" -ForegroundColor White
 }
 
-Clear-Host
+if ($Host.Name -match "ConsoleHost") {
+    Clear-Host
+}
 Write-Host ""
 Write-Host "Assistente G-LAB" -ForegroundColor White
 Write-Host "Central de instalacao, ajustes e manutencao Windows" -ForegroundColor DarkCyan
@@ -46,6 +49,9 @@ try {
         throw "WinTool.ps1 nao encontrado apos baixar o Assistente G-LAB."
     }
 
+    if (Test-Path -LiteralPath $versionPath) {
+        Write-GLabStep "Versao baixada: $((Get-Content -LiteralPath $versionPath -Raw).Trim())"
+    }
     Write-GLabStep "Abrindo interface grafica..."
     powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File $scriptPath
 }

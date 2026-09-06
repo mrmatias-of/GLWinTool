@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 $script:Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $script:ConfigPath = Join-Path $script:Root "config\apps.json"
+$script:VersionPath = Join-Path $script:Root "VERSION"
 $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
 $script:PresetsPath = Join-Path $script:Root "config\presets.json"
 $script:AppxPath = Join-Path $script:Root "config\appx.json"
@@ -24,6 +25,7 @@ $script:DnsPresets = @(
     [pscustomobject]@{ Name = "Quad9"; Primary = "9.9.9.9"; Secondary = "149.112.112.112"; Description = "DNS com bloqueio de dominios maliciosos." },
     [pscustomobject]@{ Name = "AdGuard"; Primary = "94.140.14.14"; Secondary = "94.140.15.15"; Description = "DNS com bloqueio de anuncios e rastreadores." }
 )
+$script:AppVersion = if (Test-Path -LiteralPath $script:VersionPath) { (Get-Content -LiteralPath $script:VersionPath -Raw).Trim() } else { "dev" }
 
 if (-not $ValidateOnly -and [System.Threading.Thread]::CurrentThread.GetApartmentState() -ne "STA") {
     powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path
@@ -1489,6 +1491,7 @@ function Build-Ui {
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Assistente G-LAB" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
                         <TextBlock Text="Instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD" TextWrapping="NoWrap"/>
+                        <TextBlock x:Name="VersionText" Text="" FontSize="11" Foreground="#64748B" TextWrapping="NoWrap"/>
                     </StackPanel>
                 </StackPanel>
                 <Border DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="18" Padding="14,7">
@@ -1606,6 +1609,7 @@ $script:SelectedCountText = $window.FindName("SelectedCountText")
 $script:StatusText = $window.FindName("StatusText")
 $script:ProgressBar = $window.FindName("ProgressBar")
 $script:LogoImage = $window.FindName("LogoImage")
+$script:VersionText = $window.FindName("VersionText")
 $adminText = $window.FindName("AdminText")
 
 if ($script:LogoImage -and (Test-Path -LiteralPath $script:LogoPath)) {
@@ -1616,6 +1620,9 @@ if ($script:LogoImage -and (Test-Path -LiteralPath $script:LogoPath)) {
     $logo.EndInit()
     $logo.Freeze()
     $script:LogoImage.Source = $logo
+}
+if ($script:VersionText) {
+    $script:VersionText.Text = "Versao $script:AppVersion"
 }
 
 $categories = @([pscustomobject]@{ Label = "Todos"; Value = "All" }) + (($script:Catalog | Select-Object -ExpandProperty category -Unique | Sort-Object) | ForEach-Object {
@@ -1745,7 +1752,7 @@ Refresh-AppGrid
 if ($ValidateOnly) {
     Test-AssistenteConfig
     $script:ValidationRan = $true
-    "ValidateOnly OK: $($script:Catalog.Count) apps, $(@((Get-AllTweaks)).Count) tweaks e $(@($script:Presets.PSObject.Properties).Count) presets carregados."
+    "ValidateOnly OK: versao $script:AppVersion, $($script:Catalog.Count) apps, $(@((Get-AllTweaks)).Count) tweaks e $(@($script:Presets.PSObject.Properties).Count) presets carregados."
     return
 }
 if (-not $window) {
