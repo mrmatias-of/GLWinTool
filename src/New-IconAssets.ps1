@@ -40,6 +40,37 @@ function New-FallbackIcon {
     $bitmap.Dispose()
 }
 
+function Save-IconFromUrl {
+    param(
+        [Parameter(Mandatory=$true)][string]$Url,
+        [Parameter(Mandatory=$true)][string]$Path
+    )
+
+    $tempFile = [System.IO.Path]::GetTempFileName()
+    try {
+        Invoke-WebRequest -Uri $Url -OutFile $tempFile -UseBasicParsing -TimeoutSec 20
+        if (-not (Test-Path -LiteralPath $tempFile) -or ((Get-Item -LiteralPath $tempFile).Length -le 100)) {
+            return $false
+        }
+
+        try {
+            $image = [System.Drawing.Image]::FromFile($tempFile)
+            $bitmap = [System.Drawing.Bitmap]::new($image, 64, 64)
+            $bitmap.Save($Path, [System.Drawing.Imaging.ImageFormat]::Png)
+            $bitmap.Dispose()
+            $image.Dispose()
+            return (Test-Path -LiteralPath $Path) -and ((Get-Item -LiteralPath $Path).Length -gt 100)
+        } catch {
+            Copy-Item -LiteralPath $tempFile -Destination $Path -Force
+            return (Test-Path -LiteralPath $Path) -and ((Get-Item -LiteralPath $Path).Length -gt 100)
+        }
+    } catch {
+        return $false
+    } finally {
+        Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
 $downloaded = 0
 $fallback = 0
 
@@ -48,16 +79,21 @@ foreach ($app in $apps) {
     $ok = $false
 
     if ($app.domain) {
-        $domain = [Uri]::EscapeDataString($app.domain)
-        $url = "https://www.google.com/s2/favicons?domain=$domain&sz=64"
-        try {
-            Invoke-WebRequest -Uri $url -OutFile $path -UseBasicParsing -TimeoutSec 20
-            if ((Test-Path -LiteralPath $path) -and ((Get-Item -LiteralPath $path).Length -gt 100)) {
+        $domainText = ([string]$app.domain) -replace '^https?://', ''
+        $domainText = ($domainText -split '/')[0]
+        $encodedDomain = [Uri]::EscapeDataString($domainText)
+        $urls = @(
+            "https://icons.duckduckgo.com/ip3/$domainText.ico",
+            "https://www.google.com/s2/favicons?domain=$encodedDomain&sz=64",
+            "https://$domainText/favicon.ico"
+        )
+
+        foreach ($url in $urls) {
+            if (Save-IconFromUrl -Url $url -Path $path) {
                 $ok = $true
                 $downloaded++
+                break
             }
-        } catch {
-            $ok = $false
         }
     }
 
