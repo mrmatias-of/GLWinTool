@@ -1,6 +1,7 @@
 param(
     [switch]$NoProfile,
-    [switch]$ValidateOnly
+    [switch]$ValidateOnly,
+    [switch]$SelfTest
 )
 
 $ErrorActionPreference = "Stop"
@@ -315,6 +316,52 @@ function Test-AssistenteConfig {
             }
         }
     }
+}
+
+function Test-AssistenteSelfTest {
+    Test-AssistenteConfig
+
+    $sampleWinget = Get-WingetPackageArguments -Action "install" -PackageId "Notepad++.Notepad++"
+    if ($sampleWinget -notcontains "install" -or $sampleWinget -notcontains "--silent") {
+        throw "Autoteste falhou: argumentos de instalacao invalidos."
+    }
+
+    $sampleUninstall = Get-WingetPackageArguments -Action "uninstall" -PackageId "Notepad++.Notepad++"
+    if ($sampleUninstall -contains "--accept-package-agreements") {
+        throw "Autoteste falhou: uninstall contem argumento invalido."
+    }
+
+    $sampleStore = Get-WingetPackageArguments -Action "install" -PackageId "msstore:9NKSQGP7F2NH"
+    if ($sampleStore -notcontains "msstore") {
+        throw "Autoteste falhou: app Microsoft Store sem source msstore."
+    }
+
+    foreach ($presetName in @("Minimo", "Padrao", "Avancado")) {
+        Select-TweakPreset -Preset $presetName
+        if ($script:SelectedTweakNames.Count -eq 0) {
+            throw "Autoteste falhou: preset $presetName nao selecionou ajustes."
+        }
+    }
+    Clear-TweakSelection
+
+    Select-SafeAppx
+    if ($script:SelectedAppxNames.Count -eq 0) {
+        throw "Autoteste falhou: selecao segura de AppX vazia."
+    }
+    $script:SelectedAppxNames.Clear()
+
+    $requiredButtons = @(
+        "InstallTab", "TweaksTab", "ConfigTab", "UpdatesTab", "AppxTab", "Win11Tab",
+        "ApplyPresetButton", "ApplyDnsButton", "RestorePointButton", "BackupsButton",
+        "HealthButton", "ReloadButton", "ClearButton"
+    )
+    foreach ($buttonName in $requiredButtons) {
+        if (-not $window.FindName($buttonName)) {
+            throw "Autoteste falhou: botao ausente $buttonName."
+        }
+    }
+
+    return "SelfTest OK: argumentos, presets, AppX, botoes e catalogos validados sem executar acoes destrutivas."
 }
 
 function Invoke-SafeUiAction {
@@ -2189,6 +2236,10 @@ if ($ValidateOnly) {
     Test-AssistenteConfig
     $script:ValidationRan = $true
     "ValidateOnly OK: versao $script:AppVersion, $($script:Catalog.Count) apps, $(@((Get-AllTweaks)).Count) tweaks e $(@($script:Presets.PSObject.Properties).Count) presets carregados."
+    return
+}
+if ($SelfTest) {
+    Test-AssistenteSelfTest
     return
 }
 if (-not $window) {

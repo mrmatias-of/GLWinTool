@@ -51,6 +51,12 @@ Fonte direta pelo GitHub:
 irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-bootstrap-template.ps1 | iex
 ```
 
+Autoteste seguro para desenvolvimento:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -SelfTest
+```
+
 ## Preview
 
 ![Preview da interface](assets/readme/app-preview.svg)
