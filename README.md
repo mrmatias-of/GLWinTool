@@ -78,7 +78,7 @@ Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba in
 
 ### Configurar
 
-Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer, modos de Windows Update e reparo dedicado de componentes de atualizacao.
+Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude salvo em arquivo, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer, modos de Windows Update e reparo dedicado de componentes de atualizacao.
 
 No topo da aba existem fluxos por problema real:
 
@@ -116,6 +116,7 @@ Medidas implementadas:
 - renomeio recuperavel dos caches do Windows Update em vez de exclusao direta;
 - inventario AppX antes da remocao;
 - tentativa de ponto de restauracao em ajustes e AppX quando executado como administrador;
+- relatorio de saude salvo em pasta de backup;
 - bloqueio contra acoes simultaneas;
 - barra de progresso durante operacoes;
 - log visivel na interface.

@@ -44,7 +44,7 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 ## 5. Manutencao e reparos
 
 - Fluxos por problema real no topo da aba Configurar. Status: implementado para PC lento, apps que nao instalam, internet com problema e Windows Update travado.
-- Relatorio rapido de saude do sistema.
+- Relatorio rapido de saude do sistema. Status: implementado com log e arquivo local em backup.
 - Reparo de imagem Windows com DISM/SFC.
 - Reparo basico de rede.
 - Correcao de horario/NTP.
