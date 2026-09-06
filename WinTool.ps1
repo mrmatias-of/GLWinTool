@@ -382,6 +382,7 @@ function Invoke-SafeUiAction {
 
     try {
         $script:IsBusy = $true
+        Write-Log "----- Inicio: $Name -----"
         if ($script:ProgressBar) {
             $script:ProgressBar.Visibility = "Visible"
             $script:ProgressBar.IsIndeterminate = $true
@@ -390,11 +391,13 @@ function Invoke-SafeUiAction {
             $script:StatusText.Text = "Executando: $Name"
         }
         & $ActionBlock
+        Write-Log "----- Fim: $Name -----"
     } catch {
         Write-Log "Erro ao executar ${Name}: $($_.Exception.Message)"
         if ($_.ScriptStackTrace) {
             Write-Log $_.ScriptStackTrace
         }
+        Write-Log "----- Falha: $Name -----"
     } finally {
         if ($script:ProgressBar) {
             $script:ProgressBar.IsIndeterminate = $false
