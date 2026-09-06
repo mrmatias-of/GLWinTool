@@ -1011,6 +1011,7 @@ function Show-ConfigView {
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Limpar arquivos temporarios" -Body "Remove sobras em pastas temporarias do usuario e do sistema." -ButtonText "Limpar" -Icon "LT" -Accent "#F59E0B" -ClickAction { Invoke-TempCleanup })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar imagem do Windows" -Body "Executa DISM e SFC. Pode demorar alguns minutos." -ButtonText "Reparar" -Icon "SF" -Accent "#7C3AED" -ClickAction { Invoke-SystemRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar rede" -Body "Limpa DNS, renova IP e redefine Winsock/IP com backup previo." -ButtonText "Reparar rede" -Icon "RD" -Accent "#0284C7" -ClickAction { Invoke-NetworkRepair })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Corrigir horario" -Body "Ativa o servico de tempo do Windows e solicita sincronizacao NTP." -ButtonText "Sincronizar" -Icon "HR" -Accent "#4F46E5" -ClickAction { Invoke-TimeRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reiniciar Explorer" -Body "Aplica ajustes visuais sem reiniciar o computador." -ButtonText "Reiniciar" -Icon "EX" -Accent "#0EA5E9" -ClickAction { Restart-ExplorerShell })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Relatorio de saude" -Body "Mostra versao do Windows, memoria, discos, servicos e instalador." -ButtonText "Gerar relatorio" -Icon "RS" -Accent "#0F766E" -ClickAction { Show-SystemHealthReport })) | Out-Null
 
@@ -1289,6 +1290,24 @@ function Invoke-NetworkRepair {
     }
 }
 
+function Invoke-TimeRepair {
+    Invoke-SafeUiAction -Name "Corrigir horario" -Action {
+        if (-not (Confirm-GLabAction -Title "Confirmar correcao de horario" -Message "Sincronizar horario do Windows e ajustar o servico de tempo para automatico?")) {
+            Write-Log "Correcao de horario cancelada pelo usuario."
+            return
+        }
+        $backupDir = New-BackupSession -Reason "horario"
+        Get-Service -Name "w32time" -ErrorAction SilentlyContinue |
+            Select-Object Name, Status, StartType |
+            ConvertTo-Json -Depth 3 |
+            Set-Content -LiteralPath (Join-Path $backupDir "servico-horario.json") -Encoding UTF8
+        Set-Service -Name "w32time" -StartupType Automatic -ErrorAction SilentlyContinue
+        Start-Service -Name "w32time" -ErrorAction SilentlyContinue
+        Invoke-LoggedProcess -FilePath "w32tm.exe" -Arguments @("/resync", "/force") | Out-Null
+        Write-Log "Sincronizacao de horario solicitada."
+    }
+}
+
 function New-GLabRestorePoint {
     Invoke-SafeUiAction -Name "Criar ponto de restauracao" -Action {
         if (-not (Test-IsAdmin)) {
@@ -1502,6 +1521,7 @@ function Build-Ui {
                     <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="NetworkRepairButton" Content="Reparar rede" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="TimeRepairButton" Content="Corrigir horario" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="HealthButton" Content="Relatorio de saude" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateDefaultButton" Content="Updates: padrao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="UpdateSecurityButton" Content="Updates: avisar" Margin="0,0,0,5" Height="29"/>
@@ -1630,6 +1650,7 @@ $window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
 $window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
 $window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
 $window.FindName("NetworkRepairButton").Add_Click({ Invoke-NetworkRepair })
+$window.FindName("TimeRepairButton").Add_Click({ Invoke-TimeRepair })
 $window.FindName("HealthButton").Add_Click({ Show-SystemHealthReport })
 $window.FindName("UpdateDefaultButton").Add_Click({ Set-WindowsUpdateMode -Mode "Padrao" })
 $window.FindName("UpdateSecurityButton").Add_Click({ Set-WindowsUpdateMode -Mode "Seguranca" })

@@ -58,7 +58,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 | Atualizacoes | Verificacao de updates, atualizacao dos selecionados, atualizacao geral e reparo de fontes |
 | Ajustes Windows | Checkboxes seletivos, ajustes seguros, registro controlado e reinicio do Explorer |
 | AppX | Remocao controlada de apps provisionados, categorias, busca, bloqueios e inventario antes da acao |
-| Manutencao | DISM, SFC, reparo de rede, limpeza de temporarios, relatorio de saude, ponto de restauracao e modos de Windows Update |
+| Manutencao | DISM, SFC, reparo de rede, horario/NTP, limpeza de temporarios, relatorio de saude e ponto de restauracao |
 | Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
 
 ## Modulos
@@ -73,7 +73,7 @@ Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. Apenas i
 
 ### Configurar
 
-Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, reinicio do Explorer e modos de Windows Update.
+Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer e modos de Windows Update.
 
 ### Atualizar
 
