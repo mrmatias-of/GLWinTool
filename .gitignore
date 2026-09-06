@@ -3,6 +3,7 @@
 *.tmp
 *.bak
 dist/
+backups/
 
 # PowerShell/editor noise
 *.ps1xml

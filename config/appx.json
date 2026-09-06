@@ -1,200 +1,201 @@
-﻿[
-    {
-        "name":  "Bing Search",
-        "package":  "Microsoft.BingSearch",
-        "description":  "Integrates Microsoft Bing search capabilities and web services directly into the operating system.",
-        "safe":  true
-    },
-    {
-        "name":  "Calculator",
-        "package":  "Microsoft.WindowsCalculator",
-        "description":  "Performs standard arithmetic, scientific operations, programming calculations, and unit conversions.",
-        "safe":  true
-    },
-    {
-        "name":  "Camera",
-        "package":  "Microsoft.WindowsCamera",
-        "description":  "Captures photographs and records video files via connected webcams or imaging hardware.",
-        "safe":  true
-    },
-    {
-        "name":  "Clipchamp",
-        "package":  "Clipchamp.Clipchamp",
-        "description":  "Provides a user-friendly video editor with built-in templates, effects, and timeline editing tools.",
-        "safe":  true
-    },
-    {
-        "name":  "Clock",
-        "package":  "Microsoft.WindowsAlarms",
-        "description":  "Features world clocks, alarms, countdown timers, stopwatches, and dedicated focus session tracking.",
-        "safe":  true
-    },
-    {
-        "name":  "Copilot",
-        "package":  "Microsoft.Copilot",
-        "description":  "Launches the Microsoft AI companion for contextual answers, creative writing assistance, and intelligent web search.",
-        "safe":  true
-    },
-    {
-        "name":  "Dev Home",
-        "package":  "Microsoft.WindowsDevHome",
-        "description":  "Provides a specialized dashboard for software developer environment setups, repository syncing, and hardware widgets.",
-        "safe":  true
-    },
-    {
-        "name":  "Feedback Hub",
-        "package":  "Microsoft.WindowsFeedbackHub",
-        "description":  "Allows users to submit bug reports, feature suggestions, and diagnostic data directly to Microsoft.",
-        "safe":  true
-    },
-    {
-        "name":  "Get Help",
-        "package":  "Microsoft.GetHelp",
-        "description":  "Provides access to automated troubleshooting guides, support documentation, and direct Microsoft customer assistance.",
-        "safe":  true
-    },
-    {
-        "name":  "Media Player",
-        "package":  "Microsoft.ZuneMusic",
-        "description":  "Plays local audio and video files with modern playlist management and casting capabilities.",
-        "safe":  true
-    },
-    {
-        "name":  "Microsoft 365",
-        "package":  "Microsoft.MicrosoftOfficeHub",
-        "description":  "Serves as a centralized launcher and dashboard for accessing cloud-based Microsoft 365 apps and recent documents.",
-        "safe":  true
-    },
-    {
-        "name":  "Microsoft Teams",
-        "package":  "MSTeams",
-        "description":  "Facilitates instant messaging, video conferencing, file sharing, and workspace collaboration.",
-        "safe":  true
-    },
-    {
-        "name":  "Mobile Devices",
-        "package":  "Microsoft.WindowsCrossDevice",
-        "description":  "Manages system-level background connectivity with paired mobile devices. Removing this may disable cross-device features such as phone screen mirroring, file transfer, and mobile hotspot handoff integrated into Windows Settings.",
-        "safe":  true
-    },
-    {
-        "name":  "News",
-        "package":  "Microsoft.BingNews",
-        "description":  "Aggregates breaking news headlines, personalized article feeds, and world current events.",
-        "safe":  true
-    },
-    {
-        "name":  "Notepad",
-        "package":  "Microsoft.WindowsNotepad",
-        "description":  "Provides a lightweight text editor with multi-tab support for plain text files and code snippets.",
-        "safe":  true
-    },
-    {
-        "name":  "Outlook for Windows",
-        "package":  "Microsoft.OutlookForWindows",
-        "description":  "Provides modern email management, calendar scheduling, and contact organization features.",
-        "safe":  true
-    },
-    {
-        "name":  "Paint",
-        "package":  "Microsoft.Paint",
-        "description":  "Provides built-in digital sketching, basic image editing, and pixel-level graphic manipulation tools.",
-        "safe":  true
-    },
-    {
-        "name":  "Phone Link",
-        "package":  "Microsoft.YourPhone",
-        "description":  "Synchronizes text messages, phone notifications, photos, and calls from a mobile device to the desktop.",
-        "safe":  true
-    },
-    {
-        "name":  "Photos",
-        "package":  "Microsoft.WindowsPhotos",
-        "description":  "Organizes, views, and crops local images with basic color adjustment and album creation tools.",
-        "safe":  true
-    },
-    {
-        "name":  "Power Automate",
-        "package":  "Microsoft.PowerAutomateDesktop",
-        "description":  "Automates repetitive workflows and desktop tasks using low-code visual scripting.",
-        "safe":  true
-    },
-    {
-        "name":  "Quick Assist",
-        "package":  "MicrosoftCorporationII.QuickAssist",
-        "description":  "Enables secure remote technical support and screen sharing over an internet connection.",
-        "safe":  true
-    },
-    {
-        "name":  "Snipping Tool",
-        "package":  "Microsoft.ScreenSketch",
-        "description":  "Captures screenshots or screen recordings with built-in markup, image cropping, and optical character recognition (OCR).",
-        "safe":  true
-    },
-    {
-        "name":  "Solitaire Collection",
-        "package":  "Microsoft.MicrosoftSolitaireCollection",
-        "description":  "Bundles built-in card game modes including Klondike, Spider, FreeCell, Pyramid, and TriPeaks alongside daily challenges.",
-        "safe":  true
-    },
-    {
-        "name":  "Sound Recorder",
-        "package":  "Microsoft.WindowsSoundRecorder",
-        "description":  "Records and trims live audio inputs with simple microphone adjustment controls.",
-        "safe":  true
-    },
-    {
-        "name":  "Start Experiences App",
-        "package":  "Microsoft.StartExperiencesApp",
-        "description":  "Powers the Windows Widgets board, delivering a personalized feed of news, weather, sports, and finance content.",
-        "safe":  true
-    },
-    {
-        "name":  "Sticky Notes",
-        "package":  "Microsoft.MicrosoftStickyNotes",
-        "description":  "Creates quick, floating text notes on the desktop that automatically sync across devices.",
-        "safe":  true
-    },
-    {
-        "name":  "To Do",
-        "package":  "Microsoft.Todos",
-        "description":  "Creates, tracks, and synchronizes personal tasks, smart lists, and daily reminders.",
-        "safe":  true
-    },
-    {
-        "name":  "Weather",
-        "package":  "Microsoft.BingWeather",
-        "description":  "Displays local real-time weather tracking, radar maps, and historical meteorological forecasts.",
-        "safe":  true
-    },
-    {
-        "name":  "Xbox App",
-        "package":  "Microsoft.GamingApp",
-        "description":  "Serves as the primary gaming library manager, social community interface, and PC Game Pass dashboard.",
-        "safe":  true
-    },
-    {
-        "name":  "Xbox Game Bar",
-        "package":  "Microsoft.XboxGamingOverlay",
-        "description":  "Provides customizable in-game status widgets, audio balancing sliders, system monitoring tools, and gameplay recording.",
-        "safe":  true
-    },
-    {
-        "name":  "Xbox Identity Provider",
-        "package":  "Microsoft.XboxIdentityProvider",
-        "description":  "Manages Xbox network user authentication and background account validation for connected titles. Warning: removing this may break Microsoft account sign-in for non-Xbox games and apps that rely on this authentication pipeline.",
-        "safe":  true
-    },
-    {
-        "name":  "Xbox Speech To Text Overlay",
-        "package":  "Microsoft.XboxSpeechToTextOverlay",
-        "description":  "Provides system-level live accessibility captions and voice-to-text translation for gaming chat networks.",
-        "safe":  true
-    },
-    {
-        "name":  "Xbox TCUI",
-        "package":  "Microsoft.Xbox.TCUI",
-        "description":  "Provides core account connection UI modules for single sign-on flows within game titles. Warning: removing this may break Microsoft account authentication in games and apps that do not otherwise require the Xbox app.",
-        "safe":  true
-    }
+[
+  {
+    "name": "Bing Search",
+    "package": "Microsoft.BingSearch",
+    "description": "Integra recursos de busca do Microsoft Bing e servicos web ao Windows.",
+    "safe": true
+  },
+  {
+    "name": "Calculator",
+    "package": "Microsoft.WindowsCalculator",
+    "description": "Calculadora padrao do Windows para operacoes basicas, cientificas, programacao e conversoes.",
+    "safe": true
+  },
+  {
+    "name": "Camera",
+    "package": "Microsoft.WindowsCamera",
+    "description": "Captura fotos e videos usando webcams ou dispositivos de imagem conectados.",
+    "safe": true
+  },
+  {
+    "name": "Clipchamp",
+    "package": "Clipchamp.Clipchamp",
+    "description": "Editor de video com modelos, efeitos e linha do tempo simplificada.",
+    "safe": true
+  },
+  {
+    "name": "Clock",
+    "package": "Microsoft.WindowsAlarms",
+    "description": "Relogios, alarmes, temporizadores, cronometro e sessoes de foco.",
+    "safe": true
+  },
+  {
+    "name": "Copilot",
+    "package": "Microsoft.Copilot",
+    "description": "Assistente de IA da Microsoft integrado ao Windows para respostas e tarefas criativas.",
+    "safe": true
+  },
+  {
+    "name": "Dev Home",
+    "package": "Microsoft.WindowsDevHome",
+    "description": "Painel para ambientes de desenvolvimento, repositorios e widgets de hardware.",
+    "safe": true
+  },
+  {
+    "name": "Feedback Hub",
+    "package": "Microsoft.WindowsFeedbackHub",
+    "description": "Envia comentarios, relatorios de erro e dados de diagnostico para a Microsoft.",
+    "safe": true
+  },
+  {
+    "name": "Get Help",
+    "package": "Microsoft.GetHelp",
+    "description": "Acesso a guias de solucao de problemas, documentacao e suporte da Microsoft.",
+    "safe": true
+  },
+  {
+    "name": "Media Player",
+    "package": "Microsoft.ZuneMusic",
+    "description": "Player moderno para audio e video local com playlists e transmissao.",
+    "safe": true
+  },
+  {
+    "name": "Microsoft 365",
+    "package": "Microsoft.MicrosoftOfficeHub",
+    "description": "Atalho central para aplicativos Microsoft 365 na nuvem e documentos recentes.",
+    "safe": true
+  },
+  {
+    "name": "Microsoft Teams",
+    "package": "MSTeams",
+    "description": "Mensagens, videochamadas, compartilhamento de arquivos e colaboracao.",
+    "safe": true
+  },
+  {
+    "name": "Mobile Devices",
+    "package": "Microsoft.WindowsCrossDevice",
+    "description": "Conectividade com dispositivos moveis pareados. Remover pode desativar espelhamento, transferencia de arquivos e recursos de celular nas Configuracoes.",
+    "safe": true
+  },
+  {
+    "name": "News",
+    "package": "Microsoft.BingNews",
+    "description": "Feed de noticias, manchetes e artigos personalizados.",
+    "safe": true
+  },
+  {
+    "name": "Notepad",
+    "package": "Microsoft.WindowsNotepad",
+    "description": "Editor de texto leve com suporte a abas para arquivos simples e trechos de codigo.",
+    "safe": true
+  },
+  {
+    "name": "Outlook for Windows",
+    "package": "Microsoft.OutlookForWindows",
+    "description": "Gerenciamento moderno de email, calendario e contatos.",
+    "safe": true
+  },
+  {
+    "name": "Paint",
+    "package": "Microsoft.Paint",
+    "description": "Ferramenta integrada para desenho, edicao basica de imagens e manipulacao simples.",
+    "safe": true
+  },
+  {
+    "name": "Phone Link",
+    "package": "Microsoft.YourPhone",
+    "description": "Sincroniza mensagens, notificacoes, fotos e chamadas do celular com o computador.",
+    "safe": true
+  },
+  {
+    "name": "Photos",
+    "package": "Microsoft.WindowsPhotos",
+    "description": "Visualiza, organiza e recorta imagens locais com ajustes basicos.",
+    "safe": true
+  },
+  {
+    "name": "Power Automate",
+    "package": "Microsoft.PowerAutomateDesktop",
+    "description": "Automatiza tarefas repetitivas no desktop com fluxos visuais.",
+    "safe": true
+  },
+  {
+    "name": "Quick Assist",
+    "package": "MicrosoftCorporationII.QuickAssist",
+    "description": "Suporte remoto seguro e compartilhamento de tela pela internet.",
+    "safe": true
+  },
+  {
+    "name": "Snipping Tool",
+    "package": "Microsoft.ScreenSketch",
+    "description": "Captura prints e gravacoes de tela com anotacoes, recorte e OCR.",
+    "safe": true
+  },
+  {
+    "name": "Solitaire Collection",
+    "package": "Microsoft.MicrosoftSolitaireCollection",
+    "description": "Colecao de jogos de cartas como Klondike, Spider, FreeCell, Pyramid e TriPeaks.",
+    "safe": true
+  },
+  {
+    "name": "Sound Recorder",
+    "package": "Microsoft.WindowsSoundRecorder",
+    "description": "Grava e recorta audio usando microfone ou entrada de som.",
+    "safe": true
+  },
+  {
+    "name": "Start Experiences App",
+    "package": "Microsoft.StartExperiencesApp",
+    "description": "Alimenta o painel de Widgets do Windows com noticias, clima, esportes e financas.",
+    "safe": true
+  },
+  {
+    "name": "Sticky Notes",
+    "package": "Microsoft.MicrosoftStickyNotes",
+    "description": "Notas rapidas na area de trabalho com sincronizacao entre dispositivos.",
+    "safe": true
+  },
+  {
+    "name": "To Do",
+    "package": "Microsoft.Todos",
+    "description": "Cria, acompanha e sincroniza tarefas, listas inteligentes e lembretes.",
+    "safe": true
+  },
+  {
+    "name": "Weather",
+    "package": "Microsoft.BingWeather",
+    "description": "Mostra clima local em tempo real, mapas e previsoes meteorologicas.",
+    "safe": true
+  },
+  {
+    "name": "Xbox App",
+    "package": "Microsoft.GamingApp",
+    "description": "Biblioteca de jogos, area social e painel do PC Game Pass.",
+    "safe": true
+  },
+  {
+    "name": "Xbox Game Bar",
+    "package": "Microsoft.XboxGamingOverlay",
+    "description": "Widgets de jogos, audio, monitoramento do sistema e gravacao de gameplay.",
+    "safe": true
+  },
+  {
+    "name": "Xbox Identity Provider",
+    "package": "Microsoft.XboxIdentityProvider",
+    "description": "Autenticacao da rede Xbox. Atencao: remover pode quebrar login Microsoft em jogos e apps que dependem desse componente.",
+    "safe": true
+  },
+  {
+    "name": "Xbox Speech To Text Overlay",
+    "package": "Microsoft.XboxSpeechToTextOverlay",
+    "description": "Legendas ao vivo e conversao de voz em texto para chats de jogos.",
+    "safe": true
+  },
+  {
+    "name": "Xbox TCUI",
+    "package": "Microsoft.Xbox.TCUI",
+    "description": "Interface de conexao de conta Xbox. Atencao: remover pode quebrar autenticacao Microsoft em jogos e apps ligados ao Xbox.",
+    "safe": true
+  }
 ]
+

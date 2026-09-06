@@ -37,6 +37,7 @@ irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-boots
 - Reparo do Windows com DISM e SFC.
 - Limpeza de arquivos temporarios.
 - Criacao de ponto de restauracao.
+- Backups locais antes de ajustes de registro, DNS, AppX e Windows Update.
 - Aba AppX com catalogo externo em JSON, remocoes seguras e itens sensiveis bloqueados.
 - Aba Win11 com ponto inicial para Windows 11 Creator.
 - Log integrado na interface.
@@ -126,11 +127,18 @@ Este projeto executa comandos administrativos no Windows. Use com criterio em ma
 Medidas ja adotadas:
 
 - acoes destrutivas pedem confirmacao;
+- ajustes selecionados criam uma sessao de backup antes de alterar registro;
+- DNS salva a configuracao atual antes de aplicar novo provedor;
+- Windows Update exporta a politica local antes de alterar o modo;
+- AppX salva inventario de pacotes instalados e provisionados antes da remocao;
+- AppX e ajustes tentam criar ponto de restauracao quando o app esta em modo administrador;
 - AppX sensiveis ficam bloqueados;
 - ajustes planejados aparecem, mas nao executam;
 - argumentos WinGet sao montados por funcao central;
 - `ValidateOnly` valida catalogos e argumentos;
 - logs ficam visiveis para auditoria.
+
+Os backups ficam na pasta `backups`, dentro da copia local executada. Ao rodar pelo comando remoto, eles ficam na pasta temporaria baixada pelo bootstrap daquela execucao.
 
 Recomendado para ambientes profissionais:
 
@@ -159,7 +167,7 @@ Status: em andamento avancado.
 - Adicionar desfazer ajustes selecionados.
 - Melhorar tela de preferencias.
 
-Status: proxima prioridade.
+Status: em andamento.
 
 ### Fase 3 - Apps e AppX
 
@@ -179,7 +187,7 @@ Status: iniciado com catalogos importados.
 - Fix horario/NTP.
 - Relatorio de saude do sistema.
 
-Status: iniciado.
+Status: iniciado com backups preventivos e acoes de manutencao.
 
 ### Fase 5 - Windows 11 Creator
 

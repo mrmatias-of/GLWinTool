@@ -10,7 +10,9 @@ $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
 $script:PresetsPath = Join-Path $script:Root "config\presets.json"
 $script:AppxPath = Join-Path $script:Root "config\appx.json"
 $script:IconRoot = Join-Path $script:Root "assets\icons"
+$script:BackupRoot = Join-Path $script:Root "backups"
 $script:ActiveView = "Install"
+$script:IsBusy = $false
 $script:SelectedAppIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedTweakNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedAppxNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -74,6 +76,71 @@ function Write-Log {
         $script:LogBox.AppendText("[$stamp] $Message`r`n")
         $script:LogBox.ScrollToEnd()
     })
+}
+
+function New-BackupSession {
+    param([string]$Reason = "acao")
+    $safeReason = ($Reason -replace '[^a-zA-Z0-9_-]', '-').Trim("-")
+    if ([string]::IsNullOrWhiteSpace($safeReason)) { $safeReason = "acao" }
+    $session = Join-Path $script:BackupRoot ("{0}-{1}" -f (Get-Date -Format "yyyyMMdd-HHmmss"), $safeReason)
+    New-Item -ItemType Directory -Path $session -Force | Out-Null
+    Write-Log "Backup iniciado: $session"
+    return $session
+}
+
+function Convert-RegistryPathForRegExe {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) { return "" }
+    return ($Path -replace '^HKCU:', 'HKEY_CURRENT_USER' -replace '^HKLM:', 'HKEY_LOCAL_MACHINE' -replace '^HKCR:', 'HKEY_CLASSES_ROOT' -replace '^HKU:', 'HKEY_USERS' -replace '^HKCC:', 'HKEY_CURRENT_CONFIG') -replace '/', '\'
+}
+
+function Export-RegistryBackup {
+    param(
+        [Parameter(Mandatory=$true)][string]$RegistryPath,
+        [Parameter(Mandatory=$true)][string]$BackupDir
+    )
+
+    $regPath = Convert-RegistryPathForRegExe -Path $RegistryPath
+    if ([string]::IsNullOrWhiteSpace($regPath)) { return }
+    $fileName = (($regPath -replace '[\\/:*?"<>| ]', '_').Trim("_")) + ".reg"
+    $target = Join-Path $BackupDir $fileName
+    try {
+        Invoke-LoggedProcess -FilePath "reg.exe" -Arguments @("export", $regPath, $target, "/y") | Out-Null
+        Write-Log "Registro salvo antes da alteracao: $regPath"
+    } catch {
+        Write-Log "Nao foi possivel salvar backup do registro: $regPath"
+    }
+}
+
+function Export-AppxInventory {
+    param([Parameter(Mandatory=$true)][string]$BackupDir)
+    try {
+        Get-AppxPackage -AllUsers |
+            Select-Object Name, PackageFullName, PackageUserInformation |
+            ConvertTo-Json -Depth 6 |
+            Set-Content -LiteralPath (Join-Path $BackupDir "appx-instalados.json") -Encoding UTF8
+        Get-AppxProvisionedPackage -Online |
+            Select-Object DisplayName, PackageName |
+            ConvertTo-Json -Depth 4 |
+            Set-Content -LiteralPath (Join-Path $BackupDir "appx-provisionados.json") -Encoding UTF8
+        Write-Log "Inventario AppX salvo antes da remocao."
+    } catch {
+        Write-Log "Nao foi possivel salvar inventario AppX."
+    }
+}
+
+function New-SafeRestorePoint {
+    param([string]$Description = "Assistente G-LAB")
+    if (-not (Test-IsAdmin)) {
+        Write-Log "Ponto de restauracao ignorado: execute como administrador para habilitar."
+        return
+    }
+    try {
+        Checkpoint-Computer -Description $Description -RestorePointType "MODIFY_SETTINGS"
+        Write-Log "Ponto de restauracao solicitado."
+    } catch {
+        Write-Log "Ponto de restauracao nao criado: $($_.Exception.Message)"
+    }
 }
 
 function Invoke-LoggedProcess {
@@ -226,13 +293,32 @@ function Invoke-SafeUiAction {
         [string]$Name = "acao"
     )
 
+    if ($script:IsBusy) {
+        Write-Log "Aguarde: outra acao ainda esta em execucao."
+        return
+    }
+
     try {
+        $script:IsBusy = $true
+        if ($script:ProgressBar) {
+            $script:ProgressBar.Visibility = "Visible"
+            $script:ProgressBar.IsIndeterminate = $true
+        }
+        if ($script:StatusText) {
+            $script:StatusText.Text = "Executando: $Name"
+        }
         & $ActionBlock
     } catch {
         Write-Log "Erro ao executar ${Name}: $($_.Exception.Message)"
         if ($_.ScriptStackTrace) {
             Write-Log $_.ScriptStackTrace
         }
+    } finally {
+        if ($script:ProgressBar) {
+            $script:ProgressBar.IsIndeterminate = $false
+            $script:ProgressBar.Visibility = "Collapsed"
+        }
+        $script:IsBusy = $false
     }
 }
 
@@ -545,6 +631,35 @@ function New-InfoCard {
     return $card
 }
 
+function New-ActionCard {
+    param(
+        [string]$Title,
+        [string]$Body,
+        [string]$ButtonText,
+        [scriptblock]$ClickAction,
+        [string]$Icon = "OK",
+        [string]$Accent = "#2563EB"
+    )
+
+    $card = New-InfoCard -Title $Title -Body $Body -Icon $Icon -Accent $Accent
+    $row = [System.Windows.Controls.StackPanel]$card.Child
+    $stack = [System.Windows.Controls.StackPanel]$row.Children[1]
+
+    $button = [System.Windows.Controls.Button]::new()
+    $button.Content = $ButtonText
+    $button.Height = 28
+    $button.Margin = "0,8,0,0"
+    $button.FontSize = 11
+    $button.Tag = $ClickAction
+    $button.Add_Click({
+        if ($this.Tag) {
+            & ([scriptblock]$this.Tag)
+        }
+    })
+    $stack.Children.Add($button) | Out-Null
+    return $card
+}
+
 function New-TweakCard {
     param([object]$Tweak)
 
@@ -623,10 +738,17 @@ function Get-AllTweaks {
 }
 
 function Set-RegistryTweak {
-    param([Parameter(Mandatory=$true)][psobject]$Tweak)
+    param(
+        [Parameter(Mandatory=$true)][psobject]$Tweak,
+        [string]$BackupDir = ""
+    )
 
     if ([string]::IsNullOrWhiteSpace($Tweak.path) -or [string]::IsNullOrWhiteSpace($Tweak.property)) {
         throw "Tweak de registro incompleto: $($Tweak.name)"
+    }
+
+    if ($BackupDir) {
+        Export-RegistryBackup -RegistryPath $Tweak.path -BackupDir $BackupDir
     }
 
     if (-not (Test-Path -LiteralPath $Tweak.path)) {
@@ -638,7 +760,10 @@ function Set-RegistryTweak {
 }
 
 function Invoke-TweakItem {
-    param([Parameter(Mandatory=$true)][psobject]$Tweak)
+    param(
+        [Parameter(Mandatory=$true)][psobject]$Tweak,
+        [string]$BackupDir = ""
+    )
 
     if (-not $Tweak.safe) {
         Write-Log "Tweak ignorado por nao estar marcado como seguro: $($Tweak.name)"
@@ -647,7 +772,7 @@ function Invoke-TweakItem {
 
     switch ($Tweak.type) {
         "registry" {
-            Set-RegistryTweak -Tweak $Tweak
+            Set-RegistryTweak -Tweak $Tweak -BackupDir $BackupDir
             Write-Log "Tweak aplicado: $($Tweak.name)"
         }
         "command" {
@@ -788,7 +913,18 @@ function Show-ConfigView {
     $wingetStatus = if ($winget) { "Disponivel: $($winget.Source)" } else { "Nao encontrado no PATH desta sessao." }
     $presetCount = @($script:Presets.PSObject.Properties).Count
     $tweakCount = @((Get-AllTweaks)).Count
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB antes de executar acoes.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Configurar e manter" -Subtitle "Acoes rapidas inspiradas no WinUtil, com confirmacao nos itens sensiveis.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Criar ponto de restauracao" -Body "Recomendado antes de ajustes maiores no Windows." -ButtonText "Criar agora" -Icon "PR" -Accent "#16A34A" -ClickAction { New-GLabRestorePoint })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Limpar arquivos temporarios" -Body "Remove sobras em pastas temporarias do usuario e do sistema." -ButtonText "Limpar" -Icon "LT" -Accent "#F59E0B" -ClickAction { Invoke-TempCleanup })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar imagem do Windows" -Body "Executa DISM e SFC. Pode demorar alguns minutos." -ButtonText "Reparar" -Icon "SF" -Accent "#7C3AED" -ClickAction { Invoke-SystemRepair })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reiniciar Explorer" -Body "Aplica ajustes visuais sem reiniciar o computador." -ButtonText "Reiniciar" -Icon "EX" -Accent "#0EA5E9" -ClickAction { Restart-ExplorerShell })) | Out-Null
+
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows Update" -Subtitle "Escolha o comportamento das atualizacoes automaticas por politica local.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Padrao do Windows" -Body "Remove politicas locais criadas pelo assistente." -ButtonText "Restaurar padrao" -Icon "UP" -Accent "#2563EB" -ClickAction { Set-WindowsUpdateMode -Mode "Padrao" })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Baixar e avisar" -Body "Baixa atualizacoes e avisa antes da instalacao." -ButtonText "Aplicar modo aviso" -Icon "AV" -Accent "#0891B2" -ClickAction { Set-WindowsUpdateMode -Mode "Seguranca" })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Desativar automaticas" -Body "Opcao avancada. Exige confirmacao antes de aplicar." -ButtonText "Desativar" -Icon "!" -Accent "#DC2626" -ClickAction { Set-WindowsUpdateMode -Mode "Desativar" })) | Out-Null
+
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB.")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Catalogo JSON" -Body $script:ConfigPath -Icon "JS" -Accent "#2563EB")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Administrador" -Body $adminStatus -Icon "AD" -Accent "#64748B")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "WinGet" -Body $wingetStatus -Icon "WG" -Accent "#7C3AED")) | Out-Null
@@ -906,8 +1042,10 @@ function Invoke-SafeTweaks {
         }
 
         Write-Log "Aplicando $($selectedTweaks.Count) ajustes selecionados."
+        $backupDir = New-BackupSession -Reason "ajustes"
+        New-SafeRestorePoint -Description "Assistente G-LAB - ajustes"
         foreach ($tweak in $selectedTweaks) {
-            Invoke-TweakItem -Tweak $tweak
+            Invoke-TweakItem -Tweak $tweak -BackupDir $backupDir
         }
         Write-Log "Ajustes selecionados finalizados."
         Restart-ExplorerShell
@@ -919,6 +1057,12 @@ function Set-GLabDns {
     Invoke-SafeUiAction -Name "Configurar DNS" -Action {
         $adapters = @(Get-NetAdapter | Where-Object { $_.Status -eq "Up" })
         if ($adapters.Count -eq 0) { Write-Log "Nenhum adaptador de rede ativo encontrado."; return }
+        $backupDir = New-BackupSession -Reason "dns"
+        Get-DnsClientServerAddress |
+            Select-Object InterfaceAlias, InterfaceIndex, AddressFamily, ServerAddresses |
+            ConvertTo-Json -Depth 5 |
+            Set-Content -LiteralPath (Join-Path $backupDir "dns-atual.json") -Encoding UTF8
+        Write-Log "Configuracao DNS atual salva antes da alteracao."
         foreach ($adapter in $adapters) {
             if ([string]::IsNullOrWhiteSpace($Preset.Primary)) {
                 Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses
@@ -947,8 +1091,7 @@ function New-GLabRestorePoint {
             return
         }
         Write-Log "Criando ponto de restauracao do sistema..."
-        Checkpoint-Computer -Description "Assistente G-LAB" -RestorePointType "MODIFY_SETTINGS"
-        Write-Log "Ponto de restauracao solicitado."
+        New-SafeRestorePoint -Description "Assistente G-LAB"
     }
 }
 
@@ -989,6 +1132,8 @@ function Set-WindowsUpdateMode {
             }
         }
         $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+        $backupDir = New-BackupSession -Reason "windows-update"
+        Export-RegistryBackup -RegistryPath $path -BackupDir $backupDir
         if (-not (Test-Path -LiteralPath $path)) { New-Item -Path $path -Force | Out-Null }
         switch ($Mode) {
             "Padrao" {
@@ -1029,6 +1174,9 @@ function Invoke-AppxRemoval {
             Write-Log "Remocao AppX cancelada pelo usuario."
             return
         }
+        $backupDir = New-BackupSession -Reason "appx"
+        Export-AppxInventory -BackupDir $backupDir
+        New-SafeRestorePoint -Description "Assistente G-LAB - AppX"
         foreach ($appx in $selected) {
             $name = if ($appx.name) { $appx.name } else { $appx.Name }
             $package = if ($appx.package) { $appx.package } else { $appx.Package }
@@ -1084,7 +1232,10 @@ function Build-Ui {
                     </StackPanel>
                 </StackPanel>
                 <Border DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="18" Padding="14,7">
-                    <TextBlock x:Name="StatusText" Foreground="#BFDBFE"/>
+                    <StackPanel Width="230">
+                        <TextBlock x:Name="StatusText" Foreground="#BFDBFE" TextTrimming="CharacterEllipsis"/>
+                        <ProgressBar x:Name="ProgressBar" Height="4" Margin="0,6,0,0" Visibility="Collapsed" Foreground="#22D3EE" Background="#1E293B"/>
+                    </StackPanel>
                 </Border>
             </DockPanel>
         </Border>
@@ -1191,6 +1342,7 @@ $script:AppsPanel = $window.FindName("AppsPanel")
 $script:LogBox = $window.FindName("LogBox")
 $script:SelectedCountText = $window.FindName("SelectedCountText")
 $script:StatusText = $window.FindName("StatusText")
+$script:ProgressBar = $window.FindName("ProgressBar")
 $adminText = $window.FindName("AdminText")
 
 $categories = @([pscustomobject]@{ Label = "Todos"; Value = "All" }) + (($script:Catalog | Select-Object -ExpandProperty category -Unique | Sort-Object) | ForEach-Object {
