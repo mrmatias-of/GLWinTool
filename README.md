@@ -185,7 +185,7 @@ O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 | Ajustes Windows | Mais ajustes seguros, deteccao de estado refinada e reversoes adicionais | Em andamento |
 | AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
 | Reparos | Windows Update, rede, horario/NTP e relatorio de saude | Em andamento |
-| Windows 11 Creator | ISO, USB, AutoUnattend, drivers e ajustes offline | Planejado |
+| Windows 11 Creator | Download oficial, preparacao inicial, USB, AutoUnattend, drivers e ajustes offline | Iniciado |
 | Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
 
 ## Desenvolvimento

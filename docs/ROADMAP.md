@@ -53,7 +53,9 @@ Este documento organiza a evolucao do Assistente G-LAB em frentes praticas de pr
 
 ## 6. Windows 11 Creator
 
-- Abrir fontes oficiais de ISO.
+- Abrir fontes oficiais de ISO. Status: implementado.
+- Abrir Gerenciamento de Disco para conferencia manual. Status: implementado.
+- Abrir pasta Downloads para localizar ISO/ferramentas. Status: implementado.
 - Preparar fluxo de criacao de midia USB.
 - Gerar AutoUnattend.
 - Injetar drivers em imagem offline.

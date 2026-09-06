@@ -1216,11 +1216,17 @@ function Show-Win11View {
     Set-ActiveTab -TabName "Win11Tab"
     Update-SidebarForView
     Clear-MainPanel
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows 11 Creator" -Subtitle "Area para preparar ISO/USB do Windows 11. Por seguranca, a primeira versao abre a fonte oficial.")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "Baixar Windows 11" -Body "Abre a pagina oficial da Microsoft para ISO, assistente de instalacao e media creation tool." -Icon "11" -Accent "#2563EB")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "AutoUnattend" -Body "Planejado: gerar arquivo de instalacao automatizada em etapa dedicada." -Icon "AU" -Accent "#7C3AED")) | Out-Null
-    $script:AppsPanel.Children.Add((New-InfoCard -Title "Drivers e debloat offline" -Body "Planejado: inserir drivers e aplicar ajustes em imagem offline." -Icon "ISO" -Accent "#0F766E")) | Out-Null
-    Write-Status "Windows 11" "Criador preparado"
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Preparar Windows 11" -Subtitle "Comece pelas fontes oficiais. A criacao de pendrive sera adicionada com selecao segura de disco.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
+        [pscustomobject]@{ Label = "Download oficial"; Primary = $true; Action = { Open-Windows11Creator } },
+        [pscustomobject]@{ Label = "Gerenciamento de disco"; Primary = $false; Action = { Open-DiskManagement } },
+        [pscustomobject]@{ Label = "Pasta Downloads"; Primary = $false; Action = { Open-DownloadsFolder } }
+    ))) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "ISO oficial" -Body "Baixe a imagem ou a ferramenta da Microsoft antes de preparar a midia." -Icon "ISO" -Accent "#2563EB")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Pendrive" -Body "Use um dispositivo dedicado. A gravacao apaga dados e tera confirmacao propria." -Icon "USB" -Accent "#F59E0B")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "Drivers" -Body "Separe drivers de rede, chipset e armazenamento antes da instalacao." -Icon "DR" -Accent "#0F766E")) | Out-Null
+    $script:AppsPanel.Children.Add((New-InfoCard -Title "AutoUnattend" -Body "Proxima etapa: gerar arquivo de instalacao automatizada." -Icon "AU" -Accent "#7C3AED")) | Out-Null
+    Write-Status "Windows 11" "Preparacao inicial disponivel"
 }
 
 function Invoke-WingetForSelection {
@@ -1612,6 +1618,25 @@ function Open-Windows11Creator {
     Invoke-SafeUiAction -Name "Windows 11 Creator" -Action {
         Write-Log "Abrindo download oficial do Windows 11. Criador de ISO/USB avancado sera implementado em etapa dedicada."
         Start-Process "https://www.microsoft.com/software-download/windows11"
+    }
+}
+
+function Open-DiskManagement {
+    Invoke-SafeUiAction -Name "Abrir gerenciamento de disco" -Action {
+        Start-Process "diskmgmt.msc"
+        Write-Log "Gerenciamento de Disco aberto."
+    }
+}
+
+function Open-DownloadsFolder {
+    Invoke-SafeUiAction -Name "Abrir Downloads" -Action {
+        $downloads = Join-Path $env:USERPROFILE "Downloads"
+        if (Test-Path -LiteralPath $downloads) {
+            Start-Process explorer.exe $downloads
+            Write-Log "Pasta Downloads aberta."
+        } else {
+            Write-Log "Pasta Downloads nao encontrada."
+        }
     }
 }
 
