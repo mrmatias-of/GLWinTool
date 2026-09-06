@@ -1113,19 +1113,26 @@ function Show-ConfigView {
     $osText = if ($os) { "$($os.Caption) build $($os.BuildNumber)" } else { "Nao foi possivel ler a versao do Windows." }
     $disk = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction SilentlyContinue
     $diskText = if ($disk -and $disk.Size) { "Livre em C: {0:N1} GB de {1:N1} GB" -f ($disk.FreeSpace / 1GB), ($disk.Size / 1GB) } else { "Disco principal nao identificado." }
-    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Configurar e manter" -Subtitle "Acoes rapidas inspiradas no WinUtil, com confirmacao nos itens sensiveis.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Antes de mexer" -Subtitle "Use estas acoes para criar uma trilha de recuperacao antes de ajustes maiores.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Criar ponto de restauracao" -Body "Recomendado antes de ajustes maiores no Windows." -ButtonText "Criar agora" -Icon "PR" -Accent "#16A34A" -ClickAction { New-GLabRestorePoint })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Abrir backups" -Body "Mostra os backups e inventarios salvos pelo Assistente." -ButtonText "Abrir pasta" -Icon "BK" -Accent "#2563EB" -ClickAction { Open-BackupFolder })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Pasta do assistente" -Body "Abre a copia local em execucao para conferencia tecnica." -ButtonText "Abrir pasta" -Icon "PA" -Accent "#64748B" -ClickAction { Open-AppFolder })) | Out-Null
+
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Corrigir problemas" -Subtitle "Rotinas de manutencao para quando o Windows esta lento, instavel ou com falhas.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Limpar arquivos temporarios" -Body "Remove sobras em pastas temporarias do usuario e do sistema." -ButtonText "Limpar" -Icon "LT" -Accent "#F59E0B" -ClickAction { Invoke-TempCleanup })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar imagem do Windows" -Body "Executa DISM e SFC. Pode demorar alguns minutos." -ButtonText "Reparar" -Icon "SF" -Accent "#7C3AED" -ClickAction { Invoke-SystemRepair })) | Out-Null
-    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar rede" -Body "Limpa DNS, renova IP e redefine Winsock/IP com backup previo." -ButtonText "Reparar rede" -Icon "RD" -Accent "#0284C7" -ClickAction { Invoke-NetworkRepair })) | Out-Null
-    $script:AppsPanel.Children.Add((New-ActionCard -Title "Corrigir horario" -Body "Ativa o servico de tempo do Windows e solicita sincronizacao NTP." -ButtonText "Sincronizar" -Icon "HR" -Accent "#4F46E5" -ClickAction { Invoke-TimeRepair })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Reiniciar Explorer" -Body "Aplica ajustes visuais sem reiniciar o computador." -ButtonText "Reiniciar" -Icon "EX" -Accent "#0EA5E9" -ClickAction { Restart-ExplorerShell })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Relatorio de saude" -Body "Mostra versao do Windows, memoria, discos, servicos e instalador." -ButtonText "Gerar relatorio" -Icon "RS" -Accent "#0F766E" -ClickAction { Show-SystemHealthReport })) | Out-Null
+
+    $script:AppsPanel.Children.Add((New-SectionHeader -Title "Internet e horario" -Subtitle "Acoes comuns para problemas de rede, DNS e relogio fora de sincronia.")) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Reparar rede" -Body "Limpa DNS, renova IP e redefine Winsock/IP com backup previo." -ButtonText "Reparar rede" -Icon "RD" -Accent "#0284C7" -ClickAction { Invoke-NetworkRepair })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Corrigir horario" -Body "Ativa o servico de tempo do Windows e solicita sincronizacao NTP." -ButtonText "Sincronizar" -Icon "HR" -Accent "#4F46E5" -ClickAction { Invoke-TimeRepair })) | Out-Null
 
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows Update" -Subtitle "Escolha o comportamento das atualizacoes automaticas por politica local.")) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Padrao do Windows" -Body "Remove politicas locais criadas pelo assistente." -ButtonText "Restaurar padrao" -Icon "UP" -Accent "#2563EB" -ClickAction { Set-WindowsUpdateMode -Mode "Padrao" })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Baixar e avisar" -Body "Baixa atualizacoes e avisa antes da instalacao." -ButtonText "Aplicar modo aviso" -Icon "AV" -Accent "#0891B2" -ClickAction { Set-WindowsUpdateMode -Mode "Seguranca" })) | Out-Null
     $script:AppsPanel.Children.Add((New-ActionCard -Title "Desativar automaticas" -Body "Opcao avancada. Exige confirmacao antes de aplicar." -ButtonText "Desativar" -Icon "!" -Accent "#DC2626" -ClickAction { Set-WindowsUpdateMode -Mode "Desativar" })) | Out-Null
+    $script:AppsPanel.Children.Add((New-ActionCard -Title "Abrir configuracoes" -Body "Abre a tela oficial do Windows Update." -ButtonText "Abrir Windows" -Icon "WU" -Accent "#0EA5E9" -ClickAction { Open-WindowsUpdateSettings })) | Out-Null
 
     $script:AppsPanel.Children.Add((New-SectionHeader -Title "Diagnostico do ambiente" -Subtitle "Leitura local do estado usado pelo Assistente G-LAB.")) | Out-Null
     $script:AppsPanel.Children.Add((New-InfoCard -Title "Windows" -Body $osText -Icon "OS" -Accent "#0EA5E9")) | Out-Null
@@ -1543,6 +1550,28 @@ function Set-WindowsUpdateMode {
     }
 }
 
+function Open-BackupFolder {
+    Invoke-SafeUiAction -Name "Abrir backups" -Action {
+        New-Item -ItemType Directory -Path $script:BackupRoot -Force | Out-Null
+        Start-Process explorer.exe $script:BackupRoot
+        Write-Log "Pasta de backups aberta."
+    }
+}
+
+function Open-AppFolder {
+    Invoke-SafeUiAction -Name "Abrir pasta do app" -Action {
+        Start-Process explorer.exe $script:Root
+        Write-Log "Pasta local do Assistente G-LAB aberta."
+    }
+}
+
+function Open-WindowsUpdateSettings {
+    Invoke-SafeUiAction -Name "Abrir Windows Update" -Action {
+        Start-Process "ms-settings:windowsupdate"
+        Write-Log "Configuracoes do Windows Update abertas."
+    }
+}
+
 function Set-AppxSelection {
     param([object]$Appx, [bool]$Selected)
     if (-not $Appx) { return }
@@ -1677,6 +1706,7 @@ function Build-Ui {
                     <TextBlock Text="Selecao e sistema" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <Button x:Name="ClearButton" Content="Limpar selecao" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RestorePointButton" Content="Criar ponto restauracao" Margin="0,0,0,5" Height="29"/>
+                    <Button x:Name="BackupsButton" Content="Abrir backups" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="CleanupButton" Content="Limpar temporarios" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="RepairButton" Content="Reparar Windows" Margin="0,0,0,5" Height="29"/>
                     <Button x:Name="NetworkRepairButton" Content="Reparar rede" Margin="0,0,0,5" Height="29"/>
@@ -1796,6 +1826,7 @@ $window.FindName("ApplyDnsButton").Add_Click({
     }
 })
 $window.FindName("RestorePointButton").Add_Click({ New-GLabRestorePoint })
+$window.FindName("BackupsButton").Add_Click({ Open-BackupFolder })
 $window.FindName("CleanupButton").Add_Click({ Invoke-TempCleanup })
 $window.FindName("RepairButton").Add_Click({ Invoke-SystemRepair })
 $window.FindName("NetworkRepairButton").Add_Click({ Invoke-NetworkRepair })

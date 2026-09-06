@@ -23,7 +23,8 @@
   <a href="#inicio-rapido">Inicio rapido</a> •
   <a href="#modulos">Modulos</a> •
   <a href="#seguranca-operacional">Seguranca</a> •
-  <a href="#roadmap">Roadmap</a>
+  <a href="#roadmap">Roadmap</a> •
+  <a href="docs/ROADMAP.md">Plano completo</a>
 </p>
 
 ---
@@ -78,6 +79,8 @@ Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba in
 ### Configurar
 
 Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer e modos de Windows Update.
+
+Tambem oferece atalhos para abrir backups, a pasta local do assistente e configuracoes oficiais do Windows.
 
 ### Atualizar
 
@@ -173,6 +176,8 @@ powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
 ```
 
 ## Roadmap
+
+O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Fase | Objetivo | Status |
 | --- | --- | --- |
