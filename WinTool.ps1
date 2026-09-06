@@ -1409,7 +1409,12 @@ function Invoke-WingetForSelection {
         }
 
         Update-WingetSources -WingetPath $wingetCommand.Source
+        $backupDir = New-BackupSession -Reason "apps-$Action"
+        $apps | Select-Object name, id, category, description |
+            ConvertTo-Json -Depth 4 |
+            Set-Content -LiteralPath (Join-Path $backupDir "fila-apps.json") -Encoding UTF8
         Write-Log "Aplicativos na fila: $($apps.Count)."
+        Write-Log "Fila salva em: $backupDir"
 
         foreach ($app in $apps) {
             Write-Log "${actionLabel}: $($app.name)"
