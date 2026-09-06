@@ -1592,7 +1592,7 @@ function Show-StartupUpdateScreen {
             $button.Tag = $manifest
             $button.Visibility = "Visible"
         } else {
-            $status.Text = "Sem atualizacao disponivel. Iniciando em 3 segundos..."
+            $status.Text = "Sem atualizacao disponivel."
             $timer = [System.Windows.Threading.DispatcherTimer]::new()
             $timer.Interval = [TimeSpan]::FromSeconds(3)
             $timer.Add_Tick({
