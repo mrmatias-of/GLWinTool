@@ -18,6 +18,7 @@ $script:IsBusy = $false
 $script:SelectedAppIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedTweakNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedAppxNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+$script:TweakCheckboxes = [System.Collections.ArrayList]::new()
 $script:DnsPresets = @(
     [pscustomobject]@{ Name = "Padrao do provedor"; Primary = ""; Secondary = ""; Description = "Volta para DNS automatico por DHCP." },
     [pscustomobject]@{ Name = "Cloudflare"; Primary = "1.1.1.1"; Secondary = "1.0.0.1"; Description = "DNS rapido com foco em privacidade." },
@@ -531,10 +532,18 @@ function Set-TweakSelection {
 
 function Clear-TweakSelection {
     $script:SelectedTweakNames.Clear()
-    foreach ($child in $script:AppsPanel.Children) {
-        $checkbox = $child.Tag
-        if ($checkbox -and $checkbox -is [System.Windows.Controls.CheckBox]) {
-            $checkbox.IsChecked = $false
+    foreach ($checkbox in $script:TweakCheckboxes) {
+        if ($checkbox) { $checkbox.IsChecked = $false }
+    }
+    Update-SelectedCount
+}
+
+function Refresh-TweakCheckboxStates {
+    foreach ($checkbox in $script:TweakCheckboxes) {
+        if (-not $checkbox) { continue }
+        $tweak = $checkbox.Tag
+        if ($tweak) {
+            $checkbox.IsChecked = $script:SelectedTweakNames.Contains($tweak.name)
         }
     }
     Update-SelectedCount
@@ -545,7 +554,7 @@ function Select-SafeTweaks {
     foreach ($tweak in (Get-AllTweaks | Where-Object { $_.safe })) {
         [void]$script:SelectedTweakNames.Add($tweak.name)
     }
-    Show-TweaksView
+    Refresh-TweakCheckboxStates
     Write-Log "Ajustes seguros selecionados: $($script:SelectedTweakNames.Count)."
 }
 
@@ -591,7 +600,7 @@ function Select-TweakPreset {
         $tweak = Get-AllTweaks | Where-Object { $_.safe -and $_.name -eq $name } | Select-Object -First 1
         if ($tweak) { [void]$script:SelectedTweakNames.Add($name) }
     }
-    Show-TweaksView
+    Refresh-TweakCheckboxStates
     Write-Log "Preset de ajustes aplicado: $Preset ($($script:SelectedTweakNames.Count) ajustes)."
 }
 
@@ -842,6 +851,7 @@ function New-TweakCard {
     $checkbox.ToolTip = "$($Tweak.description)`nEscopo: $($Tweak.scope)"
     $checkbox.Add_Checked({ Set-TweakSelection -Tweak $this.Tag -Selected $true })
     $checkbox.Add_Unchecked({ Set-TweakSelection -Tweak $this.Tag -Selected $false })
+    $script:TweakCheckboxes.Add($checkbox) | Out-Null
     return $checkbox
 }
 
@@ -1077,6 +1087,7 @@ function Show-TweaksView {
     Set-ActiveTab -TabName "TweaksTab"
     Update-SidebarForView
     Clear-MainPanel
+    $script:TweakCheckboxes.Clear()
 
     $script:AppsPanel.Children.Add((New-ActionBar -Actions @(
         [pscustomobject]@{ Label = "Minimo"; Primary = $false; Action = { Select-TweakPreset -Preset "Minimo" } },
@@ -1101,8 +1112,6 @@ function Show-TweaksView {
 
     $leftPanel = [System.Windows.Controls.StackPanel]::new()
     $rightPanel = [System.Windows.Controls.StackPanel]::new()
-
-    $script:AppsPanel.Children.Add((New-ActionCard -Title "Verificar ajustes" -Body "Mostra no log quais ajustes de registro ja estao aplicados." -ButtonText "Verificar agora" -Icon "VA" -Accent "#0EA5E9" -ClickAction { Show-TweakStatusReport })) | Out-Null
 
     $leftBorder = [System.Windows.Controls.Border]::new()
     $leftBorder.Padding = "10"
@@ -1455,7 +1464,7 @@ function Invoke-SafeTweaks {
     Invoke-SafeUiAction -Name "tweaks seguros" -Action {
         $selectedTweaks = @((Get-AllTweaks) | Where-Object { $_.safe -and $script:SelectedTweakNames.Contains($_.name) })
         if ($selectedTweaks.Count -eq 0) {
-            Write-Log "Nenhum ajuste seguro selecionado."
+            Write-Log "Nenhum ajuste marcado. Escolha Minimo, Padrao, Avancado ou marque ajustes manualmente."
             return
         }
 
