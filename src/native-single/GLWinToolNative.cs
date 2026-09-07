@@ -8,6 +8,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Web.Script.Serialization;
+using System.IO.Compression;
 using System.Windows.Forms;
 
 namespace GLWinToolNative
@@ -24,8 +25,8 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        private const string AppVersion = "0.5.2";
-        private const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
+        public const string AppVersion = "0.5.3";
+        public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
         private readonly ComboBox categoryBox = new ComboBox();
@@ -48,7 +49,6 @@ namespace GLWinToolNative
             BuildLayout();
             RefreshCards();
             Log("GL WinTool nativo iniciado. Catalogo carregado: " + catalog.Count + " apps.");
-            Shown += (s, e) => CheckForUpdate();
         }
 
         private static List<AppItem> LoadCatalog()
@@ -210,32 +210,137 @@ namespace GLWinToolNative
             }
         }
 
-        private void CheckForUpdate()
+        private void Log(string text)
+        {
+            logBox.AppendText("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + text + Environment.NewLine);
+        }
+    }
+
+    public class UpdateManifest
+    {
+        public string version { get; set; }
+        public string zipUrl { get; set; }
+        public string exeUrl { get; set; }
+        public string notes { get; set; }
+    }
+
+    public class UpdateForm : Form
+    {
+        private readonly Label status = new Label();
+        private readonly Button updateButton = new Button();
+        private readonly ProgressBar progress = new ProgressBar();
+        private UpdateManifest manifest;
+
+        public bool ContinueToApp { get; private set; }
+
+        public UpdateForm()
+        {
+            Text = "GL WinTool";
+            Width = 560;
+            Height = 360;
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            BackColor = Color.FromArgb(3, 7, 18);
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+
+            var icon = new PictureBox { Width = 82, Height = 82, Left = 239, Top = 34, SizeMode = PictureBoxSizeMode.StretchImage, Image = Icon.ToBitmap() };
+            Controls.Add(icon);
+            Controls.Add(new Label { Text = "GL WinTool", ForeColor = Color.White, Font = new Font("Segoe UI", 24, FontStyle.Bold), AutoSize = true, Left = 198, Top = 124 });
+            status.Text = "Buscando atualizacao...";
+            status.ForeColor = Color.FromArgb(147, 197, 253);
+            status.TextAlign = ContentAlignment.MiddleCenter;
+            status.Left = 36;
+            status.Top = 172;
+            status.Width = 488;
+            status.Height = 42;
+            Controls.Add(status);
+
+            progress.Left = 42;
+            progress.Top = 226;
+            progress.Width = 460;
+            progress.Height = 8;
+            progress.Style = ProgressBarStyle.Marquee;
+            Controls.Add(progress);
+
+            updateButton.Text = "Atualizar";
+            updateButton.Left = 182;
+            updateButton.Top = 254;
+            updateButton.Width = 190;
+            updateButton.Height = 38;
+            updateButton.Visible = false;
+            updateButton.Click += (s, e) => ApplyUpdate();
+            Controls.Add(updateButton);
+
+            Shown += (s, e) => CheckUpdate();
+        }
+
+        private void CheckUpdate()
         {
             try
             {
                 using (var web = new WebClient())
                 {
-                    var json = web.DownloadString(UpdateManifestUrl);
-                    var data = new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(json);
-                    if (data == null || !data.ContainsKey("version")) return;
-                    var latest = Convert.ToString(data["version"]);
-                    if (String.Equals(latest, AppVersion, StringComparison.OrdinalIgnoreCase)) return;
-
-                    var msg = "Atualizacao disponivel: " + latest + Environment.NewLine +
-                              "Este app sempre atualiza direto para a ultima versao publicada.";
-                    MessageBox.Show(this, msg, "GL WinTool", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    var json = web.DownloadString(MainForm.UpdateManifestUrl + "?cache=" + DateTime.UtcNow.Ticks);
+                    manifest = new JavaScriptSerializer().Deserialize<UpdateManifest>(json);
                 }
+                progress.Style = ProgressBarStyle.Continuous;
+                if (manifest != null && !String.Equals(manifest.version, MainForm.AppVersion, StringComparison.OrdinalIgnoreCase))
+                {
+                    status.Text = "Atualizacao disponivel: " + manifest.version + ". Atualize para continuar.";
+                    updateButton.Visible = true;
+                    return;
+                }
+                status.Text = "Sem atualizacao disponivel.";
+                var timer = new Timer { Interval = 1000 };
+                timer.Tick += (s, e) => { timer.Stop(); ContinueToApp = true; Close(); };
+                timer.Start();
             }
             catch
             {
-                Log("Nao foi possivel checar atualizacao agora.");
+                status.Text = "Nao foi possivel checar atualizacao. Iniciando offline.";
+                var timer = new Timer { Interval = 1200 };
+                timer.Tick += (s, e) => { timer.Stop(); ContinueToApp = true; Close(); };
+                timer.Start();
             }
         }
 
-        private void Log(string text)
+        private void ApplyUpdate()
         {
-            logBox.AppendText("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + text + Environment.NewLine);
+            if (manifest == null || String.IsNullOrWhiteSpace(manifest.zipUrl)) return;
+            updateButton.Enabled = false;
+            status.Text = "Baixando atualizacao...";
+            progress.Style = ProgressBarStyle.Marquee;
+            try
+            {
+                var tempRoot = Path.Combine(Path.GetTempPath(), "GL-WinTool-native-" + Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(tempRoot);
+                var zip = Path.Combine(tempRoot, "GL-WinTool-Native.zip");
+                using (var web = new WebClient()) web.DownloadFile(manifest.zipUrl, zip);
+                ZipFile.ExtractToDirectory(zip, tempRoot);
+                var newExe = Directory.GetFiles(tempRoot, "GL-WinTool.exe", SearchOption.AllDirectories).FirstOrDefault();
+                if (String.IsNullOrWhiteSpace(newExe)) throw new Exception("Executavel nativo nao encontrado no pacote.");
+
+                var currentExe = Application.ExecutablePath;
+                var updater = Path.Combine(tempRoot, "Apply-GL-WinTool-Native-Update.cmd");
+                File.WriteAllText(updater,
+                    "@echo off\r\n" +
+                    "timeout /t 1 /nobreak >nul\r\n" +
+                    ":wait\r\n" +
+                    "copy /y \"" + newExe + "\" \"" + currentExe + "\" >nul 2>nul\r\n" +
+                    "if errorlevel 1 (timeout /t 1 /nobreak >nul & goto wait)\r\n" +
+                    "start \"\" \"" + currentExe + "\"\r\n",
+                    Encoding.ASCII);
+                Process.Start(new ProcessStartInfo(updater) { CreateNoWindow = true, UseShellExecute = false, WindowStyle = ProcessWindowStyle.Hidden });
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                progress.Style = ProgressBarStyle.Continuous;
+                status.Text = "Falha ao atualizar: " + ex.Message;
+                updateButton.Enabled = true;
+            }
         }
     }
 
@@ -246,8 +351,14 @@ namespace GLWinToolNative
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            using (var update = new UpdateForm())
+            {
+                update.ShowDialog();
+                if (!update.ContinueToApp) return;
+            }
             Application.Run(new MainForm());
         }
     }
 }
+
 

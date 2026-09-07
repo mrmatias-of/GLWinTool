@@ -24,6 +24,8 @@ $outExe = Join-Path $outDir "GL-WinTool.exe"
     /reference:System.Drawing.dll `
     /reference:System.Windows.Forms.dll `
     /reference:System.Web.Extensions.dll `
+    /reference:System.IO.Compression.dll `
+    /reference:System.IO.Compression.FileSystem.dll `
     /resource:"$(Join-Path $root 'config\apps.json'),config.apps.json" `
     /out:"$outExe" `
     "$(Join-Path $root 'src\native-single\GLWinToolNative.cs')"
