@@ -1,9 +1,9 @@
 {
-  "version": "0.5.19",
+  "version": "0.5.20",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/GLWinTool/releases",
   "zipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "exeUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.exe",
-  "notes": "Atualizacao corretiva: checagem obrigatoria reforcada tambem dentro da janela principal."
+  "notes": "Correcao visual do topo: banner real aplicado no aplicativo nativo, build oficial limpo e pacote single-exe atualizado."
 }

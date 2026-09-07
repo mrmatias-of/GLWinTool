@@ -11,6 +11,14 @@ using System.Web.Script.Serialization;
 using System.IO.Compression;
 using System.Windows.Forms;
 
+[assembly: AssemblyTitle("GL WinTool")]
+[assembly: AssemblyDescription("Central Windows para instalacao, ajustes, AppX e manutencao tecnica")]
+[assembly: AssemblyCompany("G-LAB Cursos")]
+[assembly: AssemblyProduct("GL WinTool")]
+[assembly: AssemblyVersion("0.5.20.0")]
+[assembly: AssemblyFileVersion("0.5.20.0")]
+[assembly: AssemblyInformationalVersion("0.5.20")]
+
 namespace GLWinToolNative
 {
     public class AppItem
@@ -25,7 +33,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.19";
+        public const string AppVersion = "0.5.20";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json";
         private const string DefaultAdminPassword = "glabadmin";
         private readonly List<AppItem> catalog;
@@ -54,7 +62,6 @@ namespace GLWinToolNative
             BuildLayout();
             RefreshCards();
             Log("GL WinTool nativo iniciado. Catalogo carregado: " + catalog.Count + " apps.");
-            Shown += (s, e) => BeginInvoke(new Action(EnforceUpdateFromMainWindow));
         }
 
         private void EnforceUpdateFromMainWindow()
@@ -104,46 +111,43 @@ namespace GLWinToolNative
             using (var stream = asm.GetManifestResourceStream(name))
             {
                 if (stream == null) return null;
-                return Image.FromStream(stream);
+                using (var original = Image.FromStream(stream)) return new Bitmap(original);
             }
         }
 
         private void BuildLayout()
         {
             var root = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, ColumnCount = 1, Padding = new Padding(10) };
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 156));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 152));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 120));
             Controls.Add(root);
 
-            var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(18), Margin = new Padding(0, 0, 0, 8) };
+            var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(0), Margin = new Padding(0, 0, 0, 8) };
             banner.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                 e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                e.Graphics.Clear(Color.FromArgb(3, 7, 18));
                 if (headerBanner != null)
                 {
-                    e.Graphics.DrawImage(headerBanner, banner.ClientRectangle);
-                    using (var leftShade = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(0, 0, 470, banner.Height), Color.FromArgb(245, 3, 7, 18), Color.FromArgb(120, 3, 7, 18), 0F))
-                        e.Graphics.FillRectangle(leftShade, new Rectangle(0, 0, 470, banner.Height));
-                    using (var glow = new Pen(Color.FromArgb(120, 34, 211, 238), 2F))
-                        e.Graphics.DrawLine(glow, 0, banner.Height - 2, banner.Width, banner.Height - 2);
+                    var target = GetCoverRectangle(headerBanner.Size, banner.ClientRectangle);
+                    e.Graphics.DrawImage(headerBanner, target);
+                    using (var fade = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(0, 3, 7, 18), Color.FromArgb(110, 3, 7, 18), 0F))
+                        e.Graphics.FillRectangle(fade, banner.ClientRectangle);
                 }
                 else
                 {
                     using (var b = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(3, 7, 18), Color.FromArgb(14, 116, 144), 15F))
                         e.Graphics.FillRectangle(b, banner.ClientRectangle);
                 }
+                using (var glow = new Pen(Color.FromArgb(130, 34, 211, 238), 2F))
+                    e.Graphics.DrawLine(glow, 0, banner.Height - 2, banner.Width, banner.Height - 2);
             };
             root.Controls.Add(banner, 0, 0);
 
-            var icon = new PictureBox { Width = 86, Height = 86, Left = 22, Top = 34, SizeMode = PictureBoxSizeMode.StretchImage, Image = Icon.ToBitmap(), BackColor = Color.Transparent };
-            banner.Controls.Add(icon);
-            banner.Controls.Add(new Label { Text = "GL WinTool", ForeColor = Color.White, Font = new Font("Segoe UI", 30, FontStyle.Bold), AutoSize = true, Left = 126, Top = 34, BackColor = Color.Transparent });
-            banner.Controls.Add(new Label { Text = "Instalacao, ajustes, AppX e manutencao Windows", ForeColor = Color.FromArgb(219, 234, 254), Font = new Font("Segoe UI", 10, FontStyle.Regular), AutoSize = true, Left = 130, Top = 82, BackColor = Color.Transparent });
-            banner.Controls.Add(new Label { Text = "Versao " + AppVersion + " - pt-BR - WinGet e backups preventivos", ForeColor = Color.FromArgb(125, 211, 252), Font = new Font("Segoe UI", 9, FontStyle.Regular), AutoSize = true, Left = 130, Top = 106, BackColor = Color.Transparent });
             statusLabel.Text = "Instalar - " + catalog.Count + " apps visiveis";
             statusLabel.ForeColor = Color.FromArgb(224, 242, 254);
             statusLabel.BackColor = Color.FromArgb(6, 18, 38);
@@ -269,6 +273,15 @@ namespace GLWinToolNative
             path.AddArc(bounds.Left, bounds.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
             return path;
+        }
+
+        private static Rectangle GetCoverRectangle(Size imageSize, Rectangle bounds)
+        {
+            if (imageSize.Width <= 0 || imageSize.Height <= 0 || bounds.Width <= 0 || bounds.Height <= 0) return bounds;
+            var scale = Math.Max((float)bounds.Width / imageSize.Width, (float)bounds.Height / imageSize.Height);
+            var width = (int)Math.Ceiling(imageSize.Width * scale);
+            var height = (int)Math.Ceiling(imageSize.Height * scale);
+            return new Rectangle(bounds.X + (bounds.Width - width) / 2, bounds.Y + (bounds.Height - height) / 2, width, height);
         }
 
         private IEnumerable<AppItem> SelectedApps() { return catalog.Where(a => a.selected); }
@@ -539,17 +552,20 @@ namespace GLWinToolNative
             Shown += (s, e) => CheckUpdate();
         }
 
-        private void CheckUpdate()
+        private async void CheckUpdate()
         {
             try
             {
                 using (var web = new WebClient())
                 {
-                    var json = web.DownloadString(MainForm.UpdateManifestUrl + "?cache=" + DateTime.UtcNow.Ticks);
+                    web.Encoding = Encoding.UTF8;
+                    var json = await web.DownloadStringTaskAsync(MainForm.UpdateManifestUrl + "?cache=" + DateTime.UtcNow.Ticks);
                     manifest = new JavaScriptSerializer().Deserialize<UpdateManifest>(json);
                 }
                 progress.Style = ProgressBarStyle.Continuous;
-                if (manifest != null && !String.Equals(manifest.version, MainForm.AppVersion, StringComparison.OrdinalIgnoreCase))
+                Version remoteVersion;
+                if (manifest == null || !Version.TryParse(manifest.version, out remoteVersion)) throw new Exception("Versao publicada invalida.");
+                if (remoteVersion > new Version(MainForm.AppVersion))
                 {
                     subtitle.Text = "Atualizacao obrigatoria disponivel";
                     status.Text = "Atualizacao disponivel: " + manifest.version + ". Atualize para continuar.";
@@ -572,7 +588,7 @@ namespace GLWinToolNative
             }
         }
 
-        private void ApplyUpdate()
+        private async void ApplyUpdate()
         {
             if (manifest == null || String.IsNullOrWhiteSpace(manifest.zipUrl)) return;
             updateButton.Enabled = false;
@@ -585,7 +601,10 @@ namespace GLWinToolNative
                 var tempRoot = Path.Combine(Path.GetTempPath(), "GL-WinTool-native-" + Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(tempRoot);
                 var zip = Path.Combine(tempRoot, "GL-WinTool-Native.zip");
-                using (var web = new WebClient()) web.DownloadFile(manifest.zipUrl, zip);
+                using (var web = new WebClient()) {
+                    web.DownloadProgressChanged += (s, e) => { progress.Style = ProgressBarStyle.Continuous; progress.Value = e.ProgressPercentage; status.Text = "Baixando atualizacao: " + e.ProgressPercentage + "%"; };
+                    await web.DownloadFileTaskAsync(new Uri(manifest.zipUrl), zip);
+                }
                 status.Text = "Validando arquivos e preparando reinicio...";
                 ZipFile.ExtractToDirectory(zip, tempRoot);
                 var newExe = Directory.GetFiles(tempRoot, "GL-WinTool.exe", SearchOption.AllDirectories).FirstOrDefault();
