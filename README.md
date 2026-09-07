@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.5.17</code>
+  Versao atual: <code>0.5.18</code>
 </p>
 
 <p align="center">

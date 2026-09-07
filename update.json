@@ -1,9 +1,9 @@
 {
-  "version": "0.5.17",
+  "version": "0.5.18",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/GLWinTool/releases",
   "zipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
-  "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip",
+  "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "exeUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.exe",
-  "notes": "Migração obrigatória do executável legado para o app nativo e confirmações mais estáveis sem MessageBox WPF."
+  "notes": "Atualizacao corretiva: todos os fluxos antigos passam a migrar diretamente para o executavel nativo."
 }

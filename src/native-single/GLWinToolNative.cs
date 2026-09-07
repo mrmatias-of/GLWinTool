@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.17";
+        public const string AppVersion = "0.5.18";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json";
         private const string DefaultAdminPassword = "glabadmin";
         private readonly List<AppItem> catalog;
