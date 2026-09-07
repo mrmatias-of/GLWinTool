@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.9"
+$script:BundledVersion = "0.5.10"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"

@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.9";
+        public const string AppVersion = "0.5.10";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -33,7 +33,7 @@ namespace GLWinToolNative
         private readonly TextBox searchBox = new TextBox();
         private readonly TextBox logBox = new TextBox();
         private readonly Label statusLabel = new Label();
-        private readonly Image headerBanner = LoadEmbeddedImage("assets.readme.gl-win-tool-banner.png");
+        private readonly Image headerBanner = LoadEmbeddedImage("assets.app-header-banner.png");
 
         public MainForm()
         {
@@ -89,22 +89,9 @@ namespace GLWinToolNative
                 e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                 if (headerBanner != null)
                 {
-                    using (var background = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(2, 6, 23), Color.FromArgb(8, 47, 73), 0F))
-                        e.Graphics.FillRectangle(background, banner.ClientRectangle);
-
-                    var artLeft = Math.Max(470, banner.Width - 650);
-                    var imageArea = new Rectangle(artLeft, 8, Math.Max(1, banner.Width - artLeft - 18), banner.Height - 16);
-                    var scale = Math.Min((float)imageArea.Width / headerBanner.Width, (float)imageArea.Height / headerBanner.Height);
-                    var drawWidth = (int)(headerBanner.Width * scale);
-                    var drawHeight = (int)(headerBanner.Height * scale);
-                    var drawRect = new Rectangle(imageArea.Left + (imageArea.Width - drawWidth) / 2, imageArea.Top + (imageArea.Height - drawHeight) / 2, drawWidth, drawHeight);
-                    e.Graphics.DrawImage(headerBanner, drawRect);
-
-                    var leftShade = new Rectangle(0, 0, Math.Min(banner.Width, 540), banner.Height);
-                    using (var shade = new System.Drawing.Drawing2D.LinearGradientBrush(leftShade, Color.FromArgb(252, 3, 7, 18), Color.FromArgb(170, 3, 7, 18), 0F))
-                        e.Graphics.FillRectangle(shade, leftShade);
-                    using (var fade = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(360, 0, 300, banner.Height), Color.FromArgb(180, 3, 7, 18), Color.FromArgb(0, 3, 7, 18), 0F))
-                        e.Graphics.FillRectangle(fade, new Rectangle(360, 0, 300, banner.Height));
+                    e.Graphics.DrawImage(headerBanner, banner.ClientRectangle);
+                    using (var leftShade = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(0, 0, 470, banner.Height), Color.FromArgb(245, 3, 7, 18), Color.FromArgb(120, 3, 7, 18), 0F))
+                        e.Graphics.FillRectangle(leftShade, new Rectangle(0, 0, 470, banner.Height));
                     using (var glow = new Pen(Color.FromArgb(120, 34, 211, 238), 2F))
                         e.Graphics.DrawLine(glow, 0, banner.Height - 2, banner.Width, banner.Height - 2);
                 }
@@ -128,10 +115,10 @@ namespace GLWinToolNative
             statusLabel.Width = 260;
             statusLabel.Height = 38;
             statusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            statusLabel.Left = banner.Width - 290;
-            statusLabel.Top = 58;
-            statusLabel.Resize += (s, e) => statusLabel.Left = banner.Width - 290;
-            banner.Resize += (s, e) => statusLabel.Left = banner.Width - 290;
+            statusLabel.Left = banner.Width - 300;
+            statusLabel.Top = 18;
+            statusLabel.Resize += (s, e) => statusLabel.Left = banner.Width - 300;
+            banner.Resize += (s, e) => statusLabel.Left = banner.Width - 300;
             banner.Controls.Add(statusLabel);
 
             var tabs = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, Padding = new Padding(0, 2, 0, 0) };
