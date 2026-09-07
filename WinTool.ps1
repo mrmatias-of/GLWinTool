@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.16"
+$script:BundledVersion = "0.5.17"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/GLWinTool/archive/refs/heads/main.zip"
@@ -456,8 +456,8 @@ function Confirm-GLabAction {
         [Parameter(Mandatory=$true)][string]$Message
     )
 
-    $result = [System.Windows.MessageBox]::Show($Message, $Title, [System.Windows.MessageBoxButton]::YesNo, [System.Windows.MessageBoxImage]::Warning)
-    return $result -eq [System.Windows.MessageBoxResult]::Yes
+    $result = [System.Windows.Forms.MessageBox]::Show($Message, $Title, [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
+    return $result -eq [System.Windows.Forms.DialogResult]::Yes
 }
 
 function Show-GLabInfo {
@@ -465,7 +465,7 @@ function Show-GLabInfo {
         [Parameter(Mandatory=$true)][string]$Title,
         [Parameter(Mandatory=$true)][string]$Message
     )
-    [System.Windows.MessageBox]::Show($Message, $Title, [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information) | Out-Null
+    [System.Windows.Forms.MessageBox]::Show($Message, $Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
 }
 
 function Update-WingetSources {
@@ -1710,6 +1710,11 @@ function Get-AssistenteUpdateManifest {
     }
 }
 
+function Test-LegacyExeRun {
+    $processPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    return ($processPath -and [IO.Path]::GetExtension($processPath) -ieq ".exe" -and [IO.Path]::GetFileNameWithoutExtension($processPath) -notmatch "^(powershell|pwsh)$")
+}
+
 function Save-AssistenteUpdatePackage {
     param([Parameter(Mandatory=$true)][psobject]$Manifest)
     $url = if ($Manifest.zipUrl) { "$($Manifest.zipUrl)" } elseif ($Manifest.legacyZipUrl) { "$($Manifest.legacyZipUrl)" } else { "$($Manifest.releaseUrl)" }
@@ -1893,8 +1898,13 @@ function Show-StartupUpdateScreen {
     $splash.Add_ContentRendered({
         $manifest = Get-AssistenteUpdateManifest
         $progress.IsIndeterminate = $false
-        if ($manifest -and "$($manifest.version)" -ne "$script:AppVersion") {
-            $status.Text = "Atualizacao disponivel: $($manifest.version). Baixe para continuar."
+        $shouldMigrateLegacyExe = $manifest -and (Test-LegacyExeRun) -and $manifest.zipUrl
+        if ($manifest -and (("$($manifest.version)" -ne "$script:AppVersion") -or $shouldMigrateLegacyExe)) {
+            if ($shouldMigrateLegacyExe -and "$($manifest.version)" -eq "$script:AppVersion") {
+                $status.Text = "Migracao para o app nativo disponivel. Atualize para continuar."
+            } else {
+                $status.Text = "Atualizacao disponivel: $($manifest.version). Baixe para continuar."
+            }
             $button.Tag = $manifest
             $button.Visibility = "Visible"
         } else {

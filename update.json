@@ -1,9 +1,9 @@
 {
-  "version": "0.5.16",
+  "version": "0.5.17",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/GLWinTool/releases",
   "zipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.exe",
-  "notes": "Correção de encoding no pacote legado e blindagem da janela principal para evitar erro ShowDialog nulo."
+  "notes": "Migração obrigatória do executável legado para o app nativo e confirmações mais estáveis sem MessageBox WPF."
 }
