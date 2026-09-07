@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
+    <AssemblyName>GL-WinTool</AssemblyName>
+    <RootNamespace>GLWinTool</RootNamespace>
+    <Version>0.5.0</Version>
+    <FileVersion>0.5.0.0</FileVersion>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <Authors>G-LAB Cursos</Authors>
+    <Company>G-LAB Cursos</Company>
+    <Product>GL WinTool</Product>
+    <Description>Central de instalacao, ajustes e manutencao Windows</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\..\config\**\*.*" Link="config\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\assets\**\*.*" Link="assets\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\VERSION" Link="VERSION" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\update.json" Link="update.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\assets\app-icon.ico" Link="Assets\app-icon.ico" />
+  </ItemGroup>
+</Project>

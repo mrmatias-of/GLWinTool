@@ -17,9 +17,29 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.4.6"
+$script:BundledVersion = "0.4.7"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
+$script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
+
+function Save-RemoteFileWithFallback {
+    param(
+        [Parameter(Mandatory=$true)][string[]]$Urls,
+        [Parameter(Mandatory=$true)][string]$OutFile
+    )
+
+    $errors = @()
+    foreach ($url in $Urls) {
+        if ([string]::IsNullOrWhiteSpace($url)) { continue }
+        try {
+            Invoke-WebRequest -Uri $url -OutFile $OutFile -UseBasicParsing
+            return $url
+        } catch {
+            $errors += "$url -> $($_.Exception.Message)"
+        }
+    }
+    throw "Nao foi possivel baixar os arquivos do GL WinTool. $($errors -join ' | ')"
+}
 
 function Expand-GLWinToolRuntimePackage {
     param(
@@ -73,7 +93,7 @@ function Initialize-GLWinToolRuntime {
     New-Item -ItemType Directory -Path $script:Root -Force | Out-Null
     $zipPath = Join-Path $env:TEMP ("GL-WinTool-runtime-{0}.zip" -f ([guid]::NewGuid().ToString("N")))
     try {
-        Invoke-WebRequest -Uri $script:DefaultPackageUrl -OutFile $zipPath -UseBasicParsing
+        Save-RemoteFileWithFallback -Urls @($script:DefaultPackageUrl, $script:FallbackPackageUrl) -OutFile $zipPath | Out-Null
         Expand-GLWinToolRuntimePackage -ZipPath $zipPath -TargetRoot $script:Root
     } finally {
         if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
@@ -1582,7 +1602,7 @@ function Save-AssistenteUpdatePackage {
 
     $version = if ($Manifest.version) { "$($Manifest.version)" } else { "nova" }
     $target = Join-Path $script:Root ("GL-WinTool-{0}.zip" -f $version)
-    Invoke-WebRequest -Uri $url -OutFile $target -UseBasicParsing
+    Save-RemoteFileWithFallback -Urls @($url, $script:FallbackPackageUrl) -OutFile $target | Out-Null
     Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root
     return $target
 }
@@ -2548,4 +2568,5 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
