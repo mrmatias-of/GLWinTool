@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.5.3</code>
+  Versao atual: <code>0.5.4</code>
 </p>
 
 <p align="center">
@@ -128,6 +128,7 @@ Os backups sao gravados em `backups/` dentro da copia local em execucao.
 ## Uso responsável
 
 O GL WinTool executa rotinas administrativas capazes de alterar configurações do Windows. Para ambientes profissionais, recomenda-se validar perfis e ajustes em laboratório antes da distribuição em larga escala.
+
 
 
 

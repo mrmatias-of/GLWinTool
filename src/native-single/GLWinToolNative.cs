@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.3";
+        public const string AppVersion = "0.5.4";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -121,7 +121,7 @@ namespace GLWinToolNative
             categoryBox.Left = 12; categoryBox.Top = 238; categoryBox.Width = 202; categoryBox.DropDownStyle = ComboBoxStyle.DropDownList;
             var categories = new[] { "Todos", "Windows novo" }.Concat(catalog.Select(a => a.category).Where(c => !String.IsNullOrWhiteSpace(c))).Distinct().OrderBy(c => c).ToArray();
             categoryBox.Items.AddRange(categories.Cast<object>().ToArray());
-            categoryBox.SelectedItem = "Todos";
+            categoryBox.SelectedItem = "Windows novo";
             categoryBox.SelectedIndexChanged += (s, e) => RefreshCards();
             side.Controls.Add(new Label { Text = "Categoria", Left = 12, Top = 216, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold) });
             side.Controls.Add(categoryBox);
@@ -360,5 +360,6 @@ namespace GLWinToolNative
         }
     }
 }
+
 
 

@@ -1,9 +1,9 @@
 {
-  "version": "0.5.3",
+  "version": "0.5.4",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "App nativo agora possui tela obrigatoria de atualizacao antes de abrir a interface principal."
+  "notes": "Categoria Windows novo passa a ser a tela inicial padrao."
 }
