@@ -1,8 +1,9 @@
 {
-  "version": "0.5.0",
+  "version": "0.5.1",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
-  "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
+  "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
+  "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "Primeira versao nativa single-exe, sem janela PowerShell, com catalogo embutido."
+  "notes": "Atualizacao passa a apontar para o pacote nativo single-exe."
 }

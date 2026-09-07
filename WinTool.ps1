@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.0"
+$script:BundledVersion = "0.5.1"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -58,6 +58,11 @@ function Expand-GLWinToolRuntimePackage {
             (Test-Path -LiteralPath (Join-Path $_.FullName "assets"))
         } | Select-Object -First 1
         if ($nested) { $source = $nested.FullName }
+
+        $nativeExe = Get-ChildItem -LiteralPath $source -Filter "GL-WinTool.exe" -File -Recurse | Select-Object -First 1
+        if ($nativeExe) {
+            Copy-Item -LiteralPath $nativeExe.FullName -Destination (Join-Path $TargetRoot "GL-WinTool.exe") -Force
+        }
 
         foreach ($folder in @("assets", "config")) {
             $from = Join-Path $source $folder
@@ -1608,14 +1613,17 @@ function Get-AssistenteUpdateManifest {
 
 function Save-AssistenteUpdatePackage {
     param([Parameter(Mandatory=$true)][psobject]$Manifest)
-    $url = if ($Manifest.zipUrl) { "$($Manifest.zipUrl)" } else { "$($Manifest.releaseUrl)" }
+    $url = if ($Manifest.zipUrl) { "$($Manifest.zipUrl)" } elseif ($Manifest.legacyZipUrl) { "$($Manifest.legacyZipUrl)" } else { "$($Manifest.releaseUrl)" }
     if ([string]::IsNullOrWhiteSpace($url)) {
         throw "Manifesto de atualizacao sem link de download."
     }
 
     $version = if ($Manifest.version) { "$($Manifest.version)" } else { "nova" }
     $target = Join-Path $script:Root ("GL-WinTool-{0}.zip" -f $version)
-    Save-RemoteFileWithFallback -Urls @($url, $script:FallbackPackageUrl) -OutFile $target | Out-Null
+    $fallbacks = @($url)
+    if ($Manifest.legacyZipUrl) { $fallbacks += "$($Manifest.legacyZipUrl)" }
+    $fallbacks += $script:FallbackPackageUrl
+    Save-RemoteFileWithFallback -Urls $fallbacks -OutFile $target | Out-Null
     Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root -IncludeVersion
     if ($Manifest.version) {
         Set-Content -LiteralPath (Join-Path $script:Root "VERSION") -Value "$($Manifest.version)" -Encoding UTF8
