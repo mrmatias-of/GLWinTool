@@ -1,9 +1,9 @@
 {
-  "version": "0.5.12",
+  "version": "0.5.13",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "Area admin protegida por senha adicionada ao app nativo, com painel de configuracoes operacionais."
+  "notes": "Correção visual do topo legado e nativo: banner em proporção correta, header maior e textos sem caracteres quebrados."
 }

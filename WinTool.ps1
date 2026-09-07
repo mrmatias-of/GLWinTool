@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.12"
+$script:BundledVersion = "0.5.13"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -218,7 +218,7 @@ $script:AppxPath = Join-Path $script:Root "config\appx.json"
 $script:IconRoot = Join-Path $script:Root "assets\icons"
 $script:LogoPath = Join-Path $script:Root "assets\readme\glab-mark.png"
 $script:SplashLogoPath = Join-Path $script:Root "assets\readme\glab-splash.png"
-$script:BannerPath = Join-Path $script:Root "assets\readme\gl-win-tool-banner.png"
+$script:BannerPath = Join-Path $script:Root "assets\app-header-banner.png"
 $script:BackupRoot = Join-Path $script:Root "backups"
 $script:ActiveView = "Install"
 $script:IsBusy = $false
@@ -2506,26 +2506,26 @@ function Build-Ui {
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="112"/>
+            <RowDefinition Height="156"/>
             <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="118"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Margin="10,8,10,0" CornerRadius="20" Padding="20,14" ClipToBounds="True">
+        <Border Grid.Row="0" Margin="10,8,10,8" CornerRadius="20" Padding="20,18" ClipToBounds="True">
             <Border.Background>
                 <ImageBrush x:Name="HeaderBannerBrush" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center"/>
             </Border.Background>
             <Grid>
-                <Border Background="#99030712" CornerRadius="20"/>
+                <Border Background="#66030712" CornerRadius="20"/>
                 <DockPanel LastChildFill="True">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                        <Border Width="68" Height="68" CornerRadius="18" Background="#020617" Margin="0,0,16,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
+                        <Border Width="86" Height="86" CornerRadius="20" Background="#020617" Margin="0,0,18,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
                             <Image x:Name="LogoImage" Stretch="UniformToFill"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="GL WinTool" FontSize="30" FontWeight="Bold" Foreground="#F8FAFC"/>
-                            <TextBlock Text="Central Windows para instalacao, ajustes, AppX e manutencao tecnica" FontSize="13" Foreground="#BFDBFE" TextWrapping="NoWrap"/>
+                            <TextBlock Text="GL WinTool" FontSize="34" FontWeight="Bold" Foreground="#F8FAFC"/>
+                            <TextBlock Text="Instalacao, ajustes, AppX e manutencao Windows" FontSize="14" Foreground="#BFDBFE" TextWrapping="NoWrap"/>
                             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                                 <Border Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="10" Padding="9,3" Margin="0,0,8,0">
                                     <TextBlock x:Name="VersionText" Text="" FontSize="11" Foreground="#93C5FD" TextWrapping="NoWrap"/>
