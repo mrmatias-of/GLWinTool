@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.4.4</code>
+  Versao atual: <code>0.4.5</code>
 </p>
 
 <p align="center">
@@ -140,7 +140,7 @@ Os backups sao gravados em `backups/` dentro da copia local em execucao.
 ## Execucao local
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Start-Assistente-GLAB.ps1
+powershell -ExecutionPolicy Bypass -File .\Start-GL-WinTool.ps1
 ```
 
 Execucao direta:
@@ -160,7 +160,7 @@ powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
 ```text
 .
 ├── WinTool.ps1
-├── Start-Assistente-GLAB.ps1
+├── Start-GL-WinTool.ps1
 ├── bootstrap.ps1
 ├── web-bootstrap-template.ps1
 ├── config
@@ -233,6 +233,7 @@ git push
 ## Uso responsavel
 
 O GL WinTool executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
+
 
 
 

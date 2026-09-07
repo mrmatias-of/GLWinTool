@@ -1,11 +1,7 @@
 {
-  "version": "0.4.4",
+  "version": "0.4.5",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
-  "notes": "Nova logo oficial GL WinTool com fundo escuro."
+  "notes": "Logo oficial aplicada na tela de carregamento e pacote de atualizacao 0.4.5."
 }
-
-
-
-

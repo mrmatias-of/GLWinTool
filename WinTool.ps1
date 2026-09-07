@@ -22,6 +22,7 @@ $script:PresetsPath = Join-Path $script:Root "config\presets.json"
 $script:AppxPath = Join-Path $script:Root "config\appx.json"
 $script:IconRoot = Join-Path $script:Root "assets\icons"
 $script:LogoPath = Join-Path $script:Root "assets\readme\glab-mark.png"
+$script:SplashLogoPath = Join-Path $script:Root "assets\readme\glab-splash.png"
 $script:BackupRoot = Join-Path $script:Root "backups"
 $script:ActiveView = "Install"
 $script:IsBusy = $false
@@ -1526,47 +1527,48 @@ function Show-StartupUpdateScreen {
 
     $splash = [System.Windows.Window]::new()
     $splash.Title = "GL WinTool $script:AppVersion"
-    $splash.Width = 520
-    $splash.Height = 330
+    $splash.Width = 680
+    $splash.Height = 430
     $splash.WindowStartupLocation = "CenterScreen"
     $splash.ResizeMode = "NoResize"
     $splash.Background = "#060A17"
     $splash.FontFamily = "Segoe UI"
 
     $panel = [System.Windows.Controls.StackPanel]::new()
-    $panel.Margin = "34"
+    $panel.Margin = "34,28,34,28"
     $panel.HorizontalAlignment = "Stretch"
     $panel.VerticalAlignment = "Center"
 
     $logoBox = [System.Windows.Controls.Border]::new()
-    $logoBox.Width = 72
-    $logoBox.Height = 72
-    $logoBox.CornerRadius = "18"
-    $logoBox.BorderBrush = "#22D3EE"
+    $logoBox.Width = 520
+    $logoBox.Height = 210
+    $logoBox.CornerRadius = "22"
+    $logoBox.BorderBrush = "#1D4ED8"
     $logoBox.BorderThickness = "1"
-    $logoBox.Background = "#111827"
+    $logoBox.Background = "#020617"
     $logoBox.HorizontalAlignment = "Center"
-    if (Test-Path -LiteralPath $script:LogoPath) {
+    $logoBox.ClipToBounds = $true
+    if (Test-Path -LiteralPath $script:SplashLogoPath) {
         $img = [System.Windows.Controls.Image]::new()
         $bmp = [System.Windows.Media.Imaging.BitmapImage]::new()
         $bmp.BeginInit()
         $bmp.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
-        $bmp.UriSource = [Uri]$script:LogoPath
+        $bmp.UriSource = [Uri]$script:SplashLogoPath
         $bmp.EndInit()
         $bmp.Freeze()
         $img.Source = $bmp
-        $img.Stretch = "UniformToFill"
+        $img.Stretch = "Uniform"
         $logoBox.Child = $img
     }
     $panel.Children.Add($logoBox) | Out-Null
 
     $title = [System.Windows.Controls.TextBlock]::new()
-    $title.Text = "GL WinTool"
-    $title.FontSize = 28
+    $title.Text = "Versao $script:AppVersion"
+    $title.FontSize = 15
     $title.FontWeight = "SemiBold"
-    $title.Foreground = "#F8FAFC"
+    $title.Foreground = "#BFDBFE"
     $title.HorizontalAlignment = "Center"
-    $title.Margin = "0,16,0,4"
+    $title.Margin = "0,14,0,4"
     $panel.Children.Add($title) | Out-Null
 
     $status = [System.Windows.Controls.TextBlock]::new()
