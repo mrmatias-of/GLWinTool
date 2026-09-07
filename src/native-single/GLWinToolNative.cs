@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.5";
+        public const string AppVersion = "0.5.6";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -33,6 +33,7 @@ namespace GLWinToolNative
         private readonly TextBox searchBox = new TextBox();
         private readonly TextBox logBox = new TextBox();
         private readonly Label statusLabel = new Label();
+        private readonly Image headerBanner = LoadEmbeddedImage("assets.readme.gl-win-tool-banner.png");
 
         public MainForm()
         {
@@ -61,6 +62,16 @@ namespace GLWinToolNative
             }
         }
 
+        private static Image LoadEmbeddedImage(string name)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            using (var stream = asm.GetManifestResourceStream(name))
+            {
+                if (stream == null) return null;
+                return Image.FromStream(stream);
+            }
+        }
+
         private void BuildLayout()
         {
             var root = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, ColumnCount = 1, Padding = new Padding(10) };
@@ -73,8 +84,17 @@ namespace GLWinToolNative
             var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(18) };
             banner.Paint += (s, e) =>
             {
-                using (var b = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(3, 7, 18), Color.FromArgb(14, 116, 144), 15F))
-                    e.Graphics.FillRectangle(b, banner.ClientRectangle);
+                if (headerBanner != null)
+                {
+                    e.Graphics.DrawImage(headerBanner, banner.ClientRectangle);
+                    using (var overlay = new SolidBrush(Color.FromArgb(122, 3, 7, 18)))
+                        e.Graphics.FillRectangle(overlay, banner.ClientRectangle);
+                }
+                else
+                {
+                    using (var b = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(3, 7, 18), Color.FromArgb(14, 116, 144), 15F))
+                        e.Graphics.FillRectangle(b, banner.ClientRectangle);
+                }
             };
             root.Controls.Add(banner, 0, 0);
 
@@ -360,6 +380,7 @@ namespace GLWinToolNative
         }
     }
 }
+
 
 
 

@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.5"
+$script:BundledVersion = "0.5.6"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -218,6 +218,7 @@ $script:AppxPath = Join-Path $script:Root "config\appx.json"
 $script:IconRoot = Join-Path $script:Root "assets\icons"
 $script:LogoPath = Join-Path $script:Root "assets\readme\glab-mark.png"
 $script:SplashLogoPath = Join-Path $script:Root "assets\readme\glab-splash.png"
+$script:BannerPath = Join-Path $script:Root "assets\readme\gl-win-tool-banner.png"
 $script:BackupRoot = Join-Path $script:Root "backups"
 $script:ActiveView = "Install"
 $script:IsBusy = $false
@@ -2513,15 +2514,10 @@ function Build-Ui {
 
         <Border Grid.Row="0" Margin="10,8,10,0" CornerRadius="20" Padding="20,14" ClipToBounds="True">
             <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#030712" Offset="0"/>
-                    <GradientStop Color="#071D3A" Offset="0.48"/>
-                    <GradientStop Color="#0E7490" Offset="1"/>
-                </LinearGradientBrush>
+                <ImageBrush x:Name="HeaderBannerBrush" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center"/>
             </Border.Background>
             <Grid>
-                <Ellipse Width="420" Height="190" Fill="#1D4ED8" Opacity="0.20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-88,-120,0"/>
-                <Ellipse Width="300" Height="150" Fill="#22D3EE" Opacity="0.12" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-90,0,0,-88"/>
+                <Border Background="#99030712" CornerRadius="20"/>
                 <DockPanel LastChildFill="True">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                         <Border Width="68" Height="68" CornerRadius="18" Background="#020617" Margin="0,0,16,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
@@ -2641,8 +2637,18 @@ $script:StatusText = $window.FindName("StatusText")
 $script:ProgressBar = $window.FindName("ProgressBar")
 $script:LogoImage = $window.FindName("LogoImage")
 $script:VersionText = $window.FindName("VersionText")
+$script:HeaderBannerBrush = $window.FindName("HeaderBannerBrush")
 $adminText = $window.FindName("AdminText")
 
+if ($script:HeaderBannerBrush -and (Test-Path -LiteralPath $script:BannerPath)) {
+    $bannerImage = [System.Windows.Media.Imaging.BitmapImage]::new()
+    $bannerImage.BeginInit()
+    $bannerImage.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+    $bannerImage.UriSource = [Uri]$script:BannerPath
+    $bannerImage.EndInit()
+    $bannerImage.Freeze()
+    $script:HeaderBannerBrush.ImageSource = $bannerImage
+}
 if ($script:LogoImage -and (Test-Path -LiteralPath $script:LogoPath)) {
     $logo = [System.Windows.Media.Imaging.BitmapImage]::new()
     $logo.BeginInit()
@@ -2782,6 +2788,7 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
 
 

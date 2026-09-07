@@ -1,9 +1,9 @@
 {
-  "version": "0.5.5",
+  "version": "0.5.6",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "Primeira execucao do exe legado ganhou tela profissional de preparacao e download."
+  "notes": "Novo banner oficial aplicado ao README e ao topo visual do app."
 }

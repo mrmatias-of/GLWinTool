@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.5.5</code>
+  Versao atual: <code>0.5.6</code>
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@ O **GL WinTool** é uma ferramenta Windows criada para acelerar rotinas de banca
 
 Ele reúne instalação de aplicativos, ajustes do Windows, remoção controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface única, leve e em português.
 
-![Banner do GL WinTool](assets/readme/hero.svg)
+![Banner do GL WinTool](assets/readme/gl-win-tool-banner.png)
 
 ## Início rápido
 
@@ -128,6 +128,7 @@ Os backups sao gravados em `backups/` dentro da copia local em execucao.
 ## Uso responsável
 
 O GL WinTool executa rotinas administrativas capazes de alterar configurações do Windows. Para ambientes profissionais, recomenda-se validar perfis e ajustes em laboratório antes da distribuição em larga escala.
+
 
 
 
