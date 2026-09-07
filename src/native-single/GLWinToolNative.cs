@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.10";
+        public const string AppVersion = "0.5.11";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -62,7 +62,7 @@ namespace GLWinToolNative
             }
         }
 
-        private static Image LoadEmbeddedImage(string name)
+        public static Image LoadEmbeddedImage(string name)
         {
             var asm = Assembly.GetExecutingAssembly();
             using (var stream = asm.GetManifestResourceStream(name))
@@ -297,51 +297,106 @@ namespace GLWinToolNative
     public class UpdateForm : Form
     {
         private readonly Label status = new Label();
+        private readonly Label title = new Label();
+        private readonly Label subtitle = new Label();
         private readonly Button updateButton = new Button();
         private readonly ProgressBar progress = new ProgressBar();
+        private readonly Image updateBanner = MainForm.LoadEmbeddedImage("assets.app-header-banner.png");
         private UpdateManifest manifest;
 
         public bool ContinueToApp { get; private set; }
 
         public UpdateForm()
         {
-            Text = "GL WinTool";
-            Width = 560;
-            Height = 360;
+            Text = "GL WinTool - atualizacao";
+            Width = 720;
+            Height = 430;
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             BackColor = Color.FromArgb(3, 7, 18);
+            Font = new Font("Segoe UI", 9F);
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
 
-            var icon = new PictureBox { Width = 82, Height = 82, Left = 239, Top = 34, SizeMode = PictureBoxSizeMode.StretchImage, Image = Icon.ToBitmap() };
-            Controls.Add(icon);
-            Controls.Add(new Label { Text = "GL WinTool", ForeColor = Color.White, Font = new Font("Segoe UI", 24, FontStyle.Bold), AutoSize = true, Left = 198, Top = 124 });
-            status.Text = "Buscando atualizacao...";
-            status.ForeColor = Color.FromArgb(147, 197, 253);
+            Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using (var bg = new System.Drawing.Drawing2D.LinearGradientBrush(ClientRectangle, Color.FromArgb(2, 6, 23), Color.FromArgb(8, 47, 73), 25F))
+                    e.Graphics.FillRectangle(bg, ClientRectangle);
+            };
+
+            var hero = new Panel { Left = 18, Top = 18, Width = 668, Height = 116, BackColor = Color.FromArgb(2, 6, 23) };
+            hero.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                if (updateBanner != null) e.Graphics.DrawImage(updateBanner, hero.ClientRectangle);
+                using (var shade = new System.Drawing.Drawing2D.LinearGradientBrush(hero.ClientRectangle, Color.FromArgb(185, 3, 7, 18), Color.FromArgb(35, 3, 7, 18), 0F))
+                    e.Graphics.FillRectangle(shade, hero.ClientRectangle);
+            };
+            Controls.Add(hero);
+
+            var card = new Panel { Left = 64, Top = 154, Width = 580, Height = 210, BackColor = Color.FromArgb(8, 15, 30) };
+            card.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using (var pen = new Pen(Color.FromArgb(37, 99, 235)))
+                    e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
+            };
+            Controls.Add(card);
+
+            var icon = new PictureBox { Width = 74, Height = 74, Left = 32, Top = 28, SizeMode = PictureBoxSizeMode.StretchImage, Image = Icon.ToBitmap(), BackColor = Color.Transparent };
+            card.Controls.Add(icon);
+
+            title.Text = "GL WinTool";
+            title.ForeColor = Color.White;
+            title.Font = new Font("Segoe UI", 25, FontStyle.Bold);
+            title.AutoSize = true;
+            title.Left = 124;
+            title.Top = 30;
+            title.BackColor = Color.Transparent;
+            card.Controls.Add(title);
+
+            subtitle.Text = "Verificando pacote mais recente";
+            subtitle.ForeColor = Color.FromArgb(125, 211, 252);
+            subtitle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            subtitle.AutoSize = true;
+            subtitle.Left = 128;
+            subtitle.Top = 78;
+            subtitle.BackColor = Color.Transparent;
+            card.Controls.Add(subtitle);
+
+            status.Text = "Buscando atualizacao segura no GitHub...";
+            status.ForeColor = Color.FromArgb(191, 219, 254);
             status.TextAlign = ContentAlignment.MiddleCenter;
-            status.Left = 36;
-            status.Top = 172;
-            status.Width = 488;
-            status.Height = 42;
-            Controls.Add(status);
+            status.Left = 32;
+            status.Top = 116;
+            status.Width = 516;
+            status.Height = 28;
+            status.BackColor = Color.Transparent;
+            card.Controls.Add(status);
 
-            progress.Left = 42;
-            progress.Top = 226;
-            progress.Width = 460;
-            progress.Height = 8;
+            progress.Left = 48;
+            progress.Top = 152;
+            progress.Width = 484;
+            progress.Height = 10;
             progress.Style = ProgressBarStyle.Marquee;
-            Controls.Add(progress);
+            card.Controls.Add(progress);
 
-            updateButton.Text = "Atualizar";
+            updateButton.Text = "Baixar e atualizar agora";
             updateButton.Left = 182;
-            updateButton.Top = 254;
-            updateButton.Width = 190;
-            updateButton.Height = 38;
+            updateButton.Top = 174;
+            updateButton.Width = 220;
+            updateButton.Height = 36;
+            updateButton.FlatStyle = FlatStyle.Flat;
+            updateButton.BackColor = Color.FromArgb(14, 165, 233);
+            updateButton.ForeColor = Color.White;
+            updateButton.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            updateButton.FlatAppearance.BorderColor = Color.FromArgb(125, 211, 252);
+            updateButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(2, 132, 199);
             updateButton.Visible = false;
             updateButton.Click += (s, e) => ApplyUpdate();
-            Controls.Add(updateButton);
+            card.Controls.Add(updateButton);
 
             Shown += (s, e) => CheckUpdate();
         }
@@ -358,10 +413,12 @@ namespace GLWinToolNative
                 progress.Style = ProgressBarStyle.Continuous;
                 if (manifest != null && !String.Equals(manifest.version, MainForm.AppVersion, StringComparison.OrdinalIgnoreCase))
                 {
+                    subtitle.Text = "Atualizacao obrigatoria disponivel";
                     status.Text = "Atualizacao disponivel: " + manifest.version + ". Atualize para continuar.";
                     updateButton.Visible = true;
                     return;
                 }
+                subtitle.Text = "Tudo certo";
                 status.Text = "Sem atualizacao disponivel.";
                 var timer = new Timer { Interval = 1000 };
                 timer.Tick += (s, e) => { timer.Stop(); ContinueToApp = true; Close(); };
@@ -369,6 +426,7 @@ namespace GLWinToolNative
             }
             catch
             {
+                subtitle.Text = "Modo offline";
                 status.Text = "Nao foi possivel checar atualizacao. Iniciando offline.";
                 var timer = new Timer { Interval = 1200 };
                 timer.Tick += (s, e) => { timer.Stop(); ContinueToApp = true; Close(); };
@@ -380,7 +438,9 @@ namespace GLWinToolNative
         {
             if (manifest == null || String.IsNullOrWhiteSpace(manifest.zipUrl)) return;
             updateButton.Enabled = false;
-            status.Text = "Baixando atualizacao...";
+            updateButton.Text = "Atualizando...";
+            subtitle.Text = "Baixando pacote oficial";
+            status.Text = "Baixando e preparando a nova versao...";
             progress.Style = ProgressBarStyle.Marquee;
             try
             {
@@ -388,6 +448,7 @@ namespace GLWinToolNative
                 Directory.CreateDirectory(tempRoot);
                 var zip = Path.Combine(tempRoot, "GL-WinTool-Native.zip");
                 using (var web = new WebClient()) web.DownloadFile(manifest.zipUrl, zip);
+                status.Text = "Validando arquivos e preparando reinicio...";
                 ZipFile.ExtractToDirectory(zip, tempRoot);
                 var newExe = Directory.GetFiles(tempRoot, "GL-WinTool.exe", SearchOption.AllDirectories).FirstOrDefault();
                 if (String.IsNullOrWhiteSpace(newExe)) throw new Exception("Executavel nativo nao encontrado no pacote.");
@@ -409,6 +470,7 @@ namespace GLWinToolNative
             {
                 progress.Style = ProgressBarStyle.Continuous;
                 status.Text = "Falha ao atualizar: " + ex.Message;
+                updateButton.Text = "Tentar novamente";
                 updateButton.Enabled = true;
             }
         }

@@ -1,9 +1,9 @@
 {
-  "version": "0.5.10",
+  "version": "0.5.11",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "Banner oficial exibido como imagem dedicada no topo do aplicativo nativo, sem ficar escondido pelo fundo."
+  "notes": "Tela de atualizacao redesenhada com banner, status mais claro e visual menos parecido com console."
 }
