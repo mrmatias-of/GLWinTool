@@ -26,14 +26,16 @@ if (Test-Path -LiteralPath $iconPath) {
         -company "G-LAB Cursos" `
         -product "GL WinTool" `
         -version $Version `
-        -iconFile $iconPath
+        -iconFile $iconPath `
+        -noConsole
 } else {
     Invoke-ps2exe $compiledScript $exePath `
         -title "GL WinTool" `
         -description "Central de instalacao, ajustes e manutencao Windows" `
         -company "G-LAB Cursos" `
         -product "GL WinTool" `
-        -version $Version
+        -version $Version `
+        -noConsole
 }
 
 Write-Host "EXE gerado: $exePath"

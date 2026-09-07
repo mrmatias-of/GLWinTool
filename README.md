@@ -6,43 +6,42 @@
 
 <p align="center">
   <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0EA5E9?style=for-the-badge&logo=windows&logoColor=white">
-  <img alt="PowerShell" src="https://img.shields.io/badge/PowerShell-5.1+-2563EB?style=for-the-badge&logo=powershell&logoColor=white">
+  <img alt="Windows App" src="https://img.shields.io/badge/App-Windows-2563EB?style=for-the-badge&logo=windows&logoColor=white">
   <img alt="WinGet" src="https://img.shields.io/badge/WinGet-integrado-16A34A?style=for-the-badge">
   <img alt="Idioma" src="https://img.shields.io/badge/interface-pt--BR-7C3AED?style=for-the-badge">
 </p>
 
 <p align="center">
-  <strong>Central grafica para preparar, ajustar e manter ambientes Windows com rapidez, padrao e seguranca operacional.</strong>
+  <strong>Central gráfica para preparar, ajustar e manter ambientes Windows com rapidez, padrão e segurança operacional.</strong>
 </p>
 
 <p align="center">
-  Versao atual: <code>0.4.10</code>
+  Versao atual: <code>0.5.0</code>
 </p>
 
 <p align="center">
   <a href="#inicio-rapido">Inicio rapido</a> •
   <a href="#modulos">Modulos</a> •
   <a href="#seguranca-operacional">Seguranca</a> •
-  <a href="#roadmap">Roadmap</a> •
-  <a href="docs/ROADMAP.md">Plano completo</a>
+  <a href="#uso-responsavel">Uso responsavel</a>
 </p>
 
 ---
 
-## Visao geral
+## Visão geral
 
-O **GL WinTool** e uma ferramenta Windows criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
+O **GL WinTool** é uma ferramenta Windows criada para acelerar rotinas de bancada, pós-formatação, manutenção e padronização de máquinas.
 
-O projeto reune instalacao de aplicativos, ajustes do Windows, remocao controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface unica, leve e em portugues.
+Ele reúne instalação de aplicativos, ajustes do Windows, remoção controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface única, leve e em português.
 
 ![Banner do GL WinTool](assets/readme/hero.svg)
 
-## Inicio rapido
+## Início rápido
 
 O GL WinTool tem dois modos oficiais de uso:
 
-- **Comando web**: ideal para suporte rapido, laboratorio e maquinas novas.
-- **Executavel portatil**: ideal para pendrive, pasta tecnica ou distribuicao direta.
+- **Comando web**: ideal para suporte rápido, laboratório e máquinas novas.
+- **Executável portátil**: ideal para pendrive, pasta técnica ou distribuição direta.
 
 Execute no **Windows PowerShell**:
 
@@ -50,27 +49,9 @@ Execute no **Windows PowerShell**:
 irm https://www.glabcursos.com.br/win | iex
 ```
 
-Fonte direta pelo GitHub:
+O executável oficial pode ser distribuído sozinho. Na versão nativa, o GL WinTool abre como aplicativo Windows, sem console PowerShell.
 
-```powershell
-irm https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/web-bootstrap-template.ps1 | iex
-```
-
-Autoteste seguro para desenvolvimento:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -SelfTest
-```
-
-Gerar executavel local:
-
-```powershell
-Install-Module ps2exe -Scope CurrentUser
-powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
-.\dist\GL-WinTool.exe -SelfTest
-```
-
-O executavel oficial pode ser distribuido sozinho. Ao iniciar em uma pasta nova, ele baixa automaticamente os arquivos necessarios (`assets`, `config`, `VERSION` e `update.json`) para a mesma pasta onde o `GL-WinTool.exe` esta.
+As atualizações sempre levam direto para a versão mais recente disponível. Se alguém estiver em uma versão antiga, o app não passa por atualizações intermediárias.
 
 ## Preview
 
@@ -87,169 +68,68 @@ O executavel oficial pode ser distribuido sozinho. Ao iniciar em uma pasta nova,
 | Manutencao | DISM, SFC, reparo de rede, horario/NTP, limpeza de temporarios, relatorio de saude e ponto de restauracao |
 | Operacao | Log integrado, progresso visual, confirmacoes e backups preventivos |
 
-## Modulos
+## Módulos
 
 ### Instalar
 
-Catalogo de aplicativos organizado por categoria, com busca por nome, id, descricao e tags. A instalacao, atualizacao e remocao usam o instalador padrao do Windows, com suporte a pacotes WinGet e Microsoft Store.
+Catálogo de aplicativos organizado por categoria, com busca por nome, descrição e finalidade. A instalação, atualização e remoção usam o instalador padrão do Windows, com suporte a pacotes WinGet e Microsoft Store.
 
 ### Ajustes
 
-Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba inclui presets **Minimo**, **Padrao** e **Avancado**, verificacao de estado, aplicacao e reversao dos ajustes compativeis. Acoes sensiveis ficam em fluxos dedicados, com confirmacao e backup quando aplicavel.
+Ajustes do Windows em formato seletivo, inspirados no fluxo do WinUtil. A aba inclui perfis **Mínimo**, **Padrão** e **Avançado**, verificação de estado, aplicação e reversão dos ajustes compatíveis. Ações sensíveis ficam em fluxos dedicados, com confirmação e backup quando aplicável.
 
 ### Configurar
 
-Area de manutencao rapida para tarefas como ponto de restauracao, limpeza de temporarios, relatorio de saude salvo em arquivo, reparo do Windows, reparo de rede, horario/NTP, reinicio do Explorer, modos de Windows Update e reparo dedicado de componentes de atualizacao.
+Área de manutenção rápida para tarefas como ponto de restauração, limpeza de temporários, relatório de saúde, reparo do Windows, reparo de rede, horário/NTP, reinício do Explorer, modos de Windows Update e reparo dedicado de componentes de atualização.
 
 No topo da aba existem fluxos por problema real:
 
-- **Meu PC esta lento**: manutencao segura, limpeza de temporarios e reinicio do Explorer.
-- **Apps nao instalam**: reparo das fontes do instalador e verificacao de atualizacoes.
+- **Meu PC está lento**: manutenção segura, limpeza de temporários e reinício do Explorer.
+- **Apps não instalam**: reparo das fontes do instalador e verificação de atualizações.
 - **Internet com problema**: limpeza de DNS, renovacao de IP e reset basico de rede.
 - **Windows Update travou**: backup, reconstrucao de caches e reinicio dos servicos de atualizacao.
 
-Tambem oferece atalhos para abrir backups, a pasta local do assistente e configuracoes oficiais do Windows.
+Também oferece atalhos para backups, pasta local do assistente e configurações oficiais do Windows.
 
 ### Atualizar
 
-Painel para verificar atualizacoes disponiveis, atualizar aplicativos selecionados, atualizar todos os aplicativos detectados e reparar as fontes usadas pelo instalador.
+Painel para verificar atualizações disponíveis, atualizar aplicativos selecionados, atualizar todos os aplicativos detectados e reparar as fontes usadas pelo instalador.
 
 ### AppX
 
-Remocao e reinstalacao controlada de aplicativos provisionados do Windows, com categorias, busca, selecao de itens seguros, confirmacao e inventario antes da remocao.
+Remoção e reinstalação controlada de aplicativos provisionados do Windows, com categorias, busca, seleção de itens seguros, confirmação e inventário antes da remoção.
 
 ### Win11
 
-Base inicial para rotinas de preparacao do Windows 11, com atalhos para download oficial, gerenciamento de disco, pasta Downloads e geracao inicial de `AutoUnattend.xml` em pt-BR. A criacao de pendrive e alteracoes destrutivas de disco continuam bloqueadas ate existir um fluxo proprio de selecao e confirmacao.
+Base inicial para rotinas de preparação do Windows 11, com atalhos para download oficial, gerenciamento de disco, pasta Downloads e geração inicial de `AutoUnattend.xml` em pt-BR. A criação de pendrive e alterações destrutivas de disco continuam bloqueadas até existir um fluxo próprio de seleção e confirmação.
 
-## Seguranca operacional
+## Segurança operacional
 
 ![Fluxo seguro de operacao](assets/readme/safety-flow.svg)
 
-O GL WinTool foi desenhado para evitar alteracoes sensiveis sem contexto. Procedimentos de maior impacto passam por confirmacao, log e backups locais quando aplicavel.
+O GL WinTool foi desenhado para evitar alterações sensíveis sem contexto. Procedimentos de maior impacto passam por confirmação, log e backups locais quando aplicável.
 
 Medidas implementadas:
 
-- confirmacao antes de acoes destrutivas;
+- confirmação antes de ações destrutivas;
 - backup antes de ajustes de registro;
-- backup da configuracao DNS antes de alteracoes;
-- exportacao de politicas locais antes de mudar ou reparar Windows Update;
-- renomeio recuperavel dos caches do Windows Update em vez de exclusao direta;
-- inventario AppX antes da remocao;
-- tentativa de ponto de restauracao em ajustes e AppX quando executado como administrador;
-- relatorio de saude salvo em pasta de backup;
-- bloqueio contra acoes simultaneas;
-- barra de progresso durante operacoes;
-- log visivel na interface.
+- backup da configuração DNS antes de alterações;
+- exportação de políticas locais antes de mudar ou reparar Windows Update;
+- renomeio recuperável dos caches do Windows Update em vez de exclusão direta;
+- inventário AppX antes da remoção;
+- tentativa de ponto de restauração em ajustes e AppX quando executado como administrador;
+- relatório de saúde salvo em pasta de backup;
+- bloqueio contra ações simultâneas;
+- barra de progresso durante operações;
+- log visível na interface.
 
 Os backups sao gravados em `backups/` dentro da copia local em execucao.
 
-## Execucao local
+## Uso responsável
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Start-GL-WinTool.ps1
-```
+O GL WinTool executa rotinas administrativas capazes de alterar configurações do Windows. Para ambientes profissionais, recomenda-se validar perfis e ajustes em laboratório antes da distribuição em larga escala.
 
-Execucao direta:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\WinTool.ps1
-```
-
-Validacao sem abrir a interface:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
-```
-
-## Estrutura
-
-```text
-.
-├── WinTool.ps1
-├── Start-GL-WinTool.ps1
-├── bootstrap.ps1
-├── web-bootstrap-template.ps1
-├── config
-│   ├── apps.json
-│   ├── appx.json
-│   ├── presets.json
-│   └── tweaks.json
-├── assets
-│   ├── icons
-│   └── readme
-├── docs
-├── functions
-├── pester
-├── scripts
-├── src
-└── xaml
-```
-
-## Catalogos
-
-| Arquivo | Finalidade |
-| --- | --- |
-| `config/apps.json` | Aplicativos disponiveis para instalacao, atualizacao e remocao |
-| `config/presets.json` | Conjuntos prontos de aplicativos para cenarios comuns |
-| `config/tweaks.json` | Ajustes do Windows, comandos controlados e itens planejados |
-| `config/appx.json` | Aplicativos AppX provisionados/removiveis |
-
-## Icones
-
-Os icones dos aplicativos sao armazenados localmente em `assets/icons`.
-
-Para regenerar os assets:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\src\New-IconAssets.ps1
-```
-
-## Roadmap
-
-O plano detalhado de evolucao esta em [`docs/ROADMAP.md`](docs/ROADMAP.md).
-O relatorio de testes seguros esta em [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md).
-O processo de lancamento oficial esta em [`docs/RELEASE.md`](docs/RELEASE.md).
-
-| Fase | Objetivo | Status |
-| --- | --- | --- |
-| Base confiavel | Instalacao, remocao, atualizacao, validacao e compatibilidade PowerShell 5.1 | Em andamento avancado |
-| Ajustes Windows | Mais ajustes seguros, deteccao de estado refinada e reversoes adicionais | Em andamento |
-| AppX | Preview de remocao, restauracao quando possivel e categorias refinadas | Em andamento |
-| Reparos | Windows Update, rede, horario/NTP, imagem do Windows e relatorio de saude | Em andamento avancado |
-| Experiencia | Fluxos por problema real, textos mais claros e menos dependencia do menu lateral | Em andamento avancado |
-| Windows 11 Creator | Download oficial, preparacao inicial, AutoUnattend, USB, drivers e ajustes offline | Iniciado avancado |
-| Arquitetura | Modularizacao, XAML separado, testes Pester e pipeline de release | Planejado |
-
-## Desenvolvimento
-
-### Evolucao para aplicativo nativo
-
-A versao atual usa uma base PowerShell/WPF empacotada como executavel para acelerar desenvolvimento e validacao em maquinas reais. O plano oficial e migrar gradualmente para um aplicativo nativo Windows, preservando os catalogos e fluxos ja validados:
-
-1. separar regras, catalogos e rotinas em modulos independentes;
-2. manter compatibilidade com o comando web e com o `GL-WinTool.exe`;
-3. criar instalador oficial com atalhos, icone, pasta propria e atualizador;
-4. migrar a interface para uma base nativa Windows;
-5. manter releases versionadas no GitHub.
-
-Antes de publicar alteracoes:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\WinTool.ps1 -ValidateOnly
-```
-
-Fluxo de publicacao:
-
-```powershell
-git add .
-git commit -m "Descreva a mudanca"
-git push
-```
-
-## Uso responsavel
-
-O GL WinTool executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
 
 
 

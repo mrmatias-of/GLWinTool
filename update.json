@@ -1,7 +1,8 @@
 {
-  "version": "0.4.10",
+  "version": "0.5.0",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
-  "notes": "Atualizacao pelo splash agora reinicia o GL WinTool automaticamente apos aplicar o pacote."
+  "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
+  "notes": "Primeira versao nativa single-exe, sem janela PowerShell, com catalogo embutido."
 }

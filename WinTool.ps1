@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.4.10"
+$script:BundledVersion = "0.5.0"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -1617,6 +1617,9 @@ function Save-AssistenteUpdatePackage {
     $target = Join-Path $script:Root ("GL-WinTool-{0}.zip" -f $version)
     Save-RemoteFileWithFallback -Urls @($url, $script:FallbackPackageUrl) -OutFile $target | Out-Null
     Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root -IncludeVersion
+    if ($Manifest.version) {
+        Set-Content -LiteralPath (Join-Path $script:Root "VERSION") -Value "$($Manifest.version)" -Encoding UTF8
+    }
     return $target
 }
 
@@ -1718,9 +1721,10 @@ function Show-StartupUpdateScreen {
                 $restartTimer.Interval = [TimeSpan]::FromSeconds(1)
                 $restartTimer.Add_Tick({
                     $this.Stop()
-                    Restart-GLWinTool | Out-Null
+                    $restarted = Restart-GLWinTool
                     $splash.DialogResult = $false
                     $splash.Close()
+                    if ($restarted) { [System.Windows.Application]::Current.Shutdown() }
                 })
                 $restartTimer.Start()
             } catch {
@@ -2352,31 +2356,49 @@ function Build-Ui {
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="78"/>
+            <RowDefinition Height="112"/>
             <RowDefinition Height="42"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="118"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#060A17" Padding="18,11">
-            <DockPanel LastChildFill="True">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <Border Width="48" Height="48" CornerRadius="14" Background="#111827" Margin="0,0,12,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
-                        <Image x:Name="LogoImage" Stretch="UniformToFill"/>
+        <Border Grid.Row="0" Margin="10,8,10,0" CornerRadius="20" Padding="20,14" ClipToBounds="True">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#030712" Offset="0"/>
+                    <GradientStop Color="#071D3A" Offset="0.48"/>
+                    <GradientStop Color="#0E7490" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Ellipse Width="420" Height="190" Fill="#1D4ED8" Opacity="0.20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-88,-120,0"/>
+                <Ellipse Width="300" Height="150" Fill="#22D3EE" Opacity="0.12" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-90,0,0,-88"/>
+                <DockPanel LastChildFill="True">
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                        <Border Width="68" Height="68" CornerRadius="18" Background="#020617" Margin="0,0,16,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
+                            <Image x:Name="LogoImage" Stretch="UniformToFill"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="GL WinTool" FontSize="30" FontWeight="Bold" Foreground="#F8FAFC"/>
+                            <TextBlock Text="Central Windows para instalacao, ajustes, AppX e manutencao tecnica" FontSize="13" Foreground="#BFDBFE" TextWrapping="NoWrap"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <Border Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="10" Padding="9,3" Margin="0,0,8,0">
+                                    <TextBlock x:Name="VersionText" Text="" FontSize="11" Foreground="#93C5FD" TextWrapping="NoWrap"/>
+                                </Border>
+                                <Border Background="#042F2E" BorderBrush="#14B8A6" BorderThickness="1" CornerRadius="10" Padding="9,3">
+                                    <TextBlock Text="pt-BR • WinGet • backups preventivos" FontSize="11" Foreground="#99F6E4"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <Border DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#061226" BorderBrush="#38BDF8" BorderThickness="1" CornerRadius="22" Padding="18,10">
+                        <StackPanel Width="250">
+                            <TextBlock x:Name="StatusText" Foreground="#E0F2FE" FontWeight="SemiBold" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <ProgressBar x:Name="ProgressBar" Height="5" Margin="0,8,0,0" Visibility="Collapsed" Foreground="#22D3EE" Background="#1E293B"/>
+                        </StackPanel>
                     </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="GL WinTool" FontSize="24" FontWeight="SemiBold" Foreground="#F8FAFC"/>
-                        <TextBlock Text="Instalacao, ajustes e manutencao Windows" FontSize="12" Foreground="#93C5FD" TextWrapping="NoWrap"/>
-                        <TextBlock x:Name="VersionText" Text="" FontSize="11" Foreground="#64748B" TextWrapping="NoWrap"/>
-                    </StackPanel>
-                </StackPanel>
-                <Border DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#0F172A" BorderBrush="#1E40AF" BorderThickness="1" CornerRadius="18" Padding="14,7">
-                    <StackPanel Width="230">
-                        <TextBlock x:Name="StatusText" Foreground="#BFDBFE" TextTrimming="CharacterEllipsis"/>
-                        <ProgressBar x:Name="ProgressBar" Height="4" Margin="0,6,0,0" Visibility="Collapsed" Foreground="#22D3EE" Background="#1E293B"/>
-                    </StackPanel>
-                </Border>
-            </DockPanel>
+                </DockPanel>
+            </Grid>
         </Border>
 
         <Grid Grid.Row="1" Margin="14,7,14,5">
@@ -2606,6 +2628,9 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
+
+
 
 
 

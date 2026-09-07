@@ -3,7 +3,12 @@
 *.tmp
 *.bak
 dist/
+dist-native/
+dist-native-single/
 backups/
+.dotnet-home/
+bin/
+obj/
 
 # PowerShell/editor noise
 *.ps1xml
