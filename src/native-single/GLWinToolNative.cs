@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.6";
+        public const string AppVersion = "0.5.7";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -75,7 +75,7 @@ namespace GLWinToolNative
         private void BuildLayout()
         {
             var root = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, ColumnCount = 1, Padding = new Padding(10) };
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 112));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 156));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 120));
@@ -84,11 +84,25 @@ namespace GLWinToolNative
             var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(18) };
             banner.Paint += (s, e) =>
             {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                 if (headerBanner != null)
                 {
-                    e.Graphics.DrawImage(headerBanner, banner.ClientRectangle);
-                    using (var overlay = new SolidBrush(Color.FromArgb(122, 3, 7, 18)))
-                        e.Graphics.FillRectangle(overlay, banner.ClientRectangle);
+                    using (var background = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(2, 6, 23), Color.FromArgb(8, 47, 73), 0F))
+                        e.Graphics.FillRectangle(background, banner.ClientRectangle);
+
+                    var imageArea = new Rectangle(Math.Max(420, banner.Width / 2), 0, Math.Max(1, banner.Width - Math.Max(420, banner.Width / 2)), banner.Height);
+                    var scale = Math.Max((float)imageArea.Width / headerBanner.Width, (float)imageArea.Height / headerBanner.Height);
+                    var drawWidth = (int)(headerBanner.Width * scale);
+                    var drawHeight = (int)(headerBanner.Height * scale);
+                    var drawRect = new Rectangle(imageArea.Right - drawWidth, imageArea.Top + (imageArea.Height - drawHeight) / 2, drawWidth, drawHeight);
+                    e.Graphics.DrawImage(headerBanner, drawRect);
+
+                    using (var shade = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(245, 3, 7, 18), Color.FromArgb(40, 3, 7, 18), 0F))
+                        e.Graphics.FillRectangle(shade, banner.ClientRectangle);
+                    using (var glow = new Pen(Color.FromArgb(120, 34, 211, 238), 2F))
+                        e.Graphics.DrawLine(glow, 0, banner.Height - 2, banner.Width, banner.Height - 2);
                 }
                 else
                 {
@@ -98,11 +112,11 @@ namespace GLWinToolNative
             };
             root.Controls.Add(banner, 0, 0);
 
-            var icon = new PictureBox { Width = 68, Height = 68, Left = 18, Top = 20, SizeMode = PictureBoxSizeMode.StretchImage, Image = Icon.ToBitmap() };
+            var icon = new PictureBox { Width = 86, Height = 86, Left = 22, Top = 34, SizeMode = PictureBoxSizeMode.StretchImage, Image = Icon.ToBitmap(), BackColor = Color.Transparent };
             banner.Controls.Add(icon);
-            banner.Controls.Add(new Label { Text = "GL WinTool", ForeColor = Color.White, Font = new Font("Segoe UI", 28, FontStyle.Bold), AutoSize = true, Left = 102, Top = 20 });
-            banner.Controls.Add(new Label { Text = "Central Windows para instalacao, ajustes, AppX e manutencao tecnica", ForeColor = Color.FromArgb(191, 219, 254), AutoSize = true, Left = 106, Top = 66 });
-            banner.Controls.Add(new Label { Text = "Versao nativa " + AppVersion, ForeColor = Color.FromArgb(147, 197, 253), AutoSize = true, Left = 106, Top = 86 });
+            banner.Controls.Add(new Label { Text = "GL WinTool", ForeColor = Color.White, Font = new Font("Segoe UI", 30, FontStyle.Bold), AutoSize = true, Left = 126, Top = 34, BackColor = Color.Transparent });
+            banner.Controls.Add(new Label { Text = "Instalacao, ajustes, AppX e manutencao Windows", ForeColor = Color.FromArgb(219, 234, 254), Font = new Font("Segoe UI", 10, FontStyle.Regular), AutoSize = true, Left = 130, Top = 82, BackColor = Color.Transparent });
+            banner.Controls.Add(new Label { Text = "Versao " + AppVersion + "  |  pt-BR  |  WinGet e backups preventivos", ForeColor = Color.FromArgb(125, 211, 252), Font = new Font("Segoe UI", 9, FontStyle.Regular), AutoSize = true, Left = 130, Top = 106, BackColor = Color.Transparent });
             statusLabel.Text = "Instalar - " + catalog.Count + " apps visiveis";
             statusLabel.ForeColor = Color.FromArgb(224, 242, 254);
             statusLabel.BackColor = Color.FromArgb(6, 18, 38);
@@ -111,7 +125,7 @@ namespace GLWinToolNative
             statusLabel.Height = 38;
             statusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             statusLabel.Left = banner.Width - 290;
-            statusLabel.Top = 34;
+            statusLabel.Top = 58;
             statusLabel.Resize += (s, e) => statusLabel.Left = banner.Width - 290;
             banner.Resize += (s, e) => statusLabel.Left = banner.Width - 290;
             banner.Controls.Add(statusLabel);
