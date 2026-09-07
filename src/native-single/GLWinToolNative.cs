@@ -15,9 +15,9 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Central Windows para instalacao, ajustes, AppX e manutencao tecnica")]
 [assembly: AssemblyCompany("G-LAB Cursos")]
 [assembly: AssemblyProduct("GL WinTool")]
-[assembly: AssemblyVersion("0.5.20.0")]
-[assembly: AssemblyFileVersion("0.5.20.0")]
-[assembly: AssemblyInformationalVersion("0.5.20")]
+[assembly: AssemblyVersion("0.5.21.0")]
+[assembly: AssemblyFileVersion("0.5.21.0")]
+[assembly: AssemblyInformationalVersion("0.5.21")]
 
 namespace GLWinToolNative
 {
@@ -33,7 +33,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.20";
+        public const string AppVersion = "0.5.21";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json";
         private const string DefaultAdminPassword = "glabadmin";
         private readonly List<AppItem> catalog;
@@ -62,37 +62,6 @@ namespace GLWinToolNative
             BuildLayout();
             RefreshCards();
             Log("GL WinTool nativo iniciado. Catalogo carregado: " + catalog.Count + " apps.");
-        }
-
-        private void EnforceUpdateFromMainWindow()
-        {
-            try
-            {
-                using (var web = new WebClient())
-                {
-                    var json = web.DownloadString(UpdateManifestUrl + "?cache=" + DateTime.UtcNow.Ticks);
-                    var manifest = new JavaScriptSerializer().Deserialize<UpdateManifest>(json);
-                    if (manifest != null && !String.Equals(manifest.version, AppVersion, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Log("Atualizacao obrigatoria encontrada: " + manifest.version + ". Abrindo atualizador.");
-                        Hide();
-                        using (var update = new UpdateForm())
-                        {
-                            update.ShowDialog(this);
-                            if (!update.ContinueToApp)
-                            {
-                                Close();
-                                return;
-                            }
-                        }
-                        Show();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log("Checagem inicial de atualizacao indisponivel: " + ex.Message);
-            }
         }
 
         private static List<AppItem> LoadCatalog()
@@ -124,28 +93,29 @@ namespace GLWinToolNative
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 120));
             Controls.Add(root);
 
-            var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(0), Margin = new Padding(0, 0, 0, 8) };
-            banner.Paint += (s, e) =>
+            var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Margin = new Padding(0, 0, 0, 8) };
+            if (headerBanner != null)
             {
-                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                e.Graphics.Clear(Color.FromArgb(3, 7, 18));
-                if (headerBanner != null)
+                banner.Controls.Add(new PictureBox
                 {
-                    var target = GetCoverRectangle(headerBanner.Size, banner.ClientRectangle);
-                    e.Graphics.DrawImage(headerBanner, target);
-                    using (var fade = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(0, 3, 7, 18), Color.FromArgb(110, 3, 7, 18), 0F))
-                        e.Graphics.FillRectangle(fade, banner.ClientRectangle);
-                }
-                else
+                    Dock = DockStyle.Fill,
+                    Image = headerBanner,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    BackColor = Color.FromArgb(3, 7, 18)
+                });
+            }
+            else
+            {
+                banner.Controls.Add(new Label
                 {
-                    using (var b = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(3, 7, 18), Color.FromArgb(14, 116, 144), 15F))
-                        e.Graphics.FillRectangle(b, banner.ClientRectangle);
-                }
-                using (var glow = new Pen(Color.FromArgb(130, 34, 211, 238), 2F))
-                    e.Graphics.DrawLine(glow, 0, banner.Height - 2, banner.Width, banner.Height - 2);
-            };
+                    Dock = DockStyle.Fill,
+                    Text = "GL WinTool",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 28, FontStyle.Bold),
+                    BackColor = Color.FromArgb(3, 7, 18)
+                });
+            }
             root.Controls.Add(banner, 0, 0);
 
             statusLabel.Text = "Instalar - " + catalog.Count + " apps visiveis";
@@ -154,12 +124,6 @@ namespace GLWinToolNative
             statusLabel.TextAlign = ContentAlignment.MiddleCenter;
             statusLabel.Width = 260;
             statusLabel.Height = 38;
-            statusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            statusLabel.Left = banner.Width - 300;
-            statusLabel.Top = 18;
-            statusLabel.Resize += (s, e) => statusLabel.Left = banner.Width - 300;
-            banner.Resize += (s, e) => statusLabel.Left = banner.Width - 300;
-            banner.Controls.Add(statusLabel);
 
             var tabs = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, Padding = new Padding(0, 2, 0, 0) };
             foreach (var text in new[] { "Instalar", "Ajustes", "Configurar", "Atualizar", "AppX", "Win11" })
@@ -171,6 +135,8 @@ namespace GLWinToolNative
             searchBox.Font = new Font("Segoe UI", 10);
             searchBox.TextChanged += (s, e) => RefreshCards();
             tabs.Controls.Add(searchBox);
+            statusLabel.Margin = new Padding(16, 4, 0, 0);
+            tabs.Controls.Add(statusLabel);
             root.Controls.Add(tabs, 0, 1);
 
             var body = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
@@ -640,11 +606,9 @@ namespace GLWinToolNative
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            using (var update = new UpdateForm())
-            {
-                update.ShowDialog();
-                if (!update.ContinueToApp) return;
-            }
+            var update = new UpdateForm();
+            Application.Run(update);
+            if (!update.ContinueToApp) return;
             Application.Run(new MainForm());
         }
     }
