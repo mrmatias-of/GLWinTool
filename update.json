@@ -1,9 +1,9 @@
 {
-  "version": "0.5.18",
+  "version": "0.5.19",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/GLWinTool/releases",
   "zipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "exeUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.exe",
-  "notes": "Atualizacao corretiva: todos os fluxos antigos passam a migrar diretamente para o executavel nativo."
+  "notes": "Atualizacao corretiva: checagem obrigatoria reforcada tambem dentro da janela principal."
 }

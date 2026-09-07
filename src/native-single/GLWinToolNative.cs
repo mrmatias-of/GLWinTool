@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.18";
+        public const string AppVersion = "0.5.19";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json";
         private const string DefaultAdminPassword = "glabadmin";
         private readonly List<AppItem> catalog;
@@ -54,6 +54,38 @@ namespace GLWinToolNative
             BuildLayout();
             RefreshCards();
             Log("GL WinTool nativo iniciado. Catalogo carregado: " + catalog.Count + " apps.");
+            Shown += (s, e) => BeginInvoke(new Action(EnforceUpdateFromMainWindow));
+        }
+
+        private void EnforceUpdateFromMainWindow()
+        {
+            try
+            {
+                using (var web = new WebClient())
+                {
+                    var json = web.DownloadString(UpdateManifestUrl + "?cache=" + DateTime.UtcNow.Ticks);
+                    var manifest = new JavaScriptSerializer().Deserialize<UpdateManifest>(json);
+                    if (manifest != null && !String.Equals(manifest.version, AppVersion, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log("Atualizacao obrigatoria encontrada: " + manifest.version + ". Abrindo atualizador.");
+                        Hide();
+                        using (var update = new UpdateForm())
+                        {
+                            update.ShowDialog(this);
+                            if (!update.ContinueToApp)
+                            {
+                                Close();
+                                return;
+                            }
+                        }
+                        Show();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("Checagem inicial de atualizacao indisponivel: " + ex.Message);
+            }
         }
 
         private static List<AppItem> LoadCatalog()
