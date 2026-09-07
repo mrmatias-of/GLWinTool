@@ -1,9 +1,9 @@
 {
-  "version": "0.5.15",
+  "version": "0.5.16",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/GLWinTool/releases",
   "zipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.exe",
-  "notes": "Links oficiais de atualização migrados para o repositório GLWinTool e assets de release padronizados."
+  "notes": "Correção de encoding no pacote legado e blindagem da janela principal para evitar erro ShowDialog nulo."
 }

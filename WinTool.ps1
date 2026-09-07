@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.15"
+$script:BundledVersion = "0.5.16"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/GLWinTool/archive/refs/heads/main.zip"
@@ -222,6 +222,7 @@ $script:BannerPath = Join-Path $script:Root "assets\app-header-banner.png"
 $script:BackupRoot = Join-Path $script:Root "backups"
 $script:ActiveView = "Install"
 $script:IsBusy = $false
+$script:MainWindow = $null
 $script:SelectedAppIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedTweakNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedAppxNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -2632,6 +2633,7 @@ $window = Build-Ui
 if (-not $window) {
     throw "Nao foi possivel carregar a janela WPF do GL WinTool."
 }
+$script:MainWindow = $window
 
 $script:SearchBox = $window.FindName("SearchBox")
 $script:CategoryBox = $window.FindName("CategoryBox")
@@ -2788,12 +2790,12 @@ if ($SelfTest) {
     Test-AssistenteSelfTest
     return
 }
-if (-not $window) {
+if (-not $script:MainWindow) {
     throw "A janela WPF nao foi inicializada. Execute novamente com powershell.exe -STA."
 }
 
 if (Show-StartupUpdateScreen) {
-    [void]$window.ShowDialog()
+    [void]$script:MainWindow.ShowDialog()
 }
 
 

@@ -19,7 +19,8 @@ $header = @"
 
 "@
 
-Set-Content -LiteralPath $outputFullPath -Value ($header + $script) -Encoding UTF8
+$utf8Bom = [System.Text.UTF8Encoding]::new($true)
+[System.IO.File]::WriteAllText($outputFullPath, ($header + $script), $utf8Bom)
 
 Write-Host "Compiled: $outputFullPath"
 
