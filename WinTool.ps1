@@ -17,10 +17,105 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.4"
+$script:BundledVersion = "0.5.5"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
+
+function Show-FirstRunDownloadScreen {
+    param([Parameter(Mandatory=$true)][scriptblock]$Action)
+
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+
+    $form = [System.Windows.Forms.Form]::new()
+    $form.Text = "GL WinTool"
+    $form.Width = 620
+    $form.Height = 380
+    $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MaximizeBox = $false
+    $form.MinimizeBox = $false
+    $form.BackColor = [System.Drawing.Color]::FromArgb(3, 7, 18)
+
+    $card = [System.Windows.Forms.Panel]::new()
+    $card.Left = 28
+    $card.Top = 26
+    $card.Width = 548
+    $card.Height = 284
+    $card.BackColor = [System.Drawing.Color]::FromArgb(6, 18, 38)
+    $form.Controls.Add($card)
+
+    $logo = [System.Windows.Forms.PictureBox]::new()
+    $logo.Left = 232
+    $logo.Top = 26
+    $logo.Width = 84
+    $logo.Height = 84
+    $logo.SizeMode = "Zoom"
+    $embeddedIcon = [System.Drawing.Icon]::ExtractAssociatedIcon([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
+    if ($embeddedIcon) { $logo.Image = $embeddedIcon.ToBitmap() }
+    $card.Controls.Add($logo)
+
+    $title = [System.Windows.Forms.Label]::new()
+    $title.Text = "Preparando o GL WinTool"
+    $title.ForeColor = [System.Drawing.Color]::White
+    $title.Font = [System.Drawing.Font]::new("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
+    $title.TextAlign = "MiddleCenter"
+    $title.Left = 20
+    $title.Top = 122
+    $title.Width = 508
+    $title.Height = 36
+    $card.Controls.Add($title)
+
+    $subtitle = [System.Windows.Forms.Label]::new()
+    $subtitle.Text = "Primeira execucao: baixando os arquivos necessarios na pasta do aplicativo."
+    $subtitle.ForeColor = [System.Drawing.Color]::FromArgb(191, 219, 254)
+    $subtitle.Font = [System.Drawing.Font]::new("Segoe UI", 10)
+    $subtitle.TextAlign = "MiddleCenter"
+    $subtitle.Left = 28
+    $subtitle.Top = 164
+    $subtitle.Width = 492
+    $subtitle.Height = 28
+    $card.Controls.Add($subtitle)
+
+    $progress = [System.Windows.Forms.ProgressBar]::new()
+    $progress.Style = "Marquee"
+    $progress.Left = 54
+    $progress.Top = 212
+    $progress.Width = 440
+    $progress.Height = 10
+    $card.Controls.Add($progress)
+
+    $status = [System.Windows.Forms.Label]::new()
+    $status.Text = "Conectando ao repositorio oficial..."
+    $status.ForeColor = [System.Drawing.Color]::FromArgb(147, 197, 253)
+    $status.Font = [System.Drawing.Font]::new("Segoe UI", 9)
+    $status.TextAlign = "MiddleCenter"
+    $status.Left = 28
+    $status.Top = 236
+    $status.Width = 492
+    $status.Height = 24
+    $card.Controls.Add($status)
+
+    $form.Add_Shown({
+        try {
+            [System.Windows.Forms.Application]::DoEvents()
+            & $Action
+            $status.Text = "Arquivos preparados. Iniciando..."
+            [System.Windows.Forms.Application]::DoEvents()
+            Start-Sleep -Milliseconds 600
+            $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+            $form.Close()
+        } catch {
+            $status.Text = "Falha ao preparar: $($_.Exception.Message)"
+            [System.Windows.Forms.MessageBox]::Show($form, $_.Exception.Message, "GL WinTool", "OK", "Error") | Out-Null
+            $form.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+            $form.Close()
+        }
+    })
+
+    [void]$form.ShowDialog()
+}
 
 function Save-RemoteFileWithFallback {
     param(
@@ -104,11 +199,13 @@ function Initialize-GLWinToolRuntime {
 
     New-Item -ItemType Directory -Path $script:Root -Force | Out-Null
     $zipPath = Join-Path $env:TEMP ("GL-WinTool-runtime-{0}.zip" -f ([guid]::NewGuid().ToString("N")))
-    try {
-        Save-RemoteFileWithFallback -Urls @($script:DefaultPackageUrl, $script:FallbackPackageUrl) -OutFile $zipPath | Out-Null
-        Expand-GLWinToolRuntimePackage -ZipPath $zipPath -TargetRoot $script:Root
-    } finally {
-        if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+    Show-FirstRunDownloadScreen -Action {
+        try {
+            Save-RemoteFileWithFallback -Urls @($script:DefaultPackageUrl, $script:FallbackPackageUrl) -OutFile $zipPath | Out-Null
+            Expand-GLWinToolRuntimePackage -ZipPath $zipPath -TargetRoot $script:Root
+        } finally {
+            if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+        }
     }
 }
 
@@ -2685,6 +2782,7 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
 
 
