@@ -16,13 +16,13 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.5.7</code>
+  Versao atual: <code>0.5.9</code>
 </p>
 
 <p align="center">
-  <a href="#inicio-rapido">Inicio rapido</a> •
-  <a href="#modulos">Modulos</a> •
-  <a href="#seguranca-operacional">Seguranca</a> •
+  <a href="#inicio-rapido">Inicio rapido</a> -
+  <a href="#modulos">Modulos</a> -
+  <a href="#seguranca-operacional">Seguranca</a> -
   <a href="#uso-responsavel">Uso responsavel</a>
 </p>
 

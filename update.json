@@ -1,9 +1,9 @@
 {
-  "version": "0.5.7",
+  "version": "0.5.9",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "Topo nativo redesenhado para exibir o banner oficial com mais presenca visual."
+  "notes": "Banner oficial agora aparece como arte real no topo e textos foram limpos para evitar caracteres quebrados."
 }

@@ -25,7 +25,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.7";
+        public const string AppVersion = "0.5.9";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -37,7 +37,7 @@ namespace GLWinToolNative
 
         public MainForm()
         {
-            Text = "GL WinTool Nativo";
+            Text = "GL WinTool " + AppVersion;
             Width = 1240;
             Height = 780;
             MinimumSize = new Size(1100, 700);
@@ -81,7 +81,7 @@ namespace GLWinToolNative
             root.RowStyles.Add(new RowStyle(SizeType.Absolute, 120));
             Controls.Add(root);
 
-            var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(18) };
+            var banner = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(3, 7, 18), Padding = new Padding(18), Margin = new Padding(0, 0, 0, 8) };
             banner.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -92,15 +92,19 @@ namespace GLWinToolNative
                     using (var background = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(2, 6, 23), Color.FromArgb(8, 47, 73), 0F))
                         e.Graphics.FillRectangle(background, banner.ClientRectangle);
 
-                    var imageArea = new Rectangle(Math.Max(420, banner.Width / 2), 0, Math.Max(1, banner.Width - Math.Max(420, banner.Width / 2)), banner.Height);
-                    var scale = Math.Max((float)imageArea.Width / headerBanner.Width, (float)imageArea.Height / headerBanner.Height);
+                    var artLeft = Math.Max(470, banner.Width - 650);
+                    var imageArea = new Rectangle(artLeft, 8, Math.Max(1, banner.Width - artLeft - 18), banner.Height - 16);
+                    var scale = Math.Min((float)imageArea.Width / headerBanner.Width, (float)imageArea.Height / headerBanner.Height);
                     var drawWidth = (int)(headerBanner.Width * scale);
                     var drawHeight = (int)(headerBanner.Height * scale);
-                    var drawRect = new Rectangle(imageArea.Right - drawWidth, imageArea.Top + (imageArea.Height - drawHeight) / 2, drawWidth, drawHeight);
+                    var drawRect = new Rectangle(imageArea.Left + (imageArea.Width - drawWidth) / 2, imageArea.Top + (imageArea.Height - drawHeight) / 2, drawWidth, drawHeight);
                     e.Graphics.DrawImage(headerBanner, drawRect);
 
-                    using (var shade = new System.Drawing.Drawing2D.LinearGradientBrush(banner.ClientRectangle, Color.FromArgb(245, 3, 7, 18), Color.FromArgb(40, 3, 7, 18), 0F))
-                        e.Graphics.FillRectangle(shade, banner.ClientRectangle);
+                    var leftShade = new Rectangle(0, 0, Math.Min(banner.Width, 540), banner.Height);
+                    using (var shade = new System.Drawing.Drawing2D.LinearGradientBrush(leftShade, Color.FromArgb(252, 3, 7, 18), Color.FromArgb(170, 3, 7, 18), 0F))
+                        e.Graphics.FillRectangle(shade, leftShade);
+                    using (var fade = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(360, 0, 300, banner.Height), Color.FromArgb(180, 3, 7, 18), Color.FromArgb(0, 3, 7, 18), 0F))
+                        e.Graphics.FillRectangle(fade, new Rectangle(360, 0, 300, banner.Height));
                     using (var glow = new Pen(Color.FromArgb(120, 34, 211, 238), 2F))
                         e.Graphics.DrawLine(glow, 0, banner.Height - 2, banner.Width, banner.Height - 2);
                 }
@@ -116,7 +120,7 @@ namespace GLWinToolNative
             banner.Controls.Add(icon);
             banner.Controls.Add(new Label { Text = "GL WinTool", ForeColor = Color.White, Font = new Font("Segoe UI", 30, FontStyle.Bold), AutoSize = true, Left = 126, Top = 34, BackColor = Color.Transparent });
             banner.Controls.Add(new Label { Text = "Instalacao, ajustes, AppX e manutencao Windows", ForeColor = Color.FromArgb(219, 234, 254), Font = new Font("Segoe UI", 10, FontStyle.Regular), AutoSize = true, Left = 130, Top = 82, BackColor = Color.Transparent });
-            banner.Controls.Add(new Label { Text = "Versao " + AppVersion + "  |  pt-BR  |  WinGet e backups preventivos", ForeColor = Color.FromArgb(125, 211, 252), Font = new Font("Segoe UI", 9, FontStyle.Regular), AutoSize = true, Left = 130, Top = 106, BackColor = Color.Transparent });
+            banner.Controls.Add(new Label { Text = "Versao " + AppVersion + " - pt-BR - WinGet e backups preventivos", ForeColor = Color.FromArgb(125, 211, 252), Font = new Font("Segoe UI", 9, FontStyle.Regular), AutoSize = true, Left = 130, Top = 106, BackColor = Color.Transparent });
             statusLabel.Text = "Instalar - " + catalog.Count + " apps visiveis";
             statusLabel.ForeColor = Color.FromArgb(224, 242, 254);
             statusLabel.BackColor = Color.FromArgb(6, 18, 38);
@@ -130,12 +134,14 @@ namespace GLWinToolNative
             banner.Resize += (s, e) => statusLabel.Left = banner.Width - 290;
             banner.Controls.Add(statusLabel);
 
-            var tabs = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight };
+            var tabs = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, Padding = new Padding(0, 2, 0, 0) };
             foreach (var text in new[] { "Instalar", "Ajustes", "Configurar", "Atualizar", "AppX", "Win11" })
-                tabs.Controls.Add(new Button { Text = text, Width = 118, Height = 32 });
+                tabs.Controls.Add(MakeNavButton(text));
             searchBox.Width = 460;
             searchBox.Height = 30;
             searchBox.Margin = new Padding(18, 4, 0, 0);
+            searchBox.ForeColor = Color.FromArgb(15, 23, 42);
+            searchBox.Font = new Font("Segoe UI", 10);
             searchBox.TextChanged += (s, e) => RefreshCards();
             tabs.Controls.Add(searchBox);
             root.Controls.Add(tabs, 0, 1);
@@ -145,19 +151,22 @@ namespace GLWinToolNative
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             root.Controls.Add(body, 0, 2);
 
-            var side = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(14) };
+            var side = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 250, 252), Padding = new Padding(14), Margin = new Padding(0, 0, 10, 0) };
+            side.Paint += (s, e) => DrawRoundedSurface(e.Graphics, side.ClientRectangle, Color.FromArgb(248, 250, 252), Color.FromArgb(203, 213, 225), 18);
             body.Controls.Add(side, 0, 0);
-            side.Controls.Add(new Label { Text = "Acoes", Font = new Font("Segoe UI", 15, FontStyle.Bold), Left = 12, Top = 14, AutoSize = true });
-            AddSideButton(side, "+ Instalar selecionados", 52, () => RunWinget("install", SelectedApps()));
-            AddSideButton(side, "Atualizar selecionados", 92, () => RunWinget("upgrade", SelectedApps()));
-            AddSideButton(side, "Desinstalar selecionados", 132, () => RunWinget("uninstall", SelectedApps()));
-            AddSideButton(side, "Limpar selecao", 184, () => { catalog.ForEach(a => a.selected = false); RefreshCards(); });
-            categoryBox.Left = 12; categoryBox.Top = 238; categoryBox.Width = 202; categoryBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            side.Controls.Add(new Label { Text = "Central de acoes", Font = new Font("Segoe UI", 14, FontStyle.Bold), Left = 18, Top = 18, AutoSize = true, ForeColor = Color.FromArgb(15, 23, 42) });
+            side.Controls.Add(new Label { Text = "Escolha os apps e execute com seguranca.", Left = 19, Top = 47, Width = 190, Height = 34, ForeColor = Color.FromArgb(71, 85, 105) });
+            AddSideButton(side, "Instalar selecionados", 92, true, () => RunWinget("install", SelectedApps()));
+            AddSideButton(side, "Atualizar selecionados", 134, false, () => RunWinget("upgrade", SelectedApps()));
+            AddSideButton(side, "Desinstalar selecionados", 176, false, () => RunWinget("uninstall", SelectedApps()));
+            AddSideButton(side, "Limpar selecao", 230, false, () => { catalog.ForEach(a => a.selected = false); RefreshCards(); });
+            categoryBox.Left = 18; categoryBox.Top = 304; categoryBox.Width = 194; categoryBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            categoryBox.Font = new Font("Segoe UI", 9);
             var categories = new[] { "Todos", "Windows novo" }.Concat(catalog.Select(a => a.category).Where(c => !String.IsNullOrWhiteSpace(c))).Distinct().OrderBy(c => c).ToArray();
             categoryBox.Items.AddRange(categories.Cast<object>().ToArray());
             categoryBox.SelectedItem = "Windows novo";
             categoryBox.SelectedIndexChanged += (s, e) => RefreshCards();
-            side.Controls.Add(new Label { Text = "Categoria", Left = 12, Top = 216, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold) });
+            side.Controls.Add(new Label { Text = "Categoria", Left = 18, Top = 280, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59) });
             side.Controls.Add(categoryBox);
 
             cards.Dock = DockStyle.Fill;
@@ -174,11 +183,48 @@ namespace GLWinToolNative
             root.Controls.Add(logBox, 0, 3);
         }
 
-        private void AddSideButton(Control parent, string text, int top, Action action)
+        private Button MakeNavButton(string text)
         {
-            var b = new Button { Text = text, Left = 12, Top = top, Width = 202, Height = 32 };
+            var b = new Button { Text = text, Width = 118, Height = 32, Margin = new Padding(0, 4, 8, 0), FlatStyle = FlatStyle.Flat, BackColor = text == "Instalar" ? Color.FromArgb(2, 44, 64) : Color.White, ForeColor = text == "Instalar" ? Color.White : Color.FromArgb(15, 23, 42), Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            b.FlatAppearance.BorderColor = Color.FromArgb(186, 199, 218);
+            b.FlatAppearance.MouseOverBackColor = Color.FromArgb(224, 242, 254);
+            b.FlatAppearance.MouseDownBackColor = Color.FromArgb(186, 230, 253);
+            return b;
+        }
+
+        private void AddSideButton(Control parent, string text, int top, bool primary, Action action)
+        {
+            var b = new Button { Text = text, Left = 18, Top = top, Width = 194, Height = 34, FlatStyle = FlatStyle.Flat, BackColor = primary ? Color.FromArgb(2, 132, 199) : Color.White, ForeColor = primary ? Color.White : Color.FromArgb(15, 23, 42), Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            b.FlatAppearance.BorderColor = primary ? Color.FromArgb(14, 165, 233) : Color.FromArgb(203, 213, 225);
+            b.FlatAppearance.MouseOverBackColor = primary ? Color.FromArgb(3, 105, 161) : Color.FromArgb(239, 246, 255);
             b.Click += (s, e) => action();
             parent.Controls.Add(b);
+        }
+
+        private static void DrawRoundedSurface(Graphics graphics, Rectangle bounds, Color fill, Color border, int radius)
+        {
+            if (bounds.Width <= 1 || bounds.Height <= 1) return;
+            bounds = new Rectangle(bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+            using (var path = RoundedRect(bounds, radius))
+            using (var brush = new SolidBrush(fill))
+            using (var pen = new Pen(border))
+            {
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                graphics.FillPath(brush, path);
+                graphics.DrawPath(pen, path);
+            }
+        }
+
+        private static System.Drawing.Drawing2D.GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            int d = radius * 2;
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddArc(bounds.Left, bounds.Top, d, d, 180, 90);
+            path.AddArc(bounds.Right - d, bounds.Top, d, d, 270, 90);
+            path.AddArc(bounds.Right - d, bounds.Bottom - d, d, d, 0, 90);
+            path.AddArc(bounds.Left, bounds.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
         }
 
         private IEnumerable<AppItem> SelectedApps() { return catalog.Where(a => a.selected); }
@@ -195,7 +241,7 @@ namespace GLWinToolNative
 
             if (cat == "Windows novo" && apps.Count == 0)
             {
-                cards.Controls.Add(MakeInfoCard("Windows novo", "Categoria reservada para apps pos-formatacao."));
+                cards.Controls.Add(MakeInfoCard("Windows novo", "Sua lista de pos-formatacao vai aparecer aqui.", "Use esta categoria para montar o pacote padrao das maquinas novas da G-LAB."));
             }
             else
             {
@@ -205,22 +251,25 @@ namespace GLWinToolNative
             cards.ResumeLayout();
         }
 
-        private Control MakeInfoCard(string title, string body)
+        private Control MakeInfoCard(string title, string body, string detail)
         {
-            var p = new Panel { Width = 340, Height = 92, BackColor = Color.White, Margin = new Padding(7) };
-            p.Controls.Add(new Label { Text = title, Left = 14, Top = 14, AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) });
-            p.Controls.Add(new Label { Text = body, Left = 14, Top = 40, Width = 300, Height = 40, ForeColor = Color.FromArgb(51, 65, 85) });
+            var p = new Panel { Width = 560, Height = 150, BackColor = Color.Transparent, Margin = new Padding(10) };
+            p.Paint += (s, e) => DrawRoundedSurface(e.Graphics, p.ClientRectangle, Color.White, Color.FromArgb(191, 219, 254), 18);
+            p.Controls.Add(new Label { Text = title, Left = 22, Top = 22, AutoSize = true, Font = new Font("Segoe UI", 18, FontStyle.Bold), ForeColor = Color.FromArgb(15, 23, 42), BackColor = Color.Transparent });
+            p.Controls.Add(new Label { Text = body, Left = 24, Top = 66, Width = 500, Height = 24, ForeColor = Color.FromArgb(37, 99, 235), Font = new Font("Segoe UI", 10, FontStyle.Bold), BackColor = Color.Transparent });
+            p.Controls.Add(new Label { Text = detail, Left = 24, Top = 96, Width = 500, Height = 34, ForeColor = Color.FromArgb(71, 85, 105), BackColor = Color.Transparent });
             return p;
         }
 
         private Control MakeAppCard(AppItem app)
         {
-            var p = new Panel { Width = 292, Height = 86, BackColor = Color.White, Margin = new Padding(7) };
-            p.Controls.Add(new Label { Text = String.IsNullOrWhiteSpace(app.icon) ? "APP" : app.icon, Left = 12, Top = 20, Width = 46, Height = 34, TextAlign = ContentAlignment.MiddleCenter, BackColor = Color.FromArgb(224, 242, 254), Font = new Font("Segoe UI", 9, FontStyle.Bold) });
-            p.Controls.Add(new Label { Text = app.name, Left = 70, Top = 12, Width = 175, Height = 20, Font = new Font("Segoe UI", 9, FontStyle.Bold) });
-            p.Controls.Add(new Label { Text = app.description, Left = 70, Top = 34, Width = 175, Height = 20, ForeColor = Color.FromArgb(51, 65, 85) });
-            p.Controls.Add(new Label { Text = app.id, Left = 70, Top = 55, Width = 175, Height = 18, ForeColor = Color.FromArgb(71, 85, 105), Font = new Font("Segoe UI", 7) });
-            var cb = new CheckBox { Left = 258, Top = 32, Checked = app.selected };
+            var p = new Panel { Width = 300, Height = 104, BackColor = Color.Transparent, Margin = new Padding(8) };
+            p.Paint += (s, e) => DrawRoundedSurface(e.Graphics, p.ClientRectangle, Color.White, app.selected ? Color.FromArgb(14, 165, 233) : Color.FromArgb(203, 213, 225), 16);
+            p.Controls.Add(new Label { Text = String.IsNullOrWhiteSpace(app.icon) ? "APP" : app.icon, Left = 14, Top = 24, Width = 52, Height = 52, TextAlign = ContentAlignment.MiddleCenter, BackColor = Color.FromArgb(224, 242, 254), ForeColor = Color.FromArgb(3, 105, 161), Font = new Font("Segoe UI", 9, FontStyle.Bold) });
+            p.Controls.Add(new Label { Text = app.name, Left = 80, Top = 17, Width = 168, Height = 22, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(15, 23, 42), BackColor = Color.Transparent });
+            p.Controls.Add(new Label { Text = app.description, Left = 80, Top = 42, Width = 174, Height = 32, ForeColor = Color.FromArgb(51, 65, 85), BackColor = Color.Transparent });
+            p.Controls.Add(new Label { Text = app.id, Left = 80, Top = 76, Width = 176, Height = 18, ForeColor = Color.FromArgb(37, 99, 235), Font = new Font("Segoe UI", 7), BackColor = Color.Transparent });
+            var cb = new CheckBox { Left = 266, Top = 41, Checked = app.selected, BackColor = Color.Transparent };
             cb.CheckedChanged += (s, e) => app.selected = cb.Checked;
             p.Controls.Add(cb);
             return p;
