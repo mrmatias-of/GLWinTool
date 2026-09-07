@@ -25,15 +25,19 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.11";
+        public const string AppVersion = "0.5.12";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
+        private const string DefaultAdminPassword = "glabadmin";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
         private readonly ComboBox categoryBox = new ComboBox();
         private readonly TextBox searchBox = new TextBox();
         private readonly TextBox logBox = new TextBox();
         private readonly Label statusLabel = new Label();
+        private readonly Label adminStateLabel = new Label();
+        private readonly TextBox adminPasswordBox = new TextBox();
         private readonly Image headerBanner = LoadEmbeddedImage("assets.app-header-banner.png");
+        private bool adminUnlocked;
 
         public MainForm()
         {
@@ -141,8 +145,8 @@ namespace GLWinToolNative
             var side = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 250, 252), Padding = new Padding(14), Margin = new Padding(0, 0, 10, 0) };
             side.Paint += (s, e) => DrawRoundedSurface(e.Graphics, side.ClientRectangle, Color.FromArgb(248, 250, 252), Color.FromArgb(203, 213, 225), 18);
             body.Controls.Add(side, 0, 0);
-            side.Controls.Add(new Label { Text = "Central de acoes", Font = new Font("Segoe UI", 14, FontStyle.Bold), Left = 18, Top = 18, AutoSize = true, ForeColor = Color.FromArgb(15, 23, 42) });
-            side.Controls.Add(new Label { Text = "Escolha os apps e execute com seguranca.", Left = 19, Top = 47, Width = 190, Height = 34, ForeColor = Color.FromArgb(71, 85, 105) });
+            side.Controls.Add(new Label { Text = "Central de acoes", Font = new Font("Segoe UI", 14, FontStyle.Bold), Left = 18, Top = 18, AutoSize = true, ForeColor = Color.FromArgb(15, 23, 42), BackColor = Color.Transparent });
+            side.Controls.Add(new Label { Text = "Escolha os apps e execute com seguranca.", Left = 19, Top = 47, Width = 190, Height = 34, ForeColor = Color.FromArgb(71, 85, 105), BackColor = Color.Transparent });
             AddSideButton(side, "Instalar selecionados", 92, true, () => RunWinget("install", SelectedApps()));
             AddSideButton(side, "Atualizar selecionados", 134, false, () => RunWinget("upgrade", SelectedApps()));
             AddSideButton(side, "Desinstalar selecionados", 176, false, () => RunWinget("uninstall", SelectedApps()));
@@ -153,8 +157,28 @@ namespace GLWinToolNative
             categoryBox.Items.AddRange(categories.Cast<object>().ToArray());
             categoryBox.SelectedItem = "Windows novo";
             categoryBox.SelectedIndexChanged += (s, e) => RefreshCards();
-            side.Controls.Add(new Label { Text = "Categoria", Left = 18, Top = 280, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59) });
+            side.Controls.Add(new Label { Text = "Categoria", Left = 18, Top = 280, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59), BackColor = Color.Transparent });
             side.Controls.Add(categoryBox);
+
+            side.Controls.Add(new Label { Text = "Area admin", Left = 18, Top = 354, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59), BackColor = Color.Transparent });
+            adminPasswordBox.Left = 18;
+            adminPasswordBox.Top = 378;
+            adminPasswordBox.Width = 194;
+            adminPasswordBox.Height = 26;
+            adminPasswordBox.UseSystemPasswordChar = true;
+            adminPasswordBox.Font = new Font("Segoe UI", 9);
+            adminPasswordBox.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) UnlockAdmin(); };
+            side.Controls.Add(adminPasswordBox);
+            AddSideButton(side, "Desbloquear admin", 412, false, UnlockAdmin);
+            AddSideButton(side, "Config admin", 454, false, ShowAdminPanel);
+            adminStateLabel.Text = "Admin bloqueado";
+            adminStateLabel.Left = 18;
+            adminStateLabel.Top = 496;
+            adminStateLabel.Width = 194;
+            adminStateLabel.Height = 38;
+            adminStateLabel.ForeColor = Color.FromArgb(185, 28, 28);
+            adminStateLabel.BackColor = Color.Transparent;
+            side.Controls.Add(adminStateLabel);
 
             cards.Dock = DockStyle.Fill;
             cards.AutoScroll = true;
@@ -176,6 +200,7 @@ namespace GLWinToolNative
             b.FlatAppearance.BorderColor = Color.FromArgb(186, 199, 218);
             b.FlatAppearance.MouseOverBackColor = Color.FromArgb(224, 242, 254);
             b.FlatAppearance.MouseDownBackColor = Color.FromArgb(186, 230, 253);
+            if (text == "Configurar") b.Click += (s, e) => ShowAdminPanel();
             return b;
         }
 
@@ -215,6 +240,87 @@ namespace GLWinToolNative
         }
 
         private IEnumerable<AppItem> SelectedApps() { return catalog.Where(a => a.selected); }
+
+        private void UnlockAdmin()
+        {
+            if (adminPasswordBox.Text == DefaultAdminPassword)
+            {
+                adminUnlocked = true;
+                adminPasswordBox.Clear();
+                adminStateLabel.Text = "Admin liberado nesta sessao";
+                adminStateLabel.ForeColor = Color.FromArgb(4, 120, 87);
+                Log("Modo administrador desbloqueado.");
+                ShowAdminPanel();
+                return;
+            }
+
+            adminUnlocked = false;
+            adminStateLabel.Text = "Senha invalida";
+            adminStateLabel.ForeColor = Color.FromArgb(185, 28, 28);
+            Log("Tentativa de acesso admin recusada.");
+        }
+
+        private void ShowAdminPanel()
+        {
+            cards.SuspendLayout();
+            cards.Controls.Clear();
+            if (!adminUnlocked)
+            {
+                cards.Controls.Add(MakeInfoCard("Configuracoes admin", "Area protegida por senha.", "Digite a senha no menu lateral para liberar opcoes administrativas do GL WinTool."));
+                statusLabel.Text = "Configurar - admin bloqueado";
+                cards.ResumeLayout();
+                return;
+            }
+
+            cards.Controls.Add(MakeAdminCard("Atualizacoes", "Consultar manifesto remoto e validar versao publicada.", "Verificar agora", () => CheckAdminUpdates()));
+            cards.Controls.Add(MakeAdminCard("Catalogo", "Resumo do catalogo embutido no executavel atual.", "Ver resumo", () => ShowCatalogSummary()));
+            cards.Controls.Add(MakeAdminCard("Ambiente", "Abrir a pasta local onde o GL WinTool esta rodando.", "Abrir pasta", () => OpenAppFolder()));
+            cards.Controls.Add(MakeAdminCard("Logs", "Limpar somente a tela de registro desta sessao.", "Limpar log", () => logBox.Clear()));
+            statusLabel.Text = "Configurar - admin liberado";
+            cards.ResumeLayout();
+        }
+
+        private Control MakeAdminCard(string title, string body, string buttonText, Action action)
+        {
+            var p = new Panel { Width = 430, Height = 142, BackColor = Color.Transparent, Margin = new Padding(10) };
+            p.Paint += (s, e) => DrawRoundedSurface(e.Graphics, p.ClientRectangle, Color.White, Color.FromArgb(14, 165, 233), 18);
+            p.Controls.Add(new Label { Text = title, Left = 22, Top = 18, AutoSize = true, Font = new Font("Segoe UI", 13, FontStyle.Bold), ForeColor = Color.FromArgb(15, 23, 42), BackColor = Color.Transparent });
+            p.Controls.Add(new Label { Text = body, Left = 24, Top = 48, Width = 374, Height = 38, ForeColor = Color.FromArgb(71, 85, 105), BackColor = Color.Transparent });
+            var b = new Button { Text = buttonText, Left = 24, Top = 94, Width = 160, Height = 32, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(2, 132, 199), ForeColor = Color.White, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            b.FlatAppearance.BorderColor = Color.FromArgb(125, 211, 252);
+            b.Click += (s, e) => action();
+            p.Controls.Add(b);
+            return p;
+        }
+
+        private void CheckAdminUpdates()
+        {
+            try
+            {
+                using (var web = new WebClient())
+                {
+                    var json = web.DownloadString(UpdateManifestUrl + "?cache=" + DateTime.UtcNow.Ticks);
+                    var manifest = new JavaScriptSerializer().Deserialize<UpdateManifest>(json);
+                    Log("Versao local: " + AppVersion);
+                    Log("Versao publicada: " + (manifest == null ? "nao lida" : manifest.version));
+                    Log(manifest != null && manifest.version != AppVersion ? "Atualizacao disponivel." : "Aplicativo atualizado.");
+                }
+            }
+            catch (Exception ex) { Log("Falha ao consultar atualizacao: " + ex.Message); }
+        }
+
+        private void ShowCatalogSummary()
+        {
+            var categories = catalog.GroupBy(a => a.category ?? "Sem categoria").OrderByDescending(g => g.Count()).Take(8);
+            Log("Catalogo atual: " + catalog.Count + " apps.");
+            foreach (var group in categories) Log(group.Key + ": " + group.Count() + " apps.");
+        }
+
+        private void OpenAppFolder()
+        {
+            try { Process.Start("explorer.exe", Path.GetDirectoryName(Application.ExecutablePath)); }
+            catch (Exception ex) { Log("Falha ao abrir pasta: " + ex.Message); }
+        }
 
         private void RefreshCards()
         {

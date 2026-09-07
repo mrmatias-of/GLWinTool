@@ -1,9 +1,9 @@
 {
-  "version": "0.5.11",
+  "version": "0.5.12",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
   "exeUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.exe",
-  "notes": "Tela de atualizacao redesenhada com banner, status mais claro e visual menos parecido com console."
+  "notes": "Area admin protegida por senha adicionada ao app nativo, com painel de configuracoes operacionais."
 }
