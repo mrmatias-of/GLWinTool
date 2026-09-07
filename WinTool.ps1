@@ -17,10 +17,10 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.14"
-$script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
-$script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
-$script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
+$script:BundledVersion = "0.5.15"
+$script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json"
+$script:DefaultPackageUrl = "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip"
+$script:FallbackPackageUrl = "https://github.com/mrmatias-of/GLWinTool/archive/refs/heads/main.zip"
 
 function Show-FirstRunDownloadScreen {
     param([Parameter(Mandatory=$true)][scriptblock]$Action)
