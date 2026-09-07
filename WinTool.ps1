@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.4.7"
+$script:BundledVersion = "0.4.8"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -44,7 +44,8 @@ function Save-RemoteFileWithFallback {
 function Expand-GLWinToolRuntimePackage {
     param(
         [Parameter(Mandatory=$true)][string]$ZipPath,
-        [Parameter(Mandatory=$true)][string]$TargetRoot
+        [Parameter(Mandatory=$true)][string]$TargetRoot,
+        [switch]$IncludeVersion
     )
 
     $extractRoot = Join-Path $env:TEMP ("GL-WinTool-runtime-{0}" -f ([guid]::NewGuid().ToString("N")))
@@ -67,10 +68,16 @@ function Expand-GLWinToolRuntimePackage {
             }
         }
 
-        foreach ($file in @("VERSION", "update.json", "GLWinTool.ps1", "WinTool.ps1")) {
+        foreach ($file in @("update.json", "GLWinTool.ps1", "WinTool.ps1")) {
             $from = Join-Path $source $file
             if (Test-Path -LiteralPath $from) {
                 Copy-Item -LiteralPath $from -Destination (Join-Path $TargetRoot $file) -Force
+            }
+        }
+        if ($IncludeVersion) {
+            $from = Join-Path $source "VERSION"
+            if (Test-Path -LiteralPath $from) {
+                Copy-Item -LiteralPath $from -Destination (Join-Path $TargetRoot "VERSION") -Force
             }
         }
     } finally {
@@ -1603,7 +1610,7 @@ function Save-AssistenteUpdatePackage {
     $version = if ($Manifest.version) { "$($Manifest.version)" } else { "nova" }
     $target = Join-Path $script:Root ("GL-WinTool-{0}.zip" -f $version)
     Save-RemoteFileWithFallback -Urls @($url, $script:FallbackPackageUrl) -OutFile $target | Out-Null
-    Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root
+    Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root -IncludeVersion
     return $target
 }
 
@@ -2568,5 +2575,6 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
 

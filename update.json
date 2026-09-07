@@ -1,7 +1,7 @@
 {
-  "version": "0.4.7",
+  "version": "0.4.8",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
-  "notes": "Bootstrap portatil agora tem fallback automatico quando o asset da release ainda nao existe."
+  "notes": "Bootstrap separa arquivos de suporte da aplicacao de atualizacao, preservando o fluxo visual correto."
 }
