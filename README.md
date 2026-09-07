@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.4.5</code>
+  Versao atual: <code>0.4.6</code>
 </p>
 
 <p align="center">
@@ -31,13 +31,18 @@
 
 ## Visao geral
 
-O **GL WinTool** e uma ferramenta Windows em PowerShell/WPF criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
+O **GL WinTool** e uma ferramenta Windows criada para acelerar rotinas de bancada, pos-formatacao, manutencao e padronizacao de maquinas.
 
 O projeto reune instalacao de aplicativos, ajustes do Windows, remocao controlada de AppX, reparos, DNS, Windows Update e rotinas preventivas em uma interface unica, leve e em portugues.
 
 ![Banner do GL WinTool](assets/readme/hero.svg)
 
 ## Inicio rapido
+
+O GL WinTool tem dois modos oficiais de uso:
+
+- **Comando web**: ideal para suporte rapido, laboratorio e maquinas novas.
+- **Executavel portatil**: ideal para pendrive, pasta tecnica ou distribuicao direta.
 
 Execute no **Windows PowerShell**:
 
@@ -64,6 +69,8 @@ Install-Module ps2exe -Scope CurrentUser
 powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
 .\dist\GL-WinTool.exe -SelfTest
 ```
+
+O executavel oficial pode ser distribuido sozinho. Ao iniciar em uma pasta nova, ele baixa automaticamente os arquivos necessarios (`assets`, `config`, `VERSION` e `update.json`) para a mesma pasta onde o `GL-WinTool.exe` esta.
 
 ## Preview
 
@@ -216,6 +223,16 @@ O processo de lancamento oficial esta em [`docs/RELEASE.md`](docs/RELEASE.md).
 
 ## Desenvolvimento
 
+### Evolucao para aplicativo nativo
+
+A versao atual usa uma base PowerShell/WPF empacotada como executavel para acelerar desenvolvimento e validacao em maquinas reais. O plano oficial e migrar gradualmente para um aplicativo nativo Windows, preservando os catalogos e fluxos ja validados:
+
+1. separar regras, catalogos e rotinas em modulos independentes;
+2. manter compatibilidade com o comando web e com o `GL-WinTool.exe`;
+3. criar instalador oficial com atalhos, icone, pasta propria e atualizador;
+4. migrar a interface para uma base nativa Windows;
+5. manter releases versionadas no GitHub.
+
 Antes de publicar alteracoes:
 
 ```powershell
@@ -233,6 +250,7 @@ git push
 ## Uso responsavel
 
 O GL WinTool executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
+
 
 
 

@@ -18,7 +18,14 @@ powershell -ExecutionPolicy Bypass -File .\Build-Exe.ps1
 
 ## Como o app checa atualizacoes
 
+Existem dois modos oficiais de distribuicao:
+
+- comando web via `irm https://www.glabcursos.com.br/win | iex`;
+- executavel portatil `GL-WinTool.exe`.
+
 Ao iniciar, o app mostra uma tela de busca de atualizacoes antes da janela principal. Se houver versao nova, o botao **Baixar atualizacao** fica obrigatorio e baixa o pacote oficial `GL-WinTool.zip` da release mais recente. Se nao houver atualizacao, o app informa rapidamente que esta atualizado e abre a janela principal automaticamente.
+
+O `GL-WinTool.exe` tambem pode ser distribuido sozinho. Quando ele e executado em uma pasta sem `assets`, `config`, `VERSION` ou `update.json`, baixa automaticamente o pacote oficial da release mais recente e extrai esses arquivos na mesma pasta do executavel.
 
 A aba **Atualizar** tambem permite checagem manual e consulta:
 

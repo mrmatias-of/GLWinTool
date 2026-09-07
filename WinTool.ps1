@@ -6,17 +6,83 @@ param(
 
 $ErrorActionPreference = "Stop"
 function Get-AssistenteRoot {
+    $processPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    if ($processPath -and [IO.Path]::GetExtension($processPath) -ieq ".exe" -and [IO.Path]::GetFileNameWithoutExtension($processPath) -notmatch "^(powershell|pwsh)$") {
+        return (Split-Path -Parent $processPath)
+    }
     if ($PSScriptRoot) { return $PSScriptRoot }
     if ($MyInvocation.MyCommand.Path) { return (Split-Path -Parent $MyInvocation.MyCommand.Path) }
-    $processPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
     if ($processPath) { return (Split-Path -Parent $processPath) }
     return (Get-Location).Path
 }
 
 $script:Root = Get-AssistenteRoot
+$script:BundledVersion = "0.4.6"
+$script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
+$script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
+
+function Expand-GLWinToolRuntimePackage {
+    param(
+        [Parameter(Mandatory=$true)][string]$ZipPath,
+        [Parameter(Mandatory=$true)][string]$TargetRoot
+    )
+
+    $extractRoot = Join-Path $env:TEMP ("GL-WinTool-runtime-{0}" -f ([guid]::NewGuid().ToString("N")))
+    New-Item -ItemType Directory -Path $extractRoot -Force | Out-Null
+    try {
+        Expand-Archive -LiteralPath $ZipPath -DestinationPath $extractRoot -Force
+        $source = $extractRoot
+        $nested = Get-ChildItem -LiteralPath $extractRoot -Directory | Where-Object {
+            (Test-Path -LiteralPath (Join-Path $_.FullName "config")) -or
+            (Test-Path -LiteralPath (Join-Path $_.FullName "assets"))
+        } | Select-Object -First 1
+        if ($nested) { $source = $nested.FullName }
+
+        foreach ($folder in @("assets", "config")) {
+            $from = Join-Path $source $folder
+            if (Test-Path -LiteralPath $from) {
+                $to = Join-Path $TargetRoot $folder
+                if (Test-Path -LiteralPath $to) { Remove-Item -LiteralPath $to -Recurse -Force }
+                Copy-Item -LiteralPath $from -Destination $to -Recurse -Force
+            }
+        }
+
+        foreach ($file in @("VERSION", "update.json", "GLWinTool.ps1", "WinTool.ps1")) {
+            $from = Join-Path $source $file
+            if (Test-Path -LiteralPath $from) {
+                Copy-Item -LiteralPath $from -Destination (Join-Path $TargetRoot $file) -Force
+            }
+        }
+    } finally {
+        if (Test-Path -LiteralPath $extractRoot) { Remove-Item -LiteralPath $extractRoot -Recurse -Force }
+    }
+}
+
+function Initialize-GLWinToolRuntime {
+    param([switch]$Force)
+
+    if ($ValidateOnly -or $SelfTest) { return }
+
+    $needsRuntime = $Force -or
+        -not (Test-Path -LiteralPath (Join-Path $script:Root "config\apps.json")) -or
+        -not (Test-Path -LiteralPath (Join-Path $script:Root "config\tweaks.json")) -or
+        -not (Test-Path -LiteralPath (Join-Path $script:Root "assets\readme\glab-splash.png"))
+
+    if (-not $needsRuntime) { return }
+
+    New-Item -ItemType Directory -Path $script:Root -Force | Out-Null
+    $zipPath = Join-Path $env:TEMP ("GL-WinTool-runtime-{0}.zip" -f ([guid]::NewGuid().ToString("N")))
+    try {
+        Invoke-WebRequest -Uri $script:DefaultPackageUrl -OutFile $zipPath -UseBasicParsing
+        Expand-GLWinToolRuntimePackage -ZipPath $zipPath -TargetRoot $script:Root
+    } finally {
+        if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+    }
+}
+
+Initialize-GLWinToolRuntime
 $script:ConfigPath = Join-Path $script:Root "config\apps.json"
 $script:VersionPath = Join-Path $script:Root "VERSION"
-$script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:TweaksPath = Join-Path $script:Root "config\tweaks.json"
 $script:PresetsPath = Join-Path $script:Root "config\presets.json"
 $script:AppxPath = Join-Path $script:Root "config\appx.json"
@@ -37,7 +103,7 @@ $script:DnsPresets = @(
     [pscustomobject]@{ Name = "Quad9"; Primary = "9.9.9.9"; Secondary = "149.112.112.112"; Description = "DNS com bloqueio de dominios maliciosos." },
     [pscustomobject]@{ Name = "AdGuard"; Primary = "94.140.14.14"; Secondary = "94.140.15.15"; Description = "DNS com bloqueio de anuncios e rastreadores." }
 )
-$script:AppVersion = if (Test-Path -LiteralPath $script:VersionPath) { (Get-Content -LiteralPath $script:VersionPath -Raw).Trim() } else { "dev" }
+$script:AppVersion = if (Test-Path -LiteralPath $script:VersionPath) { (Get-Content -LiteralPath $script:VersionPath -Raw).Trim() } else { $script:BundledVersion }
 
 if (-not $ValidateOnly -and -not $SelfTest -and [System.Threading.Thread]::CurrentThread.GetApartmentState() -ne "STA") {
     if ($MyInvocation.MyCommand.Path) {
@@ -1514,11 +1580,10 @@ function Save-AssistenteUpdatePackage {
         throw "Manifesto de atualizacao sem link de download."
     }
 
-    $downloads = Join-Path $env:USERPROFILE "Downloads"
-    if (-not (Test-Path -LiteralPath $downloads)) { $downloads = $env:TEMP }
     $version = if ($Manifest.version) { "$($Manifest.version)" } else { "nova" }
-    $target = Join-Path $downloads ("GL-WinTool-{0}.zip" -f $version)
+    $target = Join-Path $script:Root ("GL-WinTool-{0}.zip" -f $version)
     Invoke-WebRequest -Uri $url -OutFile $target -UseBasicParsing
+    Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root
     return $target
 }
 
@@ -1599,7 +1664,7 @@ function Show-StartupUpdateScreen {
             $this.Content = "Baixando..."
             try {
                 $file = Save-AssistenteUpdatePackage -Manifest $manifest
-                $status.Text = "Atualizacao baixada. Abra o ZIP e substitua pela nova versao."
+                $status.Text = "Atualizacao baixada na pasta do GL WinTool. Feche o app e abra a nova versao."
                 Start-Process explorer.exe "/select,`"$file`""
             } catch {
                 $status.Text = "Nao foi possivel baixar. Abrindo pagina de release."

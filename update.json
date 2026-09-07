@@ -1,7 +1,7 @@
 {
-  "version": "0.4.5",
+  "version": "0.4.6",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
-  "notes": "Logo oficial aplicada na tela de carregamento e pacote de atualizacao 0.4.5."
+  "notes": "Exe passa a baixar automaticamente os arquivos necessarios na propria pasta ao iniciar."
 }
