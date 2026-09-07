@@ -24,7 +24,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        private const string AppVersion = "0.5.1";
+        private const string AppVersion = "0.5.2";
         private const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -250,3 +250,4 @@ namespace GLWinToolNative
         }
     }
 }
+

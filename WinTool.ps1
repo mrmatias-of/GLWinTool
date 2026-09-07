@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.1"
+$script:BundledVersion = "0.5.2"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -1624,6 +1624,47 @@ function Save-AssistenteUpdatePackage {
     if ($Manifest.legacyZipUrl) { $fallbacks += "$($Manifest.legacyZipUrl)" }
     $fallbacks += $script:FallbackPackageUrl
     Save-RemoteFileWithFallback -Urls $fallbacks -OutFile $target | Out-Null
+
+    $processPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    $isExeRun = $processPath -and [IO.Path]::GetExtension($processPath) -ieq ".exe" -and (Test-Path -LiteralPath $processPath)
+    if ($isExeRun) {
+        $extractRoot = Join-Path $env:TEMP ("GL-WinTool-native-update-{0}" -f ([guid]::NewGuid().ToString("N")))
+        New-Item -ItemType Directory -Path $extractRoot -Force | Out-Null
+        Expand-Archive -LiteralPath $target -DestinationPath $extractRoot -Force
+        $nativeExe = Get-ChildItem -LiteralPath $extractRoot -Filter "GL-WinTool.exe" -File -Recurse | Select-Object -First 1
+        if ($nativeExe) {
+            if ($Manifest.version) {
+                Set-Content -LiteralPath (Join-Path $script:Root "VERSION") -Value "$($Manifest.version)" -Encoding UTF8
+            }
+            $updaterPath = Join-Path $extractRoot "Apply-GL-WinTool-Update.ps1"
+            $updater = @'
+param(
+    [Parameter(Mandatory=$true)][string]$CurrentExe,
+    [Parameter(Mandatory=$true)][string]$NewExe,
+    [Parameter(Mandatory=$true)][string]$WorkingDir,
+    [Parameter(Mandatory=$true)][int]$OldPid
+)
+$ErrorActionPreference = "SilentlyContinue"
+Wait-Process -Id $OldPid -Timeout 20
+Start-Sleep -Milliseconds 800
+Copy-Item -LiteralPath $NewExe -Destination $CurrentExe -Force
+Start-Sleep -Milliseconds 300
+Start-Process -FilePath $CurrentExe -WorkingDirectory $WorkingDir
+'@
+            Set-Content -LiteralPath $updaterPath -Value $updater -Encoding UTF8
+            Start-Process -FilePath "powershell.exe" -WindowStyle Hidden -ArgumentList @(
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", $updaterPath,
+                "-CurrentExe", $processPath,
+                "-NewExe", $nativeExe.FullName,
+                "-WorkingDir", $script:Root,
+                "-OldPid", ([System.Diagnostics.Process]::GetCurrentProcess().Id)
+            )
+            return "restart-pending"
+        }
+    }
+
     Expand-GLWinToolRuntimePackage -ZipPath $target -TargetRoot $script:Root -IncludeVersion
     if ($Manifest.version) {
         Set-Content -LiteralPath (Join-Path $script:Root "VERSION") -Value "$($Manifest.version)" -Encoding UTF8
@@ -1723,16 +1764,19 @@ function Show-StartupUpdateScreen {
             $this.IsEnabled = $false
             $this.Content = "Baixando..."
             try {
-                Save-AssistenteUpdatePackage -Manifest $manifest | Out-Null
+                $result = Save-AssistenteUpdatePackage -Manifest $manifest
                 $status.Text = "Atualizacao aplicada. Reiniciando..."
                 $restartTimer = [System.Windows.Threading.DispatcherTimer]::new()
                 $restartTimer.Interval = [TimeSpan]::FromSeconds(1)
                 $restartTimer.Add_Tick({
                     $this.Stop()
-                    $restarted = Restart-GLWinTool
+                    $restarted = $false
+                    if ($result -ne "restart-pending") {
+                        $restarted = Restart-GLWinTool
+                    }
                     $splash.DialogResult = $false
                     $splash.Close()
-                    if ($restarted) { [System.Windows.Application]::Current.Shutdown() }
+                    [System.Windows.Application]::Current.Shutdown()
                 })
                 $restartTimer.Start()
             } catch {
@@ -2636,6 +2680,7 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
 
 
