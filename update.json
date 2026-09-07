@@ -1,7 +1,7 @@
 {
-  "version": "0.4.8",
+  "version": "0.4.9",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
-  "notes": "Bootstrap separa arquivos de suporte da aplicacao de atualizacao, preservando o fluxo visual correto."
+  "notes": "Adicionada categoria vazia Windows novo para lista de apps pos-formatacao."
 }

@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.4.8"
+$script:BundledVersion = "0.4.9"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -123,6 +123,7 @@ $script:SelectedAppIds = [System.Collections.Generic.HashSet[string]]::new([Stri
 $script:SelectedTweakNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:SelectedAppxNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $script:TweakCheckboxes = [System.Collections.ArrayList]::new()
+$script:FixedAppCategories = @("Windows novo")
 $script:DnsPresets = @(
     [pscustomobject]@{ Name = "Padrao do provedor"; Primary = ""; Secondary = ""; Description = "Volta para DNS automatico por DHCP." },
     [pscustomobject]@{ Name = "Cloudflare"; Primary = "1.1.1.1"; Secondary = "1.0.0.1"; Description = "DNS rapido com foco em privacidade." },
@@ -1242,7 +1243,12 @@ function Refresh-AppGrid {
 
     $lastCategory = $null
     if (@($apps).Count -eq 0) {
-        $script:AppsPanel.Children.Add((New-InfoCard -Title "Nada encontrado" -Body "Tente buscar por outro nome, categoria ou ID do aplicativo." -Icon "?" -Accent "#64748B")) | Out-Null
+        if ($category -eq "Windows novo") {
+            $script:AppsPanel.Children.Add((New-SectionHeader -Title "Windows novo" -Subtitle "Apps para instalar apos formatacao.")) | Out-Null
+            $script:AppsPanel.Children.Add((New-InfoCard -Title "Categoria vazia" -Body "Ainda nao ha apps nesta categoria. Ela ficou reservada para sua lista de pos-formatacao." -Icon "WN" -Accent "#2563EB")) | Out-Null
+        } else {
+            $script:AppsPanel.Children.Add((New-InfoCard -Title "Nada encontrado" -Body "Tente buscar por outro nome, categoria ou ID do aplicativo." -Icon "?" -Accent "#64748B")) | Out-Null
+        }
     }
     foreach ($app in $apps) {
         if ($app.category -ne $lastCategory) {
@@ -2456,7 +2462,8 @@ if ($script:VersionText) {
 }
 $window.Title = "GL WinTool $script:AppVersion"
 
-$categories = @([pscustomobject]@{ Label = "Todos"; Value = "All" }) + (($script:Catalog | Select-Object -ExpandProperty category -Unique | Sort-Object) | ForEach-Object {
+$catalogCategories = @($script:Catalog | Select-Object -ExpandProperty category -Unique) + $script:FixedAppCategories
+$categories = @([pscustomobject]@{ Label = "Todos"; Value = "All" }) + (($catalogCategories | Sort-Object -Unique) | ForEach-Object {
     [pscustomobject]@{ Label = $_; Value = $_ }
 })
 foreach ($category in $categories) {
@@ -2575,6 +2582,7 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
 
 
