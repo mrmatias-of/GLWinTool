@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.4.9"
+$script:BundledVersion = "0.4.10"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -1620,6 +1620,22 @@ function Save-AssistenteUpdatePackage {
     return $target
 }
 
+function Restart-GLWinTool {
+    $processPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    if ($processPath -and (Test-Path -LiteralPath $processPath) -and [IO.Path]::GetExtension($processPath) -ieq ".exe") {
+        Start-Process -FilePath $processPath -WorkingDirectory $script:Root
+        return $true
+    }
+
+    $scriptPath = Join-Path $script:Root "WinTool.ps1"
+    if (Test-Path -LiteralPath $scriptPath) {
+        Start-Process -FilePath "powershell.exe" -ArgumentList @("-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", $scriptPath) -WorkingDirectory $script:Root
+        return $true
+    }
+
+    return $false
+}
+
 function Show-StartupUpdateScreen {
     if ($ValidateOnly -or $SelfTest) { return $true }
 
@@ -1696,9 +1712,17 @@ function Show-StartupUpdateScreen {
             $this.IsEnabled = $false
             $this.Content = "Baixando..."
             try {
-                $file = Save-AssistenteUpdatePackage -Manifest $manifest
-                $status.Text = "Atualizacao baixada na pasta do GL WinTool. Feche o app e abra a nova versao."
-                Start-Process explorer.exe "/select,`"$file`""
+                Save-AssistenteUpdatePackage -Manifest $manifest | Out-Null
+                $status.Text = "Atualizacao aplicada. Reiniciando..."
+                $restartTimer = [System.Windows.Threading.DispatcherTimer]::new()
+                $restartTimer.Interval = [TimeSpan]::FromSeconds(1)
+                $restartTimer.Add_Tick({
+                    $this.Stop()
+                    Restart-GLWinTool | Out-Null
+                    $splash.DialogResult = $false
+                    $splash.Close()
+                })
+                $restartTimer.Start()
             } catch {
                 $status.Text = "Nao foi possivel baixar. Abrindo pagina de release."
                 if ($manifest.releaseUrl) { Start-Process "$($manifest.releaseUrl)" }
@@ -2582,6 +2606,7 @@ if (-not $window) {
 if (Show-StartupUpdateScreen) {
     [void]$window.ShowDialog()
 }
+
 
 
 

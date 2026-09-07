@@ -1,7 +1,7 @@
 {
-  "version": "0.4.9",
+  "version": "0.4.10",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/assistente-glab/releases",
   "zipUrl": "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip",
-  "notes": "Adicionada categoria vazia Windows novo para lista de apps pos-formatacao."
+  "notes": "Atualizacao pelo splash agora reinicia o GL WinTool automaticamente apos aplicar o pacote."
 }

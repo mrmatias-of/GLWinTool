@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  Versao atual: <code>0.4.9</code>
+  Versao atual: <code>0.4.10</code>
 </p>
 
 <p align="center">
@@ -250,6 +250,7 @@ git push
 ## Uso responsavel
 
 O GL WinTool executa rotinas administrativas capazes de alterar configuracoes do Windows. Para ambientes profissionais, recomenda-se validar presets e ajustes em laboratorio antes da distribuicao em larga escala.
+
 
 
 
