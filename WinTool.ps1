@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.13"
+$script:BundledVersion = "0.5.14"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/assistente-glab/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/assistente-glab/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/assistente-glab/archive/refs/heads/main.zip"
@@ -2512,13 +2512,20 @@ function Build-Ui {
             <RowDefinition Height="118"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Margin="10,8,10,8" CornerRadius="20" Padding="20,18" ClipToBounds="True">
-            <Border.Background>
-                <ImageBrush x:Name="HeaderBannerBrush" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center"/>
-            </Border.Background>
+        <Border Grid.Row="0" Margin="10,8,10,8" CornerRadius="20" Padding="0" ClipToBounds="True" Background="#020617">
             <Grid>
-                <Border Background="#66030712" CornerRadius="20"/>
-                <DockPanel LastChildFill="True">
+                <Image x:Name="HeaderBannerImage" Stretch="Fill" Opacity="1"/>
+                <Rectangle HorizontalAlignment="Left" Width="520">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#F7030712" Offset="0"/>
+                            <GradientStop Color="#CC030712" Offset="0.72"/>
+                            <GradientStop Color="#00030712" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <Border BorderBrush="#22D3EE" BorderThickness="0,0,0,2" Opacity="0.55"/>
+                <DockPanel LastChildFill="True" Margin="20,18">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                         <Border Width="86" Height="86" CornerRadius="20" Background="#020617" Margin="0,0,18,0" BorderBrush="#22D3EE" BorderThickness="1" ClipToBounds="True">
                             <Image x:Name="LogoImage" Stretch="UniformToFill"/>
@@ -2637,17 +2644,17 @@ $script:StatusText = $window.FindName("StatusText")
 $script:ProgressBar = $window.FindName("ProgressBar")
 $script:LogoImage = $window.FindName("LogoImage")
 $script:VersionText = $window.FindName("VersionText")
-$script:HeaderBannerBrush = $window.FindName("HeaderBannerBrush")
+$script:HeaderBannerImage = $window.FindName("HeaderBannerImage")
 $adminText = $window.FindName("AdminText")
 
-if ($script:HeaderBannerBrush -and (Test-Path -LiteralPath $script:BannerPath)) {
+if ($script:HeaderBannerImage -and (Test-Path -LiteralPath $script:BannerPath)) {
     $bannerImage = [System.Windows.Media.Imaging.BitmapImage]::new()
     $bannerImage.BeginInit()
     $bannerImage.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
     $bannerImage.UriSource = [Uri]$script:BannerPath
     $bannerImage.EndInit()
     $bannerImage.Freeze()
-    $script:HeaderBannerBrush.ImageSource = $bannerImage
+    $script:HeaderBannerImage.Source = $bannerImage
 }
 if ($script:LogoImage -and (Test-Path -LiteralPath $script:LogoPath)) {
     $logo = [System.Windows.Media.Imaging.BitmapImage]::new()
