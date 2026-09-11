@@ -35,17 +35,13 @@ namespace GLWinToolNative
     {
         public const string AppVersion = "0.5.21";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json";
-        private const string DefaultAdminPassword = "glabadmin";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
         private readonly ComboBox categoryBox = new ComboBox();
         private readonly TextBox searchBox = new TextBox();
         private readonly TextBox logBox = new TextBox();
         private readonly Label statusLabel = new Label();
-        private readonly Label adminStateLabel = new Label();
-        private readonly TextBox adminPasswordBox = new TextBox();
         private readonly Image headerBanner = LoadEmbeddedImage("assets.app-header-banner.png");
-        private bool adminUnlocked;
 
         public MainForm()
         {
@@ -162,26 +158,6 @@ namespace GLWinToolNative
             side.Controls.Add(new Label { Text = "Categoria", Left = 18, Top = 280, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59), BackColor = Color.Transparent });
             side.Controls.Add(categoryBox);
 
-            side.Controls.Add(new Label { Text = "Area admin", Left = 18, Top = 354, AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(30, 41, 59), BackColor = Color.Transparent });
-            adminPasswordBox.Left = 18;
-            adminPasswordBox.Top = 378;
-            adminPasswordBox.Width = 194;
-            adminPasswordBox.Height = 26;
-            adminPasswordBox.UseSystemPasswordChar = true;
-            adminPasswordBox.Font = new Font("Segoe UI", 9);
-            adminPasswordBox.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) UnlockAdmin(); };
-            side.Controls.Add(adminPasswordBox);
-            AddSideButton(side, "Desbloquear admin", 412, false, UnlockAdmin);
-            AddSideButton(side, "Config admin", 454, false, ShowAdminPanel);
-            adminStateLabel.Text = "Admin bloqueado";
-            adminStateLabel.Left = 18;
-            adminStateLabel.Top = 496;
-            adminStateLabel.Width = 194;
-            adminStateLabel.Height = 38;
-            adminStateLabel.ForeColor = Color.FromArgb(185, 28, 28);
-            adminStateLabel.BackColor = Color.Transparent;
-            side.Controls.Add(adminStateLabel);
-
             cards.Dock = DockStyle.Fill;
             cards.AutoScroll = true;
             cards.Padding = new Padding(8);
@@ -202,7 +178,7 @@ namespace GLWinToolNative
             b.FlatAppearance.BorderColor = Color.FromArgb(186, 199, 218);
             b.FlatAppearance.MouseOverBackColor = Color.FromArgb(224, 242, 254);
             b.FlatAppearance.MouseDownBackColor = Color.FromArgb(186, 230, 253);
-            if (text == "Configurar") b.Click += (s, e) => ShowAdminPanel();
+            if (text == "Configurar") b.Click += (s, e) => ShowSettingsPanel();
             return b;
         }
 
@@ -252,46 +228,19 @@ namespace GLWinToolNative
 
         private IEnumerable<AppItem> SelectedApps() { return catalog.Where(a => a.selected); }
 
-        private void UnlockAdmin()
-        {
-            if (adminPasswordBox.Text == DefaultAdminPassword)
-            {
-                adminUnlocked = true;
-                adminPasswordBox.Clear();
-                adminStateLabel.Text = "Admin liberado nesta sessao";
-                adminStateLabel.ForeColor = Color.FromArgb(4, 120, 87);
-                Log("Modo administrador desbloqueado.");
-                ShowAdminPanel();
-                return;
-            }
-
-            adminUnlocked = false;
-            adminStateLabel.Text = "Senha invalida";
-            adminStateLabel.ForeColor = Color.FromArgb(185, 28, 28);
-            Log("Tentativa de acesso admin recusada.");
-        }
-
-        private void ShowAdminPanel()
+        private void ShowSettingsPanel()
         {
             cards.SuspendLayout();
             cards.Controls.Clear();
-            if (!adminUnlocked)
-            {
-                cards.Controls.Add(MakeInfoCard("Configuracoes admin", "Area protegida por senha.", "Digite a senha no menu lateral para liberar opcoes administrativas do GL WinTool."));
-                statusLabel.Text = "Configurar - admin bloqueado";
-                cards.ResumeLayout();
-                return;
-            }
-
-            cards.Controls.Add(MakeAdminCard("Atualizacoes", "Consultar manifesto remoto e validar versao publicada.", "Verificar agora", () => CheckAdminUpdates()));
-            cards.Controls.Add(MakeAdminCard("Catalogo", "Resumo do catalogo embutido no executavel atual.", "Ver resumo", () => ShowCatalogSummary()));
-            cards.Controls.Add(MakeAdminCard("Ambiente", "Abrir a pasta local onde o GL WinTool esta rodando.", "Abrir pasta", () => OpenAppFolder()));
-            cards.Controls.Add(MakeAdminCard("Logs", "Limpar somente a tela de registro desta sessao.", "Limpar log", () => logBox.Clear()));
-            statusLabel.Text = "Configurar - admin liberado";
+            cards.Controls.Add(MakeSettingsCard("Atualizacoes", "Consultar manifesto remoto e validar versao publicada.", "Verificar agora", () => CheckUpdates()));
+            cards.Controls.Add(MakeSettingsCard("Catalogo", "Resumo do catalogo embutido no executavel atual.", "Ver resumo", () => ShowCatalogSummary()));
+            cards.Controls.Add(MakeSettingsCard("Ambiente", "Abrir a pasta local onde o GL WinTool esta rodando.", "Abrir pasta", () => OpenAppFolder()));
+            cards.Controls.Add(MakeSettingsCard("Logs", "Limpar somente a tela de registro desta sessao.", "Limpar log", () => logBox.Clear()));
+            statusLabel.Text = "Configurar";
             cards.ResumeLayout();
         }
 
-        private Control MakeAdminCard(string title, string body, string buttonText, Action action)
+        private Control MakeSettingsCard(string title, string body, string buttonText, Action action)
         {
             var p = new Panel { Width = 430, Height = 142, BackColor = Color.Transparent, Margin = new Padding(10) };
             p.Paint += (s, e) => DrawRoundedSurface(e.Graphics, p.ClientRectangle, Color.White, Color.FromArgb(14, 165, 233), 18);
@@ -304,7 +253,7 @@ namespace GLWinToolNative
             return p;
         }
 
-        private void CheckAdminUpdates()
+        private void CheckUpdates()
         {
             try
             {
