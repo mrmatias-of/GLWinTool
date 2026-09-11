@@ -15,9 +15,9 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Central Windows para instalacao, ajustes, AppX e manutencao tecnica")]
 [assembly: AssemblyCompany("G-LAB Cursos")]
 [assembly: AssemblyProduct("GL WinTool")]
-[assembly: AssemblyVersion("0.5.22.0")]
-[assembly: AssemblyFileVersion("0.5.22.0")]
-[assembly: AssemblyInformationalVersion("0.5.22")]
+[assembly: AssemblyVersion("0.5.21.0")]
+[assembly: AssemblyFileVersion("0.5.21.0")]
+[assembly: AssemblyInformationalVersion("0.5.21")]
 
 namespace GLWinToolNative
 {
@@ -33,7 +33,7 @@ namespace GLWinToolNative
 
     public class MainForm : Form
     {
-        public const string AppVersion = "0.5.22";
+        public const string AppVersion = "0.5.21";
         public const string UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json";
         private readonly List<AppItem> catalog;
         private readonly FlowLayoutPanel cards = new FlowLayoutPanel();
@@ -562,6 +562,7 @@ namespace GLWinToolNative
         }
     }
 }
+
 
 
 

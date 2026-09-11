@@ -17,7 +17,7 @@ function Get-AssistenteRoot {
 }
 
 $script:Root = Get-AssistenteRoot
-$script:BundledVersion = "0.5.22"
+$script:BundledVersion = "0.5.21"
 $script:UpdateManifestUrl = "https://raw.githubusercontent.com/mrmatias-of/GLWinTool/main/update.json"
 $script:DefaultPackageUrl = "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.zip"
 $script:FallbackPackageUrl = "https://github.com/mrmatias-of/GLWinTool/archive/refs/heads/main.zip"
@@ -2807,6 +2807,7 @@ if (-not $script:MainWindow) {
 if (Show-StartupUpdateScreen) {
     [void]$script:MainWindow.ShowDialog()
 }
+
 
 
 
