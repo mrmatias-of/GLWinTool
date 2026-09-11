@@ -1,9 +1,9 @@
 {
-  "version": "0.5.21",
+  "version": "0.5.22",
   "channel": "stable",
   "releaseUrl": "https://github.com/mrmatias-of/GLWinTool/releases",
   "zipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "legacyZipUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool-Native.zip",
   "exeUrl": "https://github.com/mrmatias-of/GLWinTool/releases/latest/download/GL-WinTool.exe",
-  "notes": "Correcao definitiva do topo nativo: banner renderizado como imagem inteira e inicializacao sem ShowDialog modal."
+  "notes": "Configuracoes do aplicativo nativo agora ficam acessiveis diretamente, sem senha ou bloqueio administrativo interno."
 }
